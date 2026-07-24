@@ -20,6 +20,8 @@
 #ifndef __I_SYSTEM__
 #define __I_SYSTEM__
 
+#include <stddef.h>
+
 #include "d_ticcmd.h"
 #include "d_event.h"
 
@@ -53,6 +55,9 @@ ticcmd_t* I_BaseTiccmd (void);
 void I_Quit (void);
 
 void I_Error (char *error, ...);
+
+// realloc() wrapper that aborts (I_Error) on allocation failure.
+void *I_Realloc(void *ptr, size_t size);
 
 void I_Tactile (int on, int off, int total);
 

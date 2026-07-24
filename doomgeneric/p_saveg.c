@@ -1711,11 +1711,11 @@ void P_ArchiveSpecials (void)
     {
 	if (th->function.acv == (actionf_v)NULL)
 	{
-	    for (i = 0; i < MAXCEILINGS;i++)
+	    for (i = 0; i < maxactiveceilings;i++)
 		if (activeceilings[i] == (ceiling_t *)th)
 		    break;
 	    
-	    if (i<MAXCEILINGS)
+	    if (i<maxactiveceilings)
 	    {
                 saveg_write8(tc_ceiling);
 		saveg_write_pad();

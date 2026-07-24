@@ -18,6 +18,7 @@
 //
 
 #include <stdio.h>
+#include <string.h>
 
 #include "i_system.h"
 #include "deh_main.h"
@@ -92,7 +93,8 @@ switchlist_t alphSwitchList[] =
 
 int		switchlist[MAXSWITCHES * 2];
 int		numswitches;
-button_t        buttonlist[MAXBUTTONS];
+button_t*	buttonlist = NULL;	// dynamically grown (was buttonlist[MAXBUTTONS])
+int		maxbuttons = 0;		// current capacity
 
 //
 // P_InitSwitchList
@@ -155,7 +157,7 @@ P_StartButton
     int		i;
     
     // See if button is already pressed
-    for (i = 0;i < MAXBUTTONS;i++)
+    for (i = 0;i < maxbuttons;i++)
     {
 	if (buttonlist[i].btimer
 	    && buttonlist[i].line == line)
@@ -167,7 +169,7 @@ P_StartButton
     
 
     
-    for (i = 0;i < MAXBUTTONS;i++)
+    for (i = 0;i < maxbuttons;i++)
     {
 	if (!buttonlist[i].btimer)
 	{
@@ -179,8 +181,19 @@ P_StartButton
 	    return;
 	}
     }
-    
-    I_Error("P_StartButton: no button slots left!");
+
+    // no free slot: grow the array instead of erroring out
+    {
+	int old = maxbuttons;
+	maxbuttons = maxbuttons ? maxbuttons * 2 : MAXBUTTONS;
+	buttonlist = I_Realloc(buttonlist, maxbuttons * sizeof(*buttonlist));
+	memset(buttonlist + old, 0, (maxbuttons - old) * sizeof(*buttonlist));
+	buttonlist[old].line = line;
+	buttonlist[old].where = w;
+	buttonlist[old].btexture = texture;
+	buttonlist[old].btimer = time;
+	buttonlist[old].soundorg = &line->frontsector->soundorg;
+    }
 }
 
 

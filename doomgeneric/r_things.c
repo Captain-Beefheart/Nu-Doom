@@ -278,7 +278,8 @@ void R_InitSpriteDefs (char** namelist)
 //
 // GAME FUNCTIONS
 //
-vissprite_t	vissprites[MAXVISSPRITES];
+vissprite_t*	vissprites = NULL;	// dynamically grown
+unsigned	maxvissprites = 0;	// current capacity
 vissprite_t*	vissprite_p;
 int		newvissprite;
 
@@ -308,6 +309,11 @@ void R_InitSprites (char** namelist)
 //
 void R_ClearSprites (void)
 {
+    if (vissprites == NULL)
+    {
+	maxvissprites = MAXVISSPRITES;
+	vissprites = I_Realloc(NULL, maxvissprites * sizeof(*vissprites));
+    }
     vissprite_p = vissprites;
 }
 
@@ -319,9 +325,15 @@ vissprite_t	overflowsprite;
 
 vissprite_t* R_NewVisSprite (void)
 {
-    if (vissprite_p == &vissprites[MAXVISSPRITES])
-	return &overflowsprite;
-    
+    // grow the vissprites buffer rather than dropping sprites
+    if (vissprite_p - vissprites >= (int) maxvissprites)
+    {
+	unsigned pos = vissprite_p - vissprites;
+	maxvissprites *= 2;
+	vissprites = I_Realloc(vissprites, maxvissprites * sizeof(*vissprites));
+	vissprite_p = vissprites + pos;
+    }
+
     vissprite_p++;
     return vissprite_p-1;
 }

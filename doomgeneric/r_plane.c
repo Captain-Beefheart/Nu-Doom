@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 #include "i_system.h"
 #include "z_zone.h"
@@ -41,17 +42,42 @@ planefunction_t		ceilingfunc;
 // opening
 //
 
-// Here comes the obnoxious "visplane".
-#define MAXVISPLANES	128
-visplane_t		visplanes[MAXVISPLANES];
+// Here comes the (formerly) obnoxious "visplane".
+// Now dynamically grown instead of a fixed MAXVISPLANES array.
+#define MAXVISPLANES	128			// initial capacity
+visplane_t*		visplanes = NULL;
+unsigned		maxvisplanes = 0;	// current capacity
 visplane_t*		lastvisplane;
 visplane_t*		floorplane;
 visplane_t*		ceilingplane;
 
-// ?
-#define MAXOPENINGS	SCREENWIDTH*64
-short			openings[MAXOPENINGS];
+// Openings: also dynamically grown (was openings[SCREENWIDTH*64]).
+// MAXOPENINGS (initial capacity) is defined in r_plane.h so r_segs.c sees it.
+short*			openings = NULL;
+unsigned		maxopenings = 0;	// current capacity
 short*			lastopening;
+
+
+//
+// R_GrowVisplanes
+// Double the visplanes buffer, rebasing all live visplane pointers
+// (lastvisplane and the current floor/ceiling planes).
+//
+static void R_GrowVisplanes (void)
+{
+    unsigned	lastofs = lastvisplane - visplanes;
+    ptrdiff_t	floorofs = floorplane ? floorplane - visplanes : -1;
+    ptrdiff_t	ceilofs  = ceilingplane ? ceilingplane - visplanes : -1;
+
+    maxvisplanes = maxvisplanes ? maxvisplanes * 2 : MAXVISPLANES;
+    visplanes = I_Realloc(visplanes, maxvisplanes * sizeof(*visplanes));
+
+    lastvisplane = visplanes + lastofs;
+    if (floorofs >= 0)
+	floorplane = visplanes + floorofs;
+    if (ceilofs >= 0)
+	ceilingplane = visplanes + ceilofs;
+}
 
 
 //
@@ -180,6 +206,18 @@ void R_ClearPlanes (void)
     int		i;
     angle_t	angle;
     
+    // allocate the dynamic buffers on first use
+    if (visplanes == NULL)
+    {
+	maxvisplanes = MAXVISPLANES;
+	visplanes = I_Realloc(NULL, maxvisplanes * sizeof(*visplanes));
+    }
+    if (openings == NULL)
+    {
+	maxopenings = MAXOPENINGS;
+	openings = I_Realloc(NULL, maxopenings * sizeof(*openings));
+    }
+
     // opening / clipping determination
     for (i=0 ; i<viewwidth ; i++)
     {
@@ -234,10 +272,12 @@ R_FindPlane
 			
     if (check < lastvisplane)
 	return check;
-		
-    if (lastvisplane - visplanes == MAXVISPLANES)
-	I_Error ("R_FindPlane: no more visplanes");
-		
+
+    // grow the visplanes buffer rather than erroring out
+    if (lastvisplane - visplanes >= (int) maxvisplanes)
+	R_GrowVisplanes ();
+
+    check = lastvisplane;
     lastvisplane++;
 
     check->height = height;
@@ -290,7 +330,7 @@ R_CheckPlane
     }
 
     for (x=intrl ; x<= intrh ; x++)
-	if (pl->top[x] != 0xff)
+	if (pl->top[x] != 0xffff)
 	    break;
 
     if (x > intrh)
@@ -303,10 +343,18 @@ R_CheckPlane
     }
 	
     // make a new visplane
+    if (lastvisplane - visplanes >= (int) maxvisplanes)
+    {
+	// pl points into visplanes, which R_GrowVisplanes may move
+	ptrdiff_t plofs = pl - visplanes;
+	R_GrowVisplanes ();
+	pl = visplanes + plofs;
+    }
+
     lastvisplane->height = pl->height;
     lastvisplane->picnum = pl->picnum;
     lastvisplane->lightlevel = pl->lightlevel;
-    
+
     pl = lastvisplane++;
     pl->minx = start;
     pl->maxx = stop;
@@ -367,15 +415,15 @@ void R_DrawPlanes (void)
     int                 lumpnum;
 				
 #ifdef RANGECHECK
-    if (ds_p - drawsegs > MAXDRAWSEGS)
+    if (ds_p - drawsegs > (int) maxdrawsegs)
 	I_Error ("R_DrawPlanes: drawsegs overflow (%i)",
 		 ds_p - drawsegs);
-    
-    if (lastvisplane - visplanes > MAXVISPLANES)
+
+    if (lastvisplane - visplanes > (int) maxvisplanes)
 	I_Error ("R_DrawPlanes: visplane overflow (%i)",
 		 lastvisplane - visplanes);
-    
-    if (lastopening - openings > MAXOPENINGS)
+
+    if (lastopening - openings > (int) maxopenings)
 	I_Error ("R_DrawPlanes: opening overflow (%i)",
 		 lastopening - openings);
 #endif
@@ -428,8 +476,8 @@ void R_DrawPlanes (void)
 
 	planezlight = zlight[light];
 
-	pl->top[pl->maxx+1] = 0xff;
-	pl->top[pl->minx-1] = 0xff;
+	pl->top[pl->maxx+1] = 0xffff;
+	pl->top[pl->minx-1] = 0xffff;
 		
 	stop = pl->maxx + 1;
 

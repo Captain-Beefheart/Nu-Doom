@@ -70,6 +70,22 @@ struct atexit_listentry_s
 
 static atexit_listentry_t *exit_funcs = NULL;
 
+// realloc() that aborts on failure. Used by the limit-removing renderer
+// code to grow its dynamic arrays (visplanes, drawsegs, vissprites,
+// openings) instead of overflowing fixed-size buffers.
+void *I_Realloc(void *ptr, size_t size)
+{
+    void *new_ptr = realloc(ptr, size);
+
+    if (size != 0 && new_ptr == NULL)
+    {
+        I_Error("I_Realloc: failed on allocation of %u bytes",
+                (unsigned int) size);
+    }
+
+    return new_ptr;
+}
+
 void I_AtExit(atexit_func_t func, boolean run_on_error)
 {
     atexit_listentry_t *entry;

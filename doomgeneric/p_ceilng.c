@@ -17,6 +17,9 @@
 
 
 
+#include <string.h>
+
+#include "i_system.h"
 #include "z_zone.h"
 #include "doomdef.h"
 #include "p_local.h"
@@ -35,7 +38,8 @@
 //
 
 
-ceiling_t*	activeceilings[MAXCEILINGS];
+ceiling_t**	activeceilings = NULL;	// dynamically grown (was activeceilings[MAXCEILINGS])
+int		maxactiveceilings = 0;	// current capacity
 
 
 //
@@ -240,14 +244,25 @@ EV_DoCeiling
 void P_AddActiveCeiling(ceiling_t* c)
 {
     int		i;
-    
-    for (i = 0; i < MAXCEILINGS;i++)
+
+    for (i = 0; i < maxactiveceilings;i++)
     {
 	if (activeceilings[i] == NULL)
 	{
 	    activeceilings[i] = c;
 	    return;
 	}
+    }
+
+    // no free slot: grow the array (vanilla silently dropped the ceiling here)
+    {
+	int old = maxactiveceilings;
+	maxactiveceilings = maxactiveceilings ? maxactiveceilings * 2 : MAXCEILINGS;
+	activeceilings = I_Realloc(activeceilings,
+				   maxactiveceilings * sizeof(*activeceilings));
+	memset(activeceilings + old, 0,
+	       (maxactiveceilings - old) * sizeof(*activeceilings));
+	activeceilings[old] = c;
     }
 }
 
@@ -260,7 +275,7 @@ void P_RemoveActiveCeiling(ceiling_t* c)
 {
     int		i;
 	
-    for (i = 0;i < MAXCEILINGS;i++)
+    for (i = 0;i < maxactiveceilings;i++)
     {
 	if (activeceilings[i] == c)
 	{
@@ -281,7 +296,7 @@ void P_ActivateInStasisCeiling(line_t* line)
 {
     int		i;
 	
-    for (i = 0;i < MAXCEILINGS;i++)
+    for (i = 0;i < maxactiveceilings;i++)
     {
 	if (activeceilings[i]
 	    && (activeceilings[i]->tag == line->tag)
@@ -306,7 +321,7 @@ int	EV_CeilingCrushStop(line_t	*line)
     int		rtn;
 	
     rtn = 0;
-    for (i = 0;i < MAXCEILINGS;i++)
+    for (i = 0;i < maxactiveceilings;i++)
     {
 	if (activeceilings[i]
 	    && (activeceilings[i]->tag == line->tag)

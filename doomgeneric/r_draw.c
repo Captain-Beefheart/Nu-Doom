@@ -41,8 +41,8 @@
 #define MAXWIDTH			1120
 #define MAXHEIGHT			832
 
-// status bar height at bottom of screen
-#define SBARHEIGHT		32
+// status bar height at bottom of screen (32 in 320x200 space, scaled to hi-res)
+#define SBARHEIGHT		(32 << HIRES)
 
 //
 // All drawing to the view buffer is accomplished in this file.

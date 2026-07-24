@@ -17,6 +17,7 @@
 //
 
 #include <stdio.h>
+#include <string.h>
 
 #include "i_system.h"
 #include "z_zone.h"
@@ -35,7 +36,8 @@
 #include "sounds.h"
 
 
-plat_t*		activeplats[MAXPLATS];
+plat_t**	activeplats = NULL;	// dynamically grown (was activeplats[MAXPLATS])
+int		maxactiveplats = 0;	// current capacity
 
 
 
@@ -249,7 +251,7 @@ void P_ActivateInStasis(int tag)
 {
     int		i;
 	
-    for (i = 0;i < MAXPLATS;i++)
+    for (i = 0;i < maxactiveplats;i++)
 	if (activeplats[i]
 	    && (activeplats[i])->tag == tag
 	    && (activeplats[i])->status == in_stasis)
@@ -264,7 +266,7 @@ void EV_StopPlat(line_t* line)
 {
     int		j;
 	
-    for (j = 0;j < MAXPLATS;j++)
+    for (j = 0;j < maxactiveplats;j++)
 	if (activeplats[j]
 	    && ((activeplats[j])->status != in_stasis)
 	    && ((activeplats[j])->tag == line->tag))
@@ -278,20 +280,28 @@ void EV_StopPlat(line_t* line)
 void P_AddActivePlat(plat_t* plat)
 {
     int		i;
-    
-    for (i = 0;i < MAXPLATS;i++)
+
+    for (i = 0;i < maxactiveplats;i++)
 	if (activeplats[i] == NULL)
 	{
 	    activeplats[i] = plat;
 	    return;
 	}
-    I_Error ("P_AddActivePlat: no more plats!");
+
+    // no free slot: grow the array instead of erroring out
+    {
+	int old = maxactiveplats;
+	maxactiveplats = maxactiveplats ? maxactiveplats * 2 : MAXPLATS;
+	activeplats = I_Realloc(activeplats, maxactiveplats * sizeof(*activeplats));
+	memset(activeplats + old, 0, (maxactiveplats - old) * sizeof(*activeplats));
+	activeplats[old] = plat;
+    }
 }
 
 void P_RemoveActivePlat(plat_t* plat)
 {
     int		i;
-    for (i = 0;i < MAXPLATS;i++)
+    for (i = 0;i < maxactiveplats;i++)
 	if (plat == activeplats[i])
 	{
 	    (activeplats[i])->sector->specialdata = NULL;

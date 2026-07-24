@@ -22,10 +22,20 @@
 
 #include "doomtype.h"
 
-// Screen width and height.
+// Original (logical) DOOM resolution. All 2D UI coordinates are authored in
+// this 320x200 space; V_DrawPatch & friends scale them up to the buffer.
 
-#define SCREENWIDTH  320
-#define SCREENHEIGHT 200
+#define ORIGWIDTH  320
+#define ORIGHEIGHT 200
+
+// High-resolution factor. HIRES=1 doubles the internal render buffer to
+// 640x400 for a sharp native image. The actual pixel buffer / render target
+// size is SCREENWIDTH x SCREENHEIGHT.
+
+#define HIRES 1
+
+#define SCREENWIDTH  (ORIGWIDTH  << HIRES)
+#define SCREENHEIGHT (ORIGHEIGHT << HIRES)
 
 // Screen width used for "squash" scale functions
 

@@ -237,13 +237,14 @@ typedef struct
  // max # of wall switches in a level
 #define MAXSWITCHES		50
 
- // 4 players, 4 buttons each at once, max.
+ // initial capacity (4 players, 4 buttons each); grows dynamically now.
 #define MAXBUTTONS		16
 
- // 1 second, in ticks. 
-#define BUTTONTIME      35             
+ // 1 second, in ticks.
+#define BUTTONTIME      35
 
-extern button_t	buttonlist[MAXBUTTONS]; 
+extern button_t*	buttonlist;	// dynamically grown (was buttonlist[MAXBUTTONS])
+extern int		maxbuttons;	// current capacity
 
 void
 P_ChangeSwitchTexture
@@ -300,10 +301,11 @@ typedef struct
 
 #define PLATWAIT		3
 #define PLATSPEED		FRACUNIT
-#define MAXPLATS		30
+#define MAXPLATS		30	// initial capacity; grows dynamically now
 
 
-extern plat_t*	activeplats[MAXPLATS];
+extern plat_t**	activeplats;	// dynamically grown (was activeplats[MAXPLATS])
+extern int	maxactiveplats;	// current capacity
 
 void    T_PlatRaise(plat_t*	plat);
 
@@ -512,9 +514,10 @@ typedef struct
 
 #define CEILSPEED		FRACUNIT
 #define CEILWAIT		150
-#define MAXCEILINGS		30
+#define MAXCEILINGS		30	// initial capacity; grows dynamically now
 
-extern ceiling_t*	activeceilings[MAXCEILINGS];
+extern ceiling_t**	activeceilings;	// dynamically grown (was activeceilings[MAXCEILINGS])
+extern int		maxactiveceilings; // current capacity
 
 int
 EV_DoCeiling

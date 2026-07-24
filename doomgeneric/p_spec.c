@@ -1135,7 +1135,7 @@ void P_UpdateSpecials (void)
 
     
     //	DO BUTTONS
-    for (i = 0; i < MAXBUTTONS; i++)
+    for (i = 0; i < maxbuttons; i++)
 	if (buttonlist[i].btimer)
 	{
 	    buttonlist[i].btimer--;
@@ -1475,13 +1475,30 @@ void P_SpawnSpecials (void)
 
     
     //	Init other misc stuff
-    for (i = 0;i < MAXCEILINGS;i++)
+    //  (allocate the dynamic active-effect arrays on first use, then clear)
+    if (activeceilings == NULL)
+    {
+	maxactiveceilings = MAXCEILINGS;
+	activeceilings = I_Realloc(activeceilings,
+				   maxactiveceilings * sizeof(*activeceilings));
+    }
+    for (i = 0;i < maxactiveceilings;i++)
 	activeceilings[i] = NULL;
 
-    for (i = 0;i < MAXPLATS;i++)
+    if (activeplats == NULL)
+    {
+	maxactiveplats = MAXPLATS;
+	activeplats = I_Realloc(activeplats, maxactiveplats * sizeof(*activeplats));
+    }
+    for (i = 0;i < maxactiveplats;i++)
 	activeplats[i] = NULL;
-    
-    for (i = 0;i < MAXBUTTONS;i++)
+
+    if (buttonlist == NULL)
+    {
+	maxbuttons = MAXBUTTONS;
+	buttonlist = I_Realloc(buttonlist, maxbuttons * sizeof(*buttonlist));
+    }
+    for (i = 0;i < maxbuttons;i++)
 	memset(&buttonlist[i],0,sizeof(button_t));
 
     // UNUSED: no horizonal sliders.

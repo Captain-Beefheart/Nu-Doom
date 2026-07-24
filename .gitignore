@@ -17,3 +17,9 @@ build/
 dist/
 _wadtmp/
 *.err
+*.bmp
+shot.*
+*.wad
+# hi-res verification screenshots at repo root (dev artifacts)
+/baseline_*.png
+/stage*.png

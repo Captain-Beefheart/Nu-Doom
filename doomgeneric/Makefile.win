@@ -48,7 +48,12 @@ $(OBJDIR):
 
 $(OBJDIR)/%.o:	%.c
 	@echo [Compiling $<]
-	$(VB)$(CC) $(CFLAGS) -c $< -o $@
+	$(VB)$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
 print:
 	@echo OBJS: $(OBJS)
+
+# Header dependency tracking (at end so it doesn't hijack the default goal):
+# rebuild objects when an included header changes. gcc -MMD writes a .d file
+# per object; -MP adds phony targets for headers.
+-include $(OBJS:.o=.d)
