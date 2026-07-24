@@ -40,6 +40,11 @@ extern byte*		dc_source;
 void 	R_DrawColumn (void);
 void 	R_DrawColumnLow (void);
 
+// Translucency (Crispness).
+extern byte *tranmap;
+void	R_InitTranMap (void);
+void	R_DrawTLColumn (void);
+
 // The Spectre/Invisibility effect.
 void 	R_DrawFuzzColumn (void);
 void 	R_DrawFuzzColumnLow (void);

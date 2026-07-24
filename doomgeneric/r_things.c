@@ -34,6 +34,8 @@
 #include "r_local.h"
 
 #include "doomstat.h"
+#include "info.h"
+#include "crispy.h"
 
 
 
@@ -424,6 +426,11 @@ R_DrawVisSprite
 	dc_translation = translationtables - 256 +
 	    ( (vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT-8) );
     }
+    else if (vis->translucent)
+    {
+	// Crispness: translucent sprite
+	colfunc = R_DrawTLColumn;
+    }
 	
     dc_iscale = abs(vis->xiscale)>>detailshift;
     dc_texturemid = vis->texturemid;
@@ -553,6 +560,12 @@ void R_ProjectSprite (mobj_t* thing)
     // store information in a vissprite
     vis = R_NewVisSprite ();
     vis->mobjflags = thing->flags;
+    // Crispness: draw energy projectiles translucently.
+    vis->translucent = crispy.translucency && tranmap &&
+	(thing->type == MT_TROOPSHOT  || thing->type == MT_HEADSHOT ||
+	 thing->type == MT_BRUISERSHOT || thing->type == MT_TRACER  ||
+	 thing->type == MT_FATSHOT    || thing->type == MT_ARACHPLAZ ||
+	 thing->type == MT_PLASMA     || thing->type == MT_BFG);
     vis->scale = xscale<<detailshift;
     vis->gx = thing->x;
     vis->gy = thing->y;
@@ -696,6 +709,7 @@ void R_DrawPSprite (pspdef_t* psp)
     // store information in a vissprite
     vis = &avis;
     vis->mobjflags = 0;
+    vis->translucent = 0;
     vis->texturemid = (BASEYCENTER<<FRACBITS)+FRACUNIT/2-(psp->sy-spritetopoffset[lump]);
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;	

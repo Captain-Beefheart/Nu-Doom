@@ -205,8 +205,75 @@ void R_DrawColumn (void)
 #endif
 
 
-void R_DrawColumnLow (void) 
-{ 
+//
+// Translucency (Crispness): a 256x256 tint map + a translucent masked-column
+// drawer. tranmap[(bg<<8)+fg] blends 2/3 foreground over 1/3 background.
+//
+byte *tranmap = NULL;
+
+static int R_NearestColor(const byte *pal, int r, int g, int b)
+{
+    int best = 0, bestdist = 0x7fffffff, i;
+    for (i = 0; i < 256; i++)
+    {
+        int dr = r - pal[i*3+0];
+        int dg = g - pal[i*3+1];
+        int db = b - pal[i*3+2];
+        int dist = dr*dr + dg*dg + db*db;
+        if (dist < bestdist) { bestdist = dist; best = i; }
+    }
+    return best;
+}
+
+void R_InitTranMap(void)
+{
+    byte *pal;
+    int bg, fg;
+
+    if (tranmap)
+        return;
+
+    pal = W_CacheLumpName("PLAYPAL", PU_STATIC);
+    tranmap = Z_Malloc(256*256, PU_STATIC, NULL);
+
+    for (bg = 0; bg < 256; bg++)
+        for (fg = 0; fg < 256; fg++)
+        {
+            int r = (pal[fg*3+0]*2 + pal[bg*3+0]) / 3;
+            int g = (pal[fg*3+1]*2 + pal[bg*3+1]) / 3;
+            int b = (pal[fg*3+2]*2 + pal[bg*3+2]) / 3;
+            tranmap[(bg<<8) + fg] = R_NearestColor(pal, r, g, b);
+        }
+}
+
+void R_DrawTLColumn(void)
+{
+    int count;
+    byte *dest, *source, *colormap;
+    unsigned frac, fracstep;
+
+    count = dc_yh - dc_yl + 1;
+    if (count <= 0)
+        return;
+
+    source = dc_source;
+    colormap = dc_colormap;
+    dest = ylookup[dc_yl] + columnofs[dc_x];
+
+    fracstep = dc_iscale << 9;
+    frac = (dc_texturemid + (dc_yl - centery) * dc_iscale) << 9;
+
+    do
+    {
+        *dest = tranmap[(*dest << 8) + colormap[source[frac >> 25]]];
+        dest += SCREENWIDTH;
+        frac += fracstep;
+    } while (--count);
+}
+
+
+void R_DrawColumnLow (void)
+{
     int			count; 
     byte*		dest; 
     byte*		dest2;

@@ -3,6 +3,7 @@
 #include "doomkeys.h"
 #include "m_argv.h"
 #include "doomgeneric.h"
+#include "crispy.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -137,7 +138,7 @@ void DG_Init(){
                             SDL_WINDOWPOS_UNDEFINED,
                             DOOMGENERIC_RESX,
                             DOOMGENERIC_RESY,
-                            SDL_WINDOW_SHOWN
+                            SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
                             );
 
   // Setup renderer
@@ -153,6 +154,11 @@ void DG_Init(){
 void DG_DrawFrame()
 {
   SDL_UpdateTexture(texture, NULL, DG_ScreenBuffer, DOOMGENERIC_RESX*sizeof(uint32_t));
+
+  // Crispness: smooth (linear) vs crisp (nearest) scaling when the window is
+  // resized away from the native resolution.
+  SDL_SetTextureScaleMode(texture,
+      crispy.smoothscaling ? SDL_ScaleModeLinear : SDL_ScaleModeNearest);
 
   SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, texture, NULL, NULL);

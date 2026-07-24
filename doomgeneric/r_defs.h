@@ -366,9 +366,12 @@ typedef struct vissprite_s
     // for color translation and shadow draw,
     //  maxbright frames as well
     lighttable_t*	colormap;
-   
+
     int			mobjflags;
-    
+
+    // Crispness: draw this sprite through the translucency tint map.
+    boolean		translucent;
+
 } vissprite_t;
 
 

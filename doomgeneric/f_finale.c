@@ -580,20 +580,27 @@ F_DrawPatchCol
     byte*	desttop;
     int		count;
 	
+    // x is a logical (320-wide) column; scale to the hi-res buffer.
+    const int f = 1 << HIRES;
+    int dx, dy;
+
     column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-    desttop = I_VideoBuffer + x;
+    desttop = I_VideoBuffer + (x << HIRES);
 
     // step through the posts in a column
     while (column->topdelta != 0xff )
     {
 	source = (byte *)column + 3;
-	dest = desttop + column->topdelta*SCREENWIDTH;
+	dest = desttop + (column->topdelta << HIRES)*SCREENWIDTH;
 	count = column->length;
-		
+
 	while (count--)
 	{
-	    *dest = *source++;
-	    dest += SCREENWIDTH;
+	    byte pix = *source++;
+	    for (dy = 0; dy < f; dy++)
+		for (dx = 0; dx < f; dx++)
+		    dest[dy*SCREENWIDTH + dx] = pix;
+	    dest += SCREENWIDTH << HIRES;
 	}
 	column = (column_t *)(  (byte *)column + column->length + 4 );
     }
@@ -624,12 +631,12 @@ void F_BunnyScroll (void)
     if (scrolled < 0)
 	scrolled = 0;
 		
-    for ( x=0 ; x<SCREENWIDTH ; x++)
+    for ( x=0 ; x<ORIGWIDTH ; x++)
     {
 	if (x+scrolled < 320)
 	    F_DrawPatchCol (x, p1, x+scrolled);
 	else
-	    F_DrawPatchCol (x, p2, x+scrolled - 320);		
+	    F_DrawPatchCol (x, p2, x+scrolled - 320);
     }
 	
     if (finalecount < 1130)

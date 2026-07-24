@@ -787,6 +787,7 @@ void R_Init (void)
     printf (".");
     R_InitSkyMap ();
     R_InitTranslationTables ();
+    R_InitTranMap ();		// Crispness: translucency tint map
     printf (".");
 	
     framecount = 0;
