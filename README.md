@@ -1,34 +1,52 @@
 # Nu-Doom
 
 **Nu-Doom** is an enhanced DOOM source port for modern x64 systems, built on the
-minimal [doomgeneric](https://github.com/ozkl/doomgeneric) core with a full
-**SDL2 audio backend** wired in.
+minimal [doomgeneric](https://github.com/ozkl/doomgeneric) core with the classic
+static limits removed, a **native high-resolution renderer**, an **SDL2 audio
+backend**, and a Crispy-Doom-style **Crispness** options menu.
 
-The goal of the project is to keep doomgeneric's small, portable, low-footprint
-engine while progressively removing the original engine's static limits and
-enhancing graphics on modern hardware.
+The goal is to keep doomgeneric's small, portable engine while removing the
+original engine's static limits and enhancing graphics on modern hardware.
 
-> Status: early. The gameplay/renderer come from doomgeneric (vanilla DOOM
-> lineage); sound (SFX + music) is provided by SDL2 / SDL2_mixer. Builds and runs
-> on Windows x64 via MSYS2/MinGW.
+> Status: playable. Runs the DOOM shareware (`DOOM1.WAD`), DOOM, and DOOM II at
+> native 640×400 with sound. Builds and runs on Windows x64 via MSYS2/MinGW.
+
+## Features
+
+### Limit removing
+The famous vanilla static-array overflows are gone — the arrays now grow
+dynamically instead of crashing on complex maps:
+
+- **Renderer:** visplanes, drawsegs, vissprites, openings
+  (e.g. runs *nuts.wad*'s ~10,000 monsters — vissprites grow past 4,000).
+- **Playsim:** intercepts, spechit, active plats, buttons, active ceilings.
+
+### High-resolution rendering
+- Native **640×400** software rendering (not a 2× upscale of 320×200): sharp
+  walls, sprites, HUD, status bar and menus.
+- Split logical (320×200) vs. buffer (640×400) coordinate spaces via a `HIRES`
+  factor; `V_DrawPatch` and friends scale the 2D UI, visplane spans widened for
+  the taller buffer.
+- 32-bit true-color framebuffer presented through SDL2.
+
+### Sound
+- **SDL2 audio backend** — SFX via `i_sdlsound.c`, music via `i_sdlmusic.c`
+  (SDL2_mixer, `Mix_OpenAudioDevice`), enabled with `-DFEATURE_SOUND`.
+
+### Crispness menu & config
+- A dedicated **Crispness** submenu (Options → Crispness) with toggles saved to
+  **`crispy-doom.cfg`** (config persistence, which the base doomgeneric had
+  disabled, is enabled here).
+- Working toggles: **Crosshair** (center crosshair) and **Show FPS** (framerate
+  counter). Additional toggles (uncapped framerate, translucency, colored blood,
+  smooth scaling) are present and persist; their rendering is in progress.
 
 ## Why doomgeneric?
 
 doomgeneric strips DOOM down to a tiny platform interface (`DG_Init`,
-`DG_DrawFrame`, `DG_GetKey`, `DG_GetTicksMs`, `DG_SleepMs`), which makes it an
-ideal, low-memory base to build enhancements on. Nu-Doom uses the SDL2 platform
-backend (`doomgeneric_sdl.c`) and enables the sound path that doomgeneric leaves
-optional.
-
-## Features
-
-- **Minimal, low-footprint core** from doomgeneric (vanilla DOOM gameplay).
-- **640×400, 32-bit true-color framebuffer** (2× internal scale of the classic
-  320×200), rendered through SDL2.
-- **SDL2 audio backend** — sound effects via `i_sdlsound.c` and music via
-  `i_sdlmusic.c` (SDL2_mixer, `Mix_OpenAudioDevice`), enabled with
-  `-DFEATURE_SOUND`.
-- Cross-platform SDL2 video/input.
+`DG_DrawFrame`, `DG_GetKey`, `DG_GetTicksMs`, `DG_SleepMs`), making it an ideal,
+low-footprint base to build enhancements on. Nu-Doom uses the SDL2 platform
+backend (`doomgeneric_sdl.c`).
 
 ## Building on Windows (MSYS2 / MinGW-w64)
 
@@ -50,7 +68,8 @@ optional.
    ```
 
    This produces `doomgeneric.exe` linked against `SDL2.dll` and
-   `SDL2_mixer.dll`.
+   `SDL2_mixer.dll`. (The makefile tracks header dependencies, so incremental
+   rebuilds are correct after editing headers.)
 
 ### Packaging a runnable folder
 
@@ -63,30 +82,40 @@ SDL2_mixer, and the music codec libraries) into a `dist/` folder:
 
 ## Running
 
-You need a DOOM IWAD (`DOOM1.WAD`, `DOOM.WAD`, `DOOM2.WAD`, ...). The freely
-redistributable DOOM shareware WAD, or the fully-free
-[Freedoom](https://freedoom.github.io/) IWAD, both work.
+You need a DOOM IWAD. The freely-redistributable DOOM shareware `DOOM1.WAD`, or
+the fully-free [Freedoom](https://freedoom.github.io/) IWAD, both work, as do
+the commercial `DOOM.WAD` / `DOOM2.WAD`.
 
 ```sh
+# DOOM II (flat map numbering)
 dist/doomgeneric.exe -iwad /path/to/doom2.wad
+
+# shareware DOOM (episode + map)
+dist/doomgeneric.exe -iwad /path/to/doom1.wad -warp 1 1
 ```
 
-If you run from outside the MinGW shell, keep the DLLs from `setup_dist.sh` next
-to the executable.
+Settings — including the Crispness toggles — are saved to `crispy-doom.cfg` and
+`default.cfg` in the working directory. If you run from outside the MinGW shell,
+keep the DLLs from `setup_dist.sh` next to the executable.
 
 ## Roadmap
 
-- Remove classic static limits (dynamic visplanes / drawsegs / vissprites).
-- Higher internal resolution and rendering enhancements.
-- Incremental C++ modernization of subsystems.
+- [x] Remove classic static renderer limits (visplanes / drawsegs / vissprites /
+  openings).
+- [x] Remove playsim limits (intercepts / spechit / plats / buttons / ceilings).
+- [x] Native 640×400 high-resolution rendering.
+- [x] Crispness menu + persistent `crispy-doom.cfg`; Crosshair and Show FPS.
+- [ ] More Crispness features: uncapped/interpolated framerate, translucency,
+  colored blood, smooth pixel scaling.
+- [ ] Incremental C++ modernization of subsystems.
 
 ## Credits & License
 
 Nu-Doom is derived from **doomgeneric** by ozkl, which is in turn derived from
-id Software's DOOM. This project is free software licensed under the **GNU
-General Public License v2** (see [COPYING](COPYING)); it comes with NO warranty.
+id Software's DOOM. The Crispness menu is modelled on **Crispy Doom** by Fabian
+Greffrath. This project is free software licensed under the **GNU General Public
+License v2** (see [COPYING](COPYING)); it comes with NO warranty.
 
 - DOOM — Copyright © 1993-1996 id Software
 - doomgeneric — https://github.com/ozkl/doomgeneric
-- Upstream is tracked as the `upstream` git remote for pulling future
-  doomgeneric fixes.
+- Upstream (`upstream` git remote) tracks ozkl/doomgeneric for pulling fixes.
