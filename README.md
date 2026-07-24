@@ -40,9 +40,9 @@ dynamically instead of crashing on complex maps:
 - Working toggles: **Crosshair**, **Show FPS**, **Translucency** (energy
   projectiles), **Colored blood** (cacodemon → blue, baron/knight → green),
   **Smooth pixel scaling** (linear filtering when the window is resized), and
-  **Uncapped framerate** (sub-tic interpolation of the camera and sprites, so
-  motion is smooth above 35 fps). Sector movement (doors/lifts) is not yet
-  interpolated.
+  **Uncapped framerate** (sub-tic interpolation of the camera, sprites, and
+  moving sectors, so all motion — including doors and lifts — is smooth above
+  35 fps).
 
 ## Why doomgeneric?
 
@@ -109,9 +109,9 @@ keep the DLLs from `setup_dist.sh` next to the executable.
 - [x] Native 640×400 high-resolution rendering.
 - [x] Crispness menu + persistent `crispy-doom.cfg`.
 - [x] Crispness features: Crosshair, Show FPS, Translucency, Colored blood,
-  Smooth pixel scaling, Uncapped/interpolated framerate (camera + sprites).
-- [ ] Further rendering and quality-of-life enhancements (e.g. interpolate
-  sector floor/ceiling movement for doors and lifts).
+  Smooth pixel scaling, Uncapped/interpolated framerate (camera + sprites +
+  moving sectors).
+- [ ] Further rendering and quality-of-life enhancements.
 
 ## Credits & License
 
