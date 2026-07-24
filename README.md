@@ -1,67 +1,92 @@
-# doomgeneric
-The purpose of doomgeneric is to make porting Doom easier.
-Of course Doom is already portable but with doomgeneric it is possible with just a few functions.
+# Nu-Doom
 
-To try it you will need a WAD file (game data). If you don't own the game, shareware version is freely available (doom1.wad).
+**Nu-Doom** is an enhanced DOOM source port for modern x64 systems, built on the
+minimal [doomgeneric](https://github.com/ozkl/doomgeneric) core with a full
+**SDL2 audio backend** wired in.
 
-# porting
-Create a file named doomgeneric_yourplatform.c and just implement these functions to suit your platform.
-* DG_Init
-* DG_DrawFrame
-* DG_SleepMs
-* DG_GetTicksMs
-* DG_GetKey
+The goal of the project is to keep doomgeneric's small, portable, low-footprint
+engine while progressively removing the original engine's static limits and
+enhancing graphics on modern hardware.
 
-|Functions            |Description|
-|---------------------|-----------|
-|DG_Init              |Initialize your platfrom (create window, framebuffer, etc...).
-|DG_DrawFrame         |Frame is ready in DG_ScreenBuffer. Copy it to your platform's screen.
-|DG_SleepMs           |Sleep in milliseconds.
-|DG_GetTicksMs        |The ticks passed since launch in milliseconds.
-|DG_GetKey            |Provide keyboard events.
-|DG_SetWindowTitle    |Not required. This is for setting the window title as Doom sets this from WAD file.
+> Status: early. The gameplay/renderer come from doomgeneric (vanilla DOOM
+> lineage); sound (SFX + music) is provided by SDL2 / SDL2_mixer. Builds and runs
+> on Windows x64 via MSYS2/MinGW.
 
-### main loop
-At start, call doomgeneric_Create().
+## Why doomgeneric?
 
-In a loop, call doomgeneric_Tick().
+doomgeneric strips DOOM down to a tiny platform interface (`DG_Init`,
+`DG_DrawFrame`, `DG_GetKey`, `DG_GetTicksMs`, `DG_SleepMs`), which makes it an
+ideal, low-memory base to build enhancements on. Nu-Doom uses the SDL2 platform
+backend (`doomgeneric_sdl.c`) and enables the sound path that doomgeneric leaves
+optional.
 
-In simplest form:
+## Features
+
+- **Minimal, low-footprint core** from doomgeneric (vanilla DOOM gameplay).
+- **640×400, 32-bit true-color framebuffer** (2× internal scale of the classic
+  320×200), rendered through SDL2.
+- **SDL2 audio backend** — sound effects via `i_sdlsound.c` and music via
+  `i_sdlmusic.c` (SDL2_mixer, `Mix_OpenAudioDevice`), enabled with
+  `-DFEATURE_SOUND`.
+- Cross-platform SDL2 video/input.
+
+## Building on Windows (MSYS2 / MinGW-w64)
+
+1. Install [MSYS2](https://www.msys2.org/).
+2. From an **MSYS2 MinGW64** shell, install the toolchain and SDL2 stack:
+
+   ```sh
+   pacman -S --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-SDL2 \
+       mingw-w64-x86_64-SDL2_mixer mingw-w64-x86_64-pkgconf make
+   ```
+
+3. Build with the provided MinGW makefile (adds `-DFEATURE_SOUND`,
+   `-lSDL2_mixer`, and `-std=gnu11` — doomgeneric predates C23, whose `true`/
+   `false`/`bool` keywords clash with `doomtype.h`):
+
+   ```sh
+   cd doomgeneric
+   make -f Makefile.win
+   ```
+
+   This produces `doomgeneric.exe` linked against `SDL2.dll` and
+   `SDL2_mixer.dll`.
+
+### Packaging a runnable folder
+
+`setup_dist.sh` copies the executable and all required runtime DLLs (SDL2,
+SDL2_mixer, and the music codec libraries) into a `dist/` folder:
+
+```sh
+./setup_dist.sh
 ```
-int main(int argc, char **argv)
-{
-    doomgeneric_Create(argc, argv);
 
-    while (1)
-    {
-        doomgeneric_Tick();
-    }
-    
-    return 0;
-}
+## Running
+
+You need a DOOM IWAD (`DOOM1.WAD`, `DOOM.WAD`, `DOOM2.WAD`, ...). The freely
+redistributable DOOM shareware WAD, or the fully-free
+[Freedoom](https://freedoom.github.io/) IWAD, both work.
+
+```sh
+dist/doomgeneric.exe -iwad /path/to/doom2.wad
 ```
 
-# sound
-Sound is much harder to implement! If you need sound, take a look at SDL port. It fully supports sound and music! Where to start? Define FEATURE_SOUND, assign DG_sound_module and DG_music_module.
+If you run from outside the MinGW shell, keep the DLLs from `setup_dist.sh` next
+to the executable.
 
-# platforms
-Ported platforms include Windows, X11, SDL, emscripten. Just look at (doomgeneric_win.c, doomgeneric_xlib.c, doomgeneric_sdl.c).
-Makefiles provided for each platform.
+## Roadmap
 
-## emscripten
-You can try it directly here:
-https://ozkl.github.io/doomgeneric/
+- Remove classic static limits (dynamic visplanes / drawsegs / vissprites).
+- Higher internal resolution and rendering enhancements.
+- Incremental C++ modernization of subsystems.
 
-emscripten port is based on SDL port, so it supports sound and music! For music, timidity backend is used.
+## Credits & License
 
-## Windows
-![Windows](screenshots/windows.png)
+Nu-Doom is derived from **doomgeneric** by ozkl, which is in turn derived from
+id Software's DOOM. This project is free software licensed under the **GNU
+General Public License v2** (see [COPYING](COPYING)); it comes with NO warranty.
 
-## X11 - Ubuntu
-![Ubuntu](screenshots/ubuntu.png)
-
-## X11 - FreeBSD
-![FreeBSD](screenshots/freebsd.png)
-
-## SDL
-![SDL](screenshots/sdl.png)
+- DOOM — Copyright © 1993-1996 id Software
+- doomgeneric — https://github.com/ozkl/doomgeneric
+- Upstream is tracked as the `upstream` git remote for pulling future
+  doomgeneric fixes.
