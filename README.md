@@ -114,6 +114,9 @@ keep the DLLs from `setup_dist.sh` next to the executable.
 - [x] Crispness menu (expanded set, two pages): Health-colored crosshair,
   Show coordinates, Show level stats, Centered weapon, Automap overlay,
   Automap rotate, "Secret revealed" message.
+- [x] Crispness menu (third page): VSync, Gamma correction, Sound channels
+  (8/16/32), Configurable weapon bob, Weapon squat on landing, Crosshair
+  type (cross/X/dot), Show level time, Automap secret highlighting.
 
 ### Crispness menu — build out the full feature set
 
@@ -123,23 +126,25 @@ features, grouped by menu category:
 **Rendering / Visual**
 - [ ] Widescreen rendering (16:9 / 21:9 field of view)
 - [ ] Aspect-ratio correction (4:3 pixel-perfect)
-- [ ] Framerate limit + VSync options
+- [x] VSync toggle
+- [ ] Framerate limit
 - [ ] Brightmaps (self-lit texture/sprite pixels)
 - [ ] Smooth diminishing lighting
 - [ ] Colored HUD numbers (health / armor / ammo by value)
 - [ ] Extended "Crispy" fullscreen HUD layout
-- [ ] Gamma / level brightness control
+- [x] Gamma / level brightness control
 
 **Tactical**
 - [x] Health-colored crosshair
-- [ ] Crosshair type / shape / target highlight
-- [ ] Configurable weapon bob
+- [x] Crosshair type / shape (cross / X / dot)
+- [ ] Crosshair target highlight
+- [x] Configurable weapon bob
 - [ ] Weapon recoil pitch
 - [x] Centered weapon when firing
-- [ ] Squat weapon on hard landing
+- [x] Squat weapon on hard landing
 
 **Audio**
-- [ ] More sound channels
+- [x] More sound channels (8 / 16 / 32)
 - [ ] Full sound-effect pitch shifting
 - [ ] Mono / stereo SFX toggle
 - [ ] Play sounds in full length (no cutoffs)
@@ -147,11 +152,11 @@ features, grouped by menu category:
 **Navigational / Automap**
 - [x] Automap overlay mode
 - [x] Automap rotate mode
-- [ ] Automap extended colors
-- [ ] Secret-wall highlighting on the automap
+- [x] Secret-sector highlighting on the automap
+- [ ] Automap extended colors (full recolor scheme)
 - [x] "Secret revealed" notification
 - [x] Show player coordinates and level stats
-- [ ] Show level time
+- [x] Show level time
 
 **Demos / misc**
 - [ ] Demo timer and progress bar

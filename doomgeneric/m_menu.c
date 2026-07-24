@@ -48,6 +48,7 @@
 #include "m_argv.h"
 #include "m_controls.h"
 #include "crispy.h"
+#include "doomgeneric.h"
 #include "p_saveg.h"
 
 #include "s_sound.h"
@@ -370,72 +371,122 @@ menu_t  OptionsDef =
 
 //
 // CRISPNESS MENU (Nu-Doom enhancement toggles, saved to crispy-doom.cfg)
-// The full set spans two pages; the last item on each page flips between them.
+// The full set spans three pages; the last item on each page advances to the
+// next (wrapping). Backspace/ESC steps back through the prevMenu chain.
 //
 enum
 {
     crisp_uncapped,
     crisp_smoothscaling,
+    crisp_vsync,
+    crisp_gamma,
     crisp_translucency,
     crisp_coloredblood,
-    crisp_centerweapon,
-    crisp_crosshair,
-    crisp_crosshairhealth,
+    crisp_soundchannels,
     crisp_nextpage,
     crisp_end
 } crispness_e;
 
 enum
 {
+    crisp2_centerweapon,
+    crisp2_weaponbob,
+    crisp2_weaponsquat,
+    crisp2_crosshair,
+    crisp2_crosshairhealth,
+    crisp2_crosshairtype,
     crisp2_showfps,
-    crisp2_showcoords,
-    crisp2_showstats,
-    crisp2_secretmessage,
-    crisp2_automapoverlay,
-    crisp2_automaprotate,
-    crisp2_prevpage,
+    crisp2_nextpage,
     crisp2_end
 } crispness2_e;
 
+enum
+{
+    crisp3_showcoords,
+    crisp3_showstats,
+    crisp3_showleveltime,
+    crisp3_secretmessage,
+    crisp3_automapoverlay,
+    crisp3_automaprotate,
+    crisp3_automapsecrets,
+    crisp3_nextpage,
+    crisp3_end
+} crispness3_e;
+
+// Boolean toggles.
 static void M_CrispUncapped(int choice)       { crispy.uncapped        = !crispy.uncapped; }
 static void M_CrispSmoothScaling(int choice)  { crispy.smoothscaling   = !crispy.smoothscaling; }
+static void M_CrispVSync(int choice)          { crispy.vsync = !crispy.vsync; DG_SetVSync(crispy.vsync); }
 static void M_CrispTranslucency(int choice)   { crispy.translucency    = !crispy.translucency; }
 static void M_CrispColoredBlood(int choice)   { crispy.coloredblood    = !crispy.coloredblood; }
 static void M_CrispCenterWeapon(int choice)   { crispy.centerweapon    = !crispy.centerweapon; }
+static void M_CrispWeaponSquat(int choice)    { crispy.weaponsquat     = !crispy.weaponsquat; }
 static void M_CrispCrosshair(int choice)      { crispy.crosshair       = !crispy.crosshair; }
 static void M_CrispCrosshairHealth(int choice){ crispy.crosshairhealth = !crispy.crosshairhealth; }
 static void M_CrispShowFPS(int choice)        { crispy.showfps         = !crispy.showfps; }
 static void M_CrispShowCoords(int choice)     { crispy.showcoords      = !crispy.showcoords; }
 static void M_CrispShowStats(int choice)      { crispy.showstats       = !crispy.showstats; }
+static void M_CrispShowLevelTime(int choice)  { crispy.showleveltime   = !crispy.showleveltime; }
 static void M_CrispSecretMessage(int choice)  { crispy.secretmessage   = !crispy.secretmessage; }
 static void M_CrispAutomapOverlay(int choice) { crispy.automapoverlay  = !crispy.automapoverlay; }
 static void M_CrispAutomapRotate(int choice)  { crispy.automaprotate   = !crispy.automaprotate; }
+static void M_CrispAutomapSecrets(int choice) { crispy.automapsecrets  = !crispy.automapsecrets; }
+
+// Multi-value settings.
+static void M_CrispGamma(int choice)
+{
+    usegamma = (usegamma + 1) % 5;
+    players[consoleplayer].message = DEH_String(gammamsg[usegamma]);
+    I_SetPalette (W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
+}
+static void M_CrispWeaponBob(int choice)      { crispy.weaponbob     = (crispy.weaponbob + 1) % 5; }
+static void M_CrispCrosshairType(int choice)  { crispy.crosshairtype = (crispy.crosshairtype + 1) % 3; }
+static void M_CrispSoundChannels(int choice)
+{
+    int n = (snd_channels < 16) ? 16 : (snd_channels < 32) ? 32 : 8;
+    S_ReallocChannels(n);
+}
 
 void M_DrawCrispness2(void);
-static void M_CrispnessNextPage(int choice);
-static void M_CrispnessPrevPage(int choice);
+void M_DrawCrispness3(void);
+static void M_CrispnessPage2(int choice);
+static void M_CrispnessPage3(int choice);
+static void M_CrispnessPage1(int choice);
 
 menuitem_t CrispnessMenu[]=
 {
     {1,"",M_CrispUncapped,'u'},
     {1,"",M_CrispSmoothScaling,'s'},
+    {1,"",M_CrispVSync,'v'},
+    {1,"",M_CrispGamma,'g'},
     {1,"",M_CrispTranslucency,'t'},
     {1,"",M_CrispColoredBlood,'b'},
-    {1,"",M_CrispCenterWeapon,'w'},
-    {1,"",M_CrispCrosshair,'c'},
-    {1,"",M_CrispCrosshairHealth,'h'},
-    {1,"",M_CrispnessNextPage,'n'}
+    {1,"",M_CrispSoundChannels,'c'},
+    {1,"",M_CrispnessPage2,'n'}
 };
 
 menuitem_t Crispness2Menu[]=
 {
+    {1,"",M_CrispCenterWeapon,'w'},
+    {1,"",M_CrispWeaponBob,'b'},
+    {1,"",M_CrispWeaponSquat,'q'},
+    {1,"",M_CrispCrosshair,'c'},
+    {1,"",M_CrispCrosshairHealth,'h'},
+    {1,"",M_CrispCrosshairType,'y'},
     {1,"",M_CrispShowFPS,'f'},
+    {1,"",M_CrispnessPage3,'n'}
+};
+
+menuitem_t Crispness3Menu[]=
+{
     {1,"",M_CrispShowCoords,'o'},
     {1,"",M_CrispShowStats,'l'},
+    {1,"",M_CrispShowLevelTime,'i'},
     {1,"",M_CrispSecretMessage,'m'},
     {1,"",M_CrispAutomapOverlay,'a'},
     {1,"",M_CrispAutomapRotate,'r'},
-    {1,"",M_CrispnessPrevPage,'p'}
+    {1,"",M_CrispAutomapSecrets,'e'},
+    {1,"",M_CrispnessPage1,'n'}
 };
 
 menu_t  CrispnessDef =
@@ -458,8 +509,19 @@ menu_t  Crispness2Def =
     0
 };
 
-static void M_CrispnessNextPage(int choice) { M_SetupNextMenu(&Crispness2Def); }
-static void M_CrispnessPrevPage(int choice) { M_SetupNextMenu(&CrispnessDef); }
+menu_t  Crispness3Def =
+{
+    crisp3_end,
+    &Crispness2Def,	// back returns to page 2
+    Crispness3Menu,
+    M_DrawCrispness3,
+    48,48,
+    0
+};
+
+static void M_CrispnessPage2(int choice) { M_SetupNextMenu(&Crispness2Def); }
+static void M_CrispnessPage3(int choice) { M_SetupNextMenu(&Crispness3Def); }
+static void M_CrispnessPage1(int choice) { M_SetupNextMenu(&CrispnessDef); }
 
 //
 // Read This! MENU 1 & 2
@@ -1114,41 +1176,71 @@ void M_Options(int choice)
 // M_Crispness
 //
 static char *crispOnOff[2] = { "Off", "On" };
+static char *crispBob[5]   = { "Off", "25%", "50%", "75%", "Full" };
+static char *crispXhair[3] = { "Cross", "X", "Dot" };
 
-static void M_DrawCrispnessItem(int row, char *label, int value)
+// Draw a menu row with a label on the left and a value string on the right.
+static void M_DrawCrispnessStr(int row, char *label, char *value)
 {
     int y = CrispnessDef.y + LINEHEIGHT * row;
     M_WriteText(CrispnessDef.x, y, label);
-    M_WriteText(CrispnessDef.x + 176, y, crispOnOff[value != 0]);
+    M_WriteText(CrispnessDef.x + 176, y, value);
+}
+
+static void M_DrawCrispnessItem(int row, char *label, int value)
+{
+    M_DrawCrispnessStr(row, label, crispOnOff[value != 0]);
+}
+
+static void M_DrawCrispnessNav(int row, char *label)
+{
+    M_WriteText(CrispnessDef.x, CrispnessDef.y + LINEHEIGHT * row, label);
 }
 
 void M_DrawCrispness(void)
 {
-    M_WriteText(CrispnessDef.x, CrispnessDef.y - 20, "CRISPNESS  1/2");
+    char buf[16];
 
-    M_DrawCrispnessItem(crisp_uncapped,       "Uncapped framerate",   crispy.uncapped);
-    M_DrawCrispnessItem(crisp_smoothscaling,  "Smooth pixel scaling", crispy.smoothscaling);
-    M_DrawCrispnessItem(crisp_translucency,   "Translucency",         crispy.translucency);
-    M_DrawCrispnessItem(crisp_coloredblood,   "Colored blood",        crispy.coloredblood);
-    M_DrawCrispnessItem(crisp_centerweapon,   "Center weapon",        crispy.centerweapon);
-    M_DrawCrispnessItem(crisp_crosshair,      "Crosshair",            crispy.crosshair);
-    M_DrawCrispnessItem(crisp_crosshairhealth,"Health crosshair",     crispy.crosshairhealth);
-    M_WriteText(CrispnessDef.x, CrispnessDef.y + LINEHEIGHT * crisp_nextpage,
-		"Next page >");
+    M_WriteText(CrispnessDef.x, CrispnessDef.y - 20, "CRISPNESS  1/3");
+
+    M_DrawCrispnessItem(crisp_uncapped,      "Uncapped framerate",   crispy.uncapped);
+    M_DrawCrispnessItem(crisp_smoothscaling, "Smooth pixel scaling", crispy.smoothscaling);
+    M_DrawCrispnessItem(crisp_vsync,         "Vertical sync",        crispy.vsync);
+    snprintf(buf, sizeof(buf), "%d", usegamma);
+    M_DrawCrispnessStr (crisp_gamma,         "Gamma correction",     usegamma ? buf : "Off");
+    M_DrawCrispnessItem(crisp_translucency,  "Translucency",         crispy.translucency);
+    M_DrawCrispnessItem(crisp_coloredblood,  "Colored blood",        crispy.coloredblood);
+    snprintf(buf, sizeof(buf), "%d", snd_channels);
+    M_DrawCrispnessStr (crisp_soundchannels, "Sound channels",       buf);
+    M_DrawCrispnessNav (crisp_nextpage,      "Next page >");
 }
 
 void M_DrawCrispness2(void)
 {
-    M_WriteText(Crispness2Def.x, Crispness2Def.y - 20, "CRISPNESS  2/2");
+    M_WriteText(Crispness2Def.x, Crispness2Def.y - 20, "CRISPNESS  2/3");
 
-    M_DrawCrispnessItem(crisp2_showfps,       "Show FPS",             crispy.showfps);
-    M_DrawCrispnessItem(crisp2_showcoords,    "Show coordinates",     crispy.showcoords);
-    M_DrawCrispnessItem(crisp2_showstats,     "Show level stats",     crispy.showstats);
-    M_DrawCrispnessItem(crisp2_secretmessage, "Report secrets",       crispy.secretmessage);
-    M_DrawCrispnessItem(crisp2_automapoverlay,"Automap overlay",      crispy.automapoverlay);
-    M_DrawCrispnessItem(crisp2_automaprotate, "Automap rotate",       crispy.automaprotate);
-    M_WriteText(Crispness2Def.x, Crispness2Def.y + LINEHEIGHT * crisp2_prevpage,
-		"< Prev page");
+    M_DrawCrispnessItem(crisp2_centerweapon,   "Center weapon",     crispy.centerweapon);
+    M_DrawCrispnessStr (crisp2_weaponbob,      "Weapon bob",        crispBob[crispy.weaponbob % 5]);
+    M_DrawCrispnessItem(crisp2_weaponsquat,    "Weapon squat",      crispy.weaponsquat);
+    M_DrawCrispnessItem(crisp2_crosshair,      "Crosshair",         crispy.crosshair);
+    M_DrawCrispnessItem(crisp2_crosshairhealth,"Health crosshair",  crispy.crosshairhealth);
+    M_DrawCrispnessStr (crisp2_crosshairtype,  "Crosshair type",    crispXhair[crispy.crosshairtype % 3]);
+    M_DrawCrispnessItem(crisp2_showfps,        "Show FPS",          crispy.showfps);
+    M_DrawCrispnessNav (crisp2_nextpage,       "Next page >");
+}
+
+void M_DrawCrispness3(void)
+{
+    M_WriteText(Crispness3Def.x, Crispness3Def.y - 20, "CRISPNESS  3/3");
+
+    M_DrawCrispnessItem(crisp3_showcoords,     "Show coordinates",  crispy.showcoords);
+    M_DrawCrispnessItem(crisp3_showstats,      "Show level stats",  crispy.showstats);
+    M_DrawCrispnessItem(crisp3_showleveltime,  "Show level time",   crispy.showleveltime);
+    M_DrawCrispnessItem(crisp3_secretmessage,  "Report secrets",    crispy.secretmessage);
+    M_DrawCrispnessItem(crisp3_automapoverlay, "Automap overlay",   crispy.automapoverlay);
+    M_DrawCrispnessItem(crisp3_automaprotate,  "Automap rotate",    crispy.automaprotate);
+    M_DrawCrispnessItem(crisp3_automapsecrets, "Automap secrets",   crispy.automapsecrets);
+    M_DrawCrispnessNav (crisp3_nextpage,       "< First page");
 }
 
 void M_Crispness(int choice)

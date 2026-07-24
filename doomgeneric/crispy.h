@@ -21,6 +21,7 @@
 #define __CRISPY_H__
 
 #include "doomtype.h"
+#include "m_fixed.h"
 
 typedef struct
 {
@@ -30,13 +31,19 @@ typedef struct
     int coloredblood;   // colored blood and corpses
     int crosshair;      // draw a crosshair in the center of the view
     int crosshairhealth;// tint the crosshair by the player's health
+    int crosshairtype;  // crosshair shape: 0 cross, 1 X, 2 dot
     int showfps;        // show a framerate counter
     int showcoords;     // show player x/y/z/angle
     int showstats;      // show level kills / items / secrets
+    int showleveltime;  // show elapsed level time
     int centerweapon;   // center the weapon while firing (no side bob)
+    int weaponbob;      // view/weapon bob amount: 0 off .. 4 full
+    int weaponsquat;    // dip the weapon on a hard landing
     int automapoverlay; // draw the automap over the game view
     int automaprotate;  // rotate the automap to the player's facing
+    int automapsecrets; // highlight unfound secret sectors on the automap
     int secretmessage;  // print a message when a secret is revealed
+    int vsync;          // vertical sync on the display
 } crispy_t;
 
 // The single global crispness settings block.
@@ -50,7 +57,11 @@ void M_BindCrispnessVariables(void);
 void Crispy_DrawCrosshair(void);  // crispy.crosshair (+ crispy.crosshairhealth)
 void Crispy_DrawFPS(void);        // crispy.showfps
 void Crispy_DrawCoords(void);     // crispy.showcoords
-void Crispy_DrawStats(void);      // crispy.showstats
+void Crispy_DrawStats(void);      // crispy.showstats (+ crispy.showleveltime)
+
+// Fixed-point bob multiplier (FRACUNIT = full) from crispy.weaponbob; used to
+// scale the render-only view/weapon bob without touching the playsim.
+fixed_t Crispy_BobFactor(void);
 
 // Colored-blood translation tables (crispy.coloredblood).
 extern byte crispy_bloodtrans_blue[256];

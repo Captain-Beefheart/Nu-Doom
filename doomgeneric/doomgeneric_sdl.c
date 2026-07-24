@@ -149,6 +149,15 @@ void DG_Init(){
   SDL_RenderPresent(renderer);
 
   texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, DOOMGENERIC_RESX, DOOMGENERIC_RESY);
+
+  DG_SetVSync(crispy.vsync);   // apply the saved Crispness VSync setting
+}
+
+// Crispness: toggle vertical sync on the live renderer.
+void DG_SetVSync(int enabled)
+{
+  if (renderer != NULL)
+    SDL_RenderSetVSync(renderer, enabled ? 1 : 0);
 }
 
 void DG_DrawFrame()

@@ -102,6 +102,8 @@ void P_CalcHeight (player_t* player)
 		
     angle = (FINEANGLES/20*leveltime)&FINEMASK;
     bob = FixedMul ( player->bob/2, finesine[angle]);
+    // Crispness: scale the (render-only) view bob; playsim is unaffected.
+    bob = FixedMul (bob, Crispy_BobFactor());
 
     
     // move viewheight

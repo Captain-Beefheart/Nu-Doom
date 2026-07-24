@@ -44,7 +44,7 @@
 
 #define LOW_PASS_FILTER 1
 //#define DEBUG_DUMP_WAVS
-#define NUM_CHANNELS 16
+#define NUM_CHANNELS 32   // Crispness: allow up to 32 sound channels
 
 typedef struct allocated_sound_s allocated_sound_t;
 

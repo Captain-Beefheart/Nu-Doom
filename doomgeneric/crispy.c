@@ -58,13 +58,22 @@ void M_BindCrispnessVariables(void)
     M_BindVariable("crispy_coloredblood",  &crispy.coloredblood);
     M_BindVariable("crispy_crosshair",      &crispy.crosshair);
     M_BindVariable("crispy_crosshairhealth",&crispy.crosshairhealth);
+    M_BindVariable("crispy_crosshairtype",  &crispy.crosshairtype);
     M_BindVariable("crispy_showfps",        &crispy.showfps);
     M_BindVariable("crispy_showcoords",     &crispy.showcoords);
     M_BindVariable("crispy_showstats",      &crispy.showstats);
+    M_BindVariable("crispy_showleveltime",  &crispy.showleveltime);
     M_BindVariable("crispy_centerweapon",   &crispy.centerweapon);
+    M_BindVariable("crispy_weaponbob",      &crispy.weaponbob);
+    M_BindVariable("crispy_weaponsquat",    &crispy.weaponsquat);
     M_BindVariable("crispy_automapoverlay", &crispy.automapoverlay);
     M_BindVariable("crispy_automaprotate",  &crispy.automaprotate);
+    M_BindVariable("crispy_automapsecrets", &crispy.automapsecrets);
     M_BindVariable("crispy_secretmessage",  &crispy.secretmessage);
+    M_BindVariable("crispy_vsync",          &crispy.vsync);
+
+    // Weapon bob defaults to full (4) so gameplay is unchanged out of the box.
+    crispy.weaponbob = 4;
 
     Crispy_InitColoredBlood();
 }
@@ -95,11 +104,45 @@ void Crispy_DrawCrosshair(void)
     cx = viewwindowx + (viewwidth >> 1);
     cy = viewwindowy + (viewheight >> 1);
 
-    for (i = -4; i <= 4; i++)
+    switch (crispy.crosshairtype)
     {
-        fb[cy * SCREENWIDTH + (cx + i)] = col;
-        fb[(cy + i) * SCREENWIDTH + cx] = col;
+      case 1:  // diagonal X
+        for (i = -4; i <= 4; i++)
+        {
+            fb[(cy + i) * SCREENWIDTH + (cx + i)] = col;
+            fb[(cy + i) * SCREENWIDTH + (cx - i)] = col;
+        }
+        break;
+
+      case 2:  // small dot
+        for (i = -1; i <= 1; i++)
+        {
+            fb[cy * SCREENWIDTH + (cx + i)] = col;
+            fb[(cy + i) * SCREENWIDTH + cx] = col;
+        }
+        break;
+
+      default: // plus-shaped cross
+        for (i = -4; i <= 4; i++)
+        {
+            fb[cy * SCREENWIDTH + (cx + i)] = col;
+            fb[(cy + i) * SCREENWIDTH + cx] = col;
+        }
+        break;
     }
+}
+
+//
+// Crispy_BobFactor
+// Fixed-point multiplier for the render-only view/weapon bob.
+// crispy.weaponbob: 0 = off .. 4 = full, in 25% steps.
+//
+fixed_t Crispy_BobFactor(void)
+{
+    int b = crispy.weaponbob;
+    if (b < 0) b = 0;
+    if (b > 4) b = 4;
+    return b * FRACUNIT / 4;
 }
 
 //
@@ -127,22 +170,33 @@ void Crispy_DrawCoords(void)
 
 //
 // Crispy_DrawStats
-// Shows level kills / items / secrets (top-left, under the FPS counter).
+// Shows level kills / items / secrets and/or the elapsed level time
+// (top-left, under the FPS counter).
 //
 void Crispy_DrawStats(void)
 {
     player_t *p = &players[displayplayer];
     char buf[24];
 
-    if (!crispy.showstats || gamestate != GS_LEVEL)
+    if (gamestate != GS_LEVEL)
         return;
 
-    snprintf(buf, sizeof(buf), "K %d/%d", p->killcount, totalkills);
-    M_WriteText(2, 12, buf);
-    snprintf(buf, sizeof(buf), "I %d/%d", p->itemcount, totalitems);
-    M_WriteText(2, 20, buf);
-    snprintf(buf, sizeof(buf), "S %d/%d", p->secretcount, totalsecret);
-    M_WriteText(2, 28, buf);
+    if (crispy.showstats)
+    {
+        snprintf(buf, sizeof(buf), "K %d/%d", p->killcount, totalkills);
+        M_WriteText(2, 12, buf);
+        snprintf(buf, sizeof(buf), "I %d/%d", p->itemcount, totalitems);
+        M_WriteText(2, 20, buf);
+        snprintf(buf, sizeof(buf), "S %d/%d", p->secretcount, totalsecret);
+        M_WriteText(2, 28, buf);
+    }
+
+    if (crispy.showleveltime)
+    {
+        int secs = leveltime / TICRATE;
+        snprintf(buf, sizeof(buf), "T %d:%02d", secs / 60, secs % 60);
+        M_WriteText(2, 36, buf);
+    }
 }
 
 //

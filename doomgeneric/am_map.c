@@ -78,6 +78,8 @@
 #define THINGCOLORS	GREENS
 #define THINGRANGE	GREENRANGE
 #define SECRETWALLCOLORS WALLCOLORS
+// Crispness: bright green used to highlight unfound secret sectors.
+#define SECRETSECTORCOLORS (112)
 #define SECRETWALLRANGE WALLRANGE
 #define GRIDCOLORS	(GRAYS + GRAYSRANGE/2)
 #define GRIDRANGE	0
@@ -1172,6 +1174,14 @@ void AM_drawWalls(void)
 	{
 	    if ((lines[i].flags & LINE_NEVERSEE) && !cheating)
 		continue;
+	    // Crispness: highlight boundaries of still-unfound secret sectors.
+	    if (crispy.automapsecrets &&
+		((lines[i].frontsector && lines[i].frontsector->special == 9) ||
+		 (lines[i].backsector  && lines[i].backsector->special  == 9)))
+	    {
+		AM_drawMline(&l, SECRETSECTORCOLORS);
+		continue;
+	    }
 	    if (!lines[i].backsector)
 	    {
 		AM_drawMline(&l, WALLCOLORS+lightlev);

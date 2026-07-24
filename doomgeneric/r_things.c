@@ -730,7 +730,18 @@ void R_DrawPSprite (pspdef_t* psp)
     vis->mobjflags = 0;
     vis->translucent = 0;
     vis->translation = NULL;
-    vis->texturemid = (BASEYCENTER<<FRACBITS)+FRACUNIT/2-(psp->sy-spritetopoffset[lump]);
+
+    // Crispness: dip the weapon on a hard landing, following the view drop.
+    // 41*FRACUNIT is the standing view height (VIEWHEIGHT); render-only.
+    fixed_t psp_sy = psp->sy;
+    if (crispy.weaponsquat)
+    {
+	fixed_t drop = 41*FRACUNIT - viewplayer->viewheight;
+	if (drop > 0)
+	    psp_sy += drop >> 1;
+    }
+
+    vis->texturemid = (BASEYCENTER<<FRACBITS)+FRACUNIT/2-(psp_sy-spritetopoffset[lump]);
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;	
     vis->scale = pspritescale<<detailshift;

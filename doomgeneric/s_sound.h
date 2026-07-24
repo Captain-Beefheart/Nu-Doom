@@ -31,8 +31,11 @@
 
 void S_Init(int sfxVolume, int musicVolume);
 
+// Crispness: resize the mixing-channel pool at runtime.
+void S_ReallocChannels(int numchannels);
 
-// Shut down sound 
+
+// Shut down sound
 
 void S_Shutdown(void);
 

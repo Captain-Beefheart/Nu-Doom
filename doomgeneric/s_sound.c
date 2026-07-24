@@ -183,6 +183,37 @@ static void S_StopChannel(int cnum)
 }
 
 //
+// Crispness: resize the mixing-channel pool at runtime (8 / 16 / 32).
+//
+void S_ReallocChannels(int numchannels)
+{
+    int i;
+
+    if (channels == NULL || numchannels == snd_channels)
+    {
+        snd_channels = numchannels;
+        return;
+    }
+
+    // stop everything playing on the current channel set first
+    for (i = 0; i < snd_channels; i++)
+    {
+        if (channels[i].sfxinfo)
+            S_StopChannel(i);
+    }
+
+    Z_Free(channels);
+
+    snd_channels = numchannels;
+
+    channels = Z_Malloc(snd_channels * sizeof(channel_t), PU_STATIC, 0);
+    for (i = 0; i < snd_channels; i++)
+    {
+        channels[i].sfxinfo = 0;
+    }
+}
+
+//
 // Per level startup code.
 // Kills playing sounds at start of level,
 //  determines music if any, changes music.

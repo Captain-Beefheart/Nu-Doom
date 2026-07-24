@@ -328,9 +328,11 @@ A_WeaponReady
     }
     else
     {
-	psp->sx = FRACUNIT + FixedMul (player->bob, finecosine[angle]);
+	// Crispness: scale the (render-only) weapon bob amount.
+	fixed_t bob = FixedMul (player->bob, Crispy_BobFactor());
+	psp->sx = FRACUNIT + FixedMul (bob, finecosine[angle]);
 	angle &= FINEANGLES/2-1;
-	psp->sy = WEAPONTOP + FixedMul (player->bob, finesine[angle]);
+	psp->sy = WEAPONTOP + FixedMul (bob, finesine[angle]);
     }
 }
 
