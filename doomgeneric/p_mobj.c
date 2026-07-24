@@ -32,6 +32,7 @@
 #include "s_sound.h"
 
 #include "doomstat.h"
+#include "crispy.h"
 
 
 void G_PlayerReborn (int player);
@@ -879,7 +880,8 @@ P_SpawnBlood
 ( fixed_t	x,
   fixed_t	y,
   fixed_t	z,
-  int		damage )
+  int		damage,
+  mobj_t*	target )
 {
     mobj_t*	th;
 	
@@ -895,6 +897,15 @@ P_SpawnBlood
 	P_SetMobjState (th,S_BLOOD2);
     else if (damage < 9)
 	P_SetMobjState (th,S_BLOOD3);
+
+    // Crispness: colored blood based on the monster that was hit.
+    if (crispy.coloredblood && target)
+    {
+	if (target->type == MT_HEAD)
+	    th->translation = crispy_bloodtrans_blue;   // cacodemon
+	else if (target->type == MT_BRUISER || target->type == MT_KNIGHT)
+	    th->translation = crispy_bloodtrans_green;  // baron / hell knight
+    }
 }
 
 

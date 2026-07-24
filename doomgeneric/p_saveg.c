@@ -416,6 +416,9 @@ static void saveg_read_mobj_t(mobj_t *str)
 
     // struct mobj_s* tracer;
     str->tracer = saveg_readp();
+
+    // byte* translation (Crispness): not persisted; reset for safety.
+    str->translation = NULL;
 }
 
 static void saveg_write_mobj_t(mobj_t *str)
