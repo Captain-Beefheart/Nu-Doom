@@ -1,0 +1,3 @@
+# Keep shell scripts and makefiles LF so they work under MSYS2/MinGW and Unix.
+*.sh        text eol=lf
+Makefile*   text eol=lf

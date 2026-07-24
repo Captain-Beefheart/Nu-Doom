@@ -11,3 +11,9 @@ Release/
 Build/
 doomgeneric
 doomgeneric.map
+
+# Nu-Doom build/runtime artifacts
+build/
+dist/
+_wadtmp/
+*.err
