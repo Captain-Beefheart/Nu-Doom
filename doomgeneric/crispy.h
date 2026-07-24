@@ -37,4 +37,8 @@ extern crispy_t crispy;
 // and save to crispy-doom.cfg. Called from D_BindVariables().
 void M_BindCrispnessVariables(void);
 
+// Per-frame overlays gated by the crispness toggles (called from D_Display).
+void Crispy_DrawCrosshair(void);  // crispy.crosshair
+void Crispy_DrawFPS(void);        // crispy.showfps
+
 #endif // __CRISPY_H__
