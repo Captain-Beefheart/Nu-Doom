@@ -716,9 +716,13 @@ void R_ExecuteSetViewSize (void)
 	
     R_InitTextureMapping ();
     
-    // psprite scales
-    pspritescale = FRACUNIT*viewwidth/SCREENWIDTH;
-    pspriteiscale = FRACUNIT*SCREENWIDTH/viewwidth;
+    // psprite scales.
+    // viewwidth is in buffer space but the weapon sprite math is in the
+    // 320x200 logical space, so scale against ORIGWIDTH (not SCREENWIDTH) —
+    // otherwise at hi-res the scale collapses to 1.0, shrinking the weapon and
+    // floating it up toward the middle (and squashing the sky).
+    pspritescale = FRACUNIT*viewwidth/ORIGWIDTH;
+    pspriteiscale = FRACUNIT*ORIGWIDTH/viewwidth;
     
     // thing clipping
     for (i=0 ; i<viewwidth ; i++)
