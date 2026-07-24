@@ -29,6 +29,7 @@
 
 // State.
 #include "doomstat.h"
+#include "crispy.h"
 
 // Data.
 #include "sounds.h"
@@ -319,9 +320,18 @@ A_WeaponReady
     
     // bob the weapon based on movement speed
     angle = (128*leveltime)&FINEMASK;
-    psp->sx = FRACUNIT + FixedMul (player->bob, finecosine[angle]);
-    angle &= FINEANGLES/2-1;
-    psp->sy = WEAPONTOP + FixedMul (player->bob, finesine[angle]);
+    // Crispness: center the weapon (drop the bob) while ready if requested.
+    if (crispy.centerweapon)
+    {
+	psp->sx = FRACUNIT;
+	psp->sy = WEAPONTOP;
+    }
+    else
+    {
+	psp->sx = FRACUNIT + FixedMul (player->bob, finecosine[angle]);
+	angle &= FINEANGLES/2-1;
+	psp->sy = WEAPONTOP + FixedMul (player->bob, finesine[angle]);
+    }
 }
 
 

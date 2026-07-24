@@ -111,6 +111,9 @@ keep the DLLs from `setup_dist.sh` next to the executable.
 - [x] Crispness menu (initial set): Crosshair, Show FPS, Translucency, Colored
   blood, Smooth pixel scaling, Uncapped/interpolated framerate (camera +
   sprites + moving sectors).
+- [x] Crispness menu (expanded set, two pages): Health-colored crosshair,
+  Show coordinates, Show level stats, Centered weapon, Automap overlay,
+  Automap rotate, "Secret revealed" message.
 
 ### Crispness menu — build out the full feature set
 
@@ -128,10 +131,11 @@ features, grouped by menu category:
 - [ ] Gamma / level brightness control
 
 **Tactical**
-- [ ] Crosshair type, shape and color (+ target highlight)
+- [x] Health-colored crosshair
+- [ ] Crosshair type / shape / target highlight
 - [ ] Configurable weapon bob
 - [ ] Weapon recoil pitch
-- [ ] Centered weapon when firing
+- [x] Centered weapon when firing
 - [ ] Squat weapon on hard landing
 
 **Audio**
@@ -141,10 +145,13 @@ features, grouped by menu category:
 - [ ] Play sounds in full length (no cutoffs)
 
 **Navigational / Automap**
-- [ ] Automap overlay mode, rotate mode and extended colors
+- [x] Automap overlay mode
+- [x] Automap rotate mode
+- [ ] Automap extended colors
 - [ ] Secret-wall highlighting on the automap
-- [ ] "Secret revealed" notification
-- [ ] Show player coordinates / level stats / level time
+- [x] "Secret revealed" notification
+- [x] Show player coordinates and level stats
+- [ ] Show level time
 
 **Demos / misc**
 - [ ] Demo timer and progress bar

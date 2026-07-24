@@ -25,6 +25,7 @@
 
 #include "doomdef.h"
 #include "doomstat.h"
+#include "crispy.h"
 
 #include "deh_main.h"
 #include "i_system.h"
@@ -1059,6 +1060,8 @@ void P_PlayerInSpecialSector (player_t* player)
 	// SECRET SECTOR
 	player->secretcount++;
 	sector->special = 0;
+	if (crispy.secretmessage && player == &players[consoleplayer])
+	    player->message = "A secret is revealed!";
 	break;
 			
       case 11:

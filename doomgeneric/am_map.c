@@ -44,6 +44,7 @@
 #include "dstrings.h"
 
 #include "am_map.h"
+#include "crispy.h"
 
 
 // For use if I do walls with outsides/insides
@@ -256,6 +257,11 @@ static fixed_t scale_mtof = (fixed_t)INITSCALEMTOF;
 static fixed_t scale_ftom;
 
 static player_t *plr; // the player represented by an arrow
+
+// [crispy] automap rotation: map is spun so the player always faces north.
+static angle_t  mapangle;
+static mpoint_t mapcenter;
+static void AM_rotatePoint(mpoint_t* pt);
 
 static patch_t *marknums[10]; // numbers used for marking by the automap
 static mpoint_t markpoints[AM_NUMMARKPOINTS]; // where the points are
@@ -874,28 +880,38 @@ AM_clipMline
     else if ((mx) >= f_w) (oc) |= RIGHT;
 
     
+    // Trivial rejects work in map coords.  When the map is rotated, an
+    // on-screen point can land outside the axis-aligned window, so widen
+    // the reject box (the fine outcode pass below still clips exactly).
+    fixed_t cx1 = m_x, cx2 = m_x2, cy1 = m_y, cy2 = m_y2;
+    if (crispy.automaprotate)
+    {
+	cx1 -= m_w;  cx2 += m_w;
+	cy1 -= m_h;  cy2 += m_h;
+    }
+
     // do trivial rejects and outcodes
-    if (ml->a.y > m_y2)
+    if (ml->a.y > cy2)
 	outcode1 = TOP;
-    else if (ml->a.y < m_y)
+    else if (ml->a.y < cy1)
 	outcode1 = BOTTOM;
 
-    if (ml->b.y > m_y2)
+    if (ml->b.y > cy2)
 	outcode2 = TOP;
-    else if (ml->b.y < m_y)
+    else if (ml->b.y < cy1)
 	outcode2 = BOTTOM;
-    
+
     if (outcode1 & outcode2)
 	return false; // trivially outside
 
-    if (ml->a.x < m_x)
+    if (ml->a.x < cx1)
 	outcode1 |= LEFT;
-    else if (ml->a.x > m_x2)
+    else if (ml->a.x > cx2)
 	outcode1 |= RIGHT;
-    
-    if (ml->b.x < m_x)
+
+    if (ml->b.x < cx1)
 	outcode2 |= LEFT;
-    else if (ml->b.x > m_x2)
+    else if (ml->b.x > cx2)
 	outcode2 |= RIGHT;
     
     if (outcode1 & outcode2)
@@ -1094,7 +1110,15 @@ void AM_drawGrid(int color)
     {
 	ml.a.x = x;
 	ml.b.x = x;
-	AM_drawMline(&ml, color);
+	if (crispy.automaprotate)
+	{
+	    mline_t r = ml;
+	    AM_rotatePoint(&r.a);
+	    AM_rotatePoint(&r.b);
+	    AM_drawMline(&r, color);
+	}
+	else
+	    AM_drawMline(&ml, color);
     }
 
     // Figure out start of horizontal gridlines
@@ -1111,7 +1135,15 @@ void AM_drawGrid(int color)
     {
 	ml.a.y = y;
 	ml.b.y = y;
-	AM_drawMline(&ml, color);
+	if (crispy.automaprotate)
+	{
+	    mline_t r = ml;
+	    AM_rotatePoint(&r.a);
+	    AM_rotatePoint(&r.b);
+	    AM_drawMline(&r, color);
+	}
+	else
+	    AM_drawMline(&ml, color);
     }
 
 }
@@ -1131,6 +1163,11 @@ void AM_drawWalls(void)
 	l.a.y = lines[i].v1->y;
 	l.b.x = lines[i].v2->x;
 	l.b.y = lines[i].v2->y;
+	if (crispy.automaprotate)
+	{
+	    AM_rotatePoint(&l.a);
+	    AM_rotatePoint(&l.b);
+	}
 	if (cheating || (lines[i].flags & ML_MAPPED))
 	{
 	    if ((lines[i].flags & LINE_NEVERSEE) && !cheating)
@@ -1194,6 +1231,28 @@ AM_rotate
     *x = tmpx;
 }
 
+//
+// AM_rotatePoint
+// Rotate a map point around the map center by mapangle (for automaprotate).
+//
+static void
+AM_rotatePoint ( mpoint_t* pt )
+{
+    fixed_t tmpx;
+    const angle_t a = mapangle >> ANGLETOFINESHIFT;
+
+    pt->x -= mapcenter.x;
+    pt->y -= mapcenter.y;
+
+    tmpx = FixedMul(pt->x, finecosine[a])
+	 - FixedMul(pt->y, finesine[a]) + mapcenter.x;
+
+    pt->y = FixedMul(pt->x, finesine[a])
+	  + FixedMul(pt->y, finecosine[a]) + mapcenter.y;
+
+    pt->x = tmpx;
+}
+
 void
 AM_drawLineCharacter
 ( mline_t*	lineguy,
@@ -1253,14 +1312,23 @@ void AM_drawPlayers(void)
 
     if (!netgame)
     {
+	mpoint_t pt = { plr->mo->x, plr->mo->y };
+	angle_t  angle = plr->mo->angle;
+
+	if (crispy.automaprotate)
+	{
+	    AM_rotatePoint(&pt);
+	    angle += mapangle;
+	}
+
 	if (cheating)
 	    AM_drawLineCharacter
 		(cheat_player_arrow, arrlen(cheat_player_arrow), 0,
-		 plr->mo->angle, WHITE, plr->mo->x, plr->mo->y);
+		 angle, WHITE, pt.x, pt.y);
 	else
 	    AM_drawLineCharacter
-		(player_arrow, arrlen(player_arrow), 0, plr->mo->angle,
-		 WHITE, plr->mo->x, plr->mo->y);
+		(player_arrow, arrlen(player_arrow), 0, angle,
+		 WHITE, pt.x, pt.y);
 	return;
     }
 
@@ -1300,9 +1368,18 @@ AM_drawThings
 	t = sectors[i].thinglist;
 	while (t)
 	{
+	    mpoint_t pt = { t->x, t->y };
+	    angle_t  angle = t->angle;
+
+	    if (crispy.automaprotate)
+	    {
+		AM_rotatePoint(&pt);
+		angle += mapangle;
+	    }
+
 	    AM_drawLineCharacter
 		(thintriangle_guy, arrlen(thintriangle_guy),
-		 16<<FRACBITS, t->angle, colors+lightlev, t->x, t->y);
+		 16<<FRACBITS, angle, colors+lightlev, pt.x, pt.y);
 	    t = t->snext;
 	}
     }
@@ -1320,8 +1397,11 @@ void AM_drawMarks(void)
 	    //      h = SHORT(marknums[i]->height);
 	    w = 5; // because something's wrong with the wad, i guess
 	    h = 6; // because something's wrong with the wad, i guess
-	    fx = CXMTOF(markpoints[i].x);
-	    fy = CYMTOF(markpoints[i].y);
+	    mpoint_t pt = { markpoints[i].x, markpoints[i].y };
+	    if (crispy.automaprotate)
+		AM_rotatePoint(&pt);
+	    fx = CXMTOF(pt.x);
+	    fy = CYMTOF(pt.y);
 	    if (fx >= f_x && fx <= f_w - w && fy >= f_y && fy <= f_h - h)
 		V_DrawPatch(fx, fy, marknums[i]);
 	}
@@ -1339,7 +1419,19 @@ void AM_Drawer (void)
 {
     if (!automapactive) return;
 
-    AM_clearFB(BACKGROUND);
+    // In overlay mode the map is drawn on top of the 3D view, so keep the
+    // rendered scene instead of blanking to the background colour.
+    if (!crispy.automapoverlay)
+	AM_clearFB(BACKGROUND);
+
+    // Recompute the rotation pivot (map center) and angle for this frame.
+    if (crispy.automaprotate)
+    {
+	mapcenter.x = m_x + m_w / 2;
+	mapcenter.y = m_y + m_h / 2;
+	mapangle = ANG90 - plr->mo->angle;
+    }
+
     if (grid)
 	AM_drawGrid(GRIDCOLORS);
     AM_drawWalls();

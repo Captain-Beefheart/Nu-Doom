@@ -21,6 +21,8 @@
 #include "m_config.h"
 #include "i_video.h"
 #include "i_timer.h"
+#include "m_fixed.h"
+#include "doomstat.h"
 
 // State owned by the renderer / menu that the overlays need.
 extern int  viewwindowx, viewwindowy, viewwidth, viewheight;
@@ -54,8 +56,15 @@ void M_BindCrispnessVariables(void)
     M_BindVariable("crispy_smoothscaling", &crispy.smoothscaling);
     M_BindVariable("crispy_translucency",  &crispy.translucency);
     M_BindVariable("crispy_coloredblood",  &crispy.coloredblood);
-    M_BindVariable("crispy_crosshair",     &crispy.crosshair);
-    M_BindVariable("crispy_showfps",       &crispy.showfps);
+    M_BindVariable("crispy_crosshair",      &crispy.crosshair);
+    M_BindVariable("crispy_crosshairhealth",&crispy.crosshairhealth);
+    M_BindVariable("crispy_showfps",        &crispy.showfps);
+    M_BindVariable("crispy_showcoords",     &crispy.showcoords);
+    M_BindVariable("crispy_showstats",      &crispy.showstats);
+    M_BindVariable("crispy_centerweapon",   &crispy.centerweapon);
+    M_BindVariable("crispy_automapoverlay", &crispy.automapoverlay);
+    M_BindVariable("crispy_automaprotate",  &crispy.automaprotate);
+    M_BindVariable("crispy_secretmessage",  &crispy.secretmessage);
 
     Crispy_InitColoredBlood();
 }
@@ -68,19 +77,72 @@ void M_BindCrispnessVariables(void)
 void Crispy_DrawCrosshair(void)
 {
     int cx, cy, i;
+    byte col = 4;  // near-white
     byte *fb = I_VideoBuffer;
 
     if (!crispy.crosshair)
         return;
+
+    // Optionally tint the crosshair by the player's health.
+    if (crispy.crosshairhealth)
+    {
+        int h = players[displayplayer].health;
+        if (h < 34)         col = 176;  // red
+        else if (h < 67)    col = 231;  // yellow
+        else                col = 112;  // green
+    }
 
     cx = viewwindowx + (viewwidth >> 1);
     cy = viewwindowy + (viewheight >> 1);
 
     for (i = -4; i <= 4; i++)
     {
-        fb[cy * SCREENWIDTH + (cx + i)] = 4;
-        fb[(cy + i) * SCREENWIDTH + cx] = 4;
+        fb[cy * SCREENWIDTH + (cx + i)] = col;
+        fb[(cy + i) * SCREENWIDTH + cx] = col;
     }
+}
+
+//
+// Crispy_DrawCoords
+// Shows the display player's map coordinates (top-right).
+//
+void Crispy_DrawCoords(void)
+{
+    player_t *p = &players[displayplayer];
+    char buf[24];
+
+    if (!crispy.showcoords || gamestate != GS_LEVEL || !p->mo)
+        return;
+
+    snprintf(buf, sizeof(buf), "X %d", p->mo->x >> FRACBITS);
+    M_WriteText(ORIGWIDTH - 72, 8, buf);
+    snprintf(buf, sizeof(buf), "Y %d", p->mo->y >> FRACBITS);
+    M_WriteText(ORIGWIDTH - 72, 16, buf);
+    snprintf(buf, sizeof(buf), "Z %d", p->mo->z >> FRACBITS);
+    M_WriteText(ORIGWIDTH - 72, 24, buf);
+    snprintf(buf, sizeof(buf), "A %d",
+             (int)(((uint64_t) p->mo->angle * 360) >> 32));
+    M_WriteText(ORIGWIDTH - 72, 32, buf);
+}
+
+//
+// Crispy_DrawStats
+// Shows level kills / items / secrets (top-left, under the FPS counter).
+//
+void Crispy_DrawStats(void)
+{
+    player_t *p = &players[displayplayer];
+    char buf[24];
+
+    if (!crispy.showstats || gamestate != GS_LEVEL)
+        return;
+
+    snprintf(buf, sizeof(buf), "K %d/%d", p->killcount, totalkills);
+    M_WriteText(2, 12, buf);
+    snprintf(buf, sizeof(buf), "I %d/%d", p->itemcount, totalitems);
+    M_WriteText(2, 20, buf);
+    snprintf(buf, sizeof(buf), "S %d/%d", p->secretcount, totalsecret);
+    M_WriteText(2, 28, buf);
 }
 
 //

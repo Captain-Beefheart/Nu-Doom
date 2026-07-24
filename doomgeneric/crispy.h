@@ -24,12 +24,19 @@
 
 typedef struct
 {
-    int uncapped;      // uncapped / interpolated framerate
-    int smoothscaling; // smooth (linear) pixel scaling to the display
-    int translucency;  // translucent sprites / effects
-    int coloredblood;  // colored blood and corpses
-    int crosshair;     // draw a crosshair in the center of the view
-    int showfps;       // show a framerate counter
+    int uncapped;       // uncapped / interpolated framerate
+    int smoothscaling;  // smooth (linear) pixel scaling to the display
+    int translucency;   // translucent sprites / effects
+    int coloredblood;   // colored blood and corpses
+    int crosshair;      // draw a crosshair in the center of the view
+    int crosshairhealth;// tint the crosshair by the player's health
+    int showfps;        // show a framerate counter
+    int showcoords;     // show player x/y/z/angle
+    int showstats;      // show level kills / items / secrets
+    int centerweapon;   // center the weapon while firing (no side bob)
+    int automapoverlay; // draw the automap over the game view
+    int automaprotate;  // rotate the automap to the player's facing
+    int secretmessage;  // print a message when a secret is revealed
 } crispy_t;
 
 // The single global crispness settings block.
@@ -40,8 +47,10 @@ extern crispy_t crispy;
 void M_BindCrispnessVariables(void);
 
 // Per-frame overlays gated by the crispness toggles (called from D_Display).
-void Crispy_DrawCrosshair(void);  // crispy.crosshair
+void Crispy_DrawCrosshair(void);  // crispy.crosshair (+ crispy.crosshairhealth)
 void Crispy_DrawFPS(void);        // crispy.showfps
+void Crispy_DrawCoords(void);     // crispy.showcoords
+void Crispy_DrawStats(void);      // crispy.showstats
 
 // Colored-blood translation tables (crispy.coloredblood).
 extern byte crispy_bloodtrans_blue[256];

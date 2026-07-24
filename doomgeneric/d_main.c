@@ -214,7 +214,7 @@ void D_Display (void)
       case GS_LEVEL:
 		if (!gametic)
 			break;
-		if (automapactive)
+		if (automapactive && !crispy.automapoverlay)
 			AM_Drawer ();
 		if (wipe || (viewheight != 200 && fullscreen) )
 			redrawsbar = true;
@@ -241,8 +241,12 @@ void D_Display (void)
     I_UpdateNoBlit ();
     
     // draw the view directly
-    if (gamestate == GS_LEVEL && !automapactive && gametic)
+    if (gamestate == GS_LEVEL && (!automapactive || crispy.automapoverlay) && gametic)
     	R_RenderPlayerView (&players[displayplayer]);
+
+    // overlay automap sits on top of the freshly rendered 3D view
+    if (gamestate == GS_LEVEL && automapactive && crispy.automapoverlay && gametic)
+    	AM_Drawer ();
 
     if (gamestate == GS_LEVEL && gametic)
     {
@@ -299,7 +303,9 @@ void D_Display (void)
 
     // menus go directly to the screen
     M_Drawer ();          // menu is drawn even on top of everything
-    Crispy_DrawFPS ();     // crispness: framerate counter (on top)
+    Crispy_DrawFPS ();     // crispness overlays (on top)
+    Crispy_DrawStats ();
+    Crispy_DrawCoords ();
     NetUpdate ();         // send out any new accumulation
 
 
