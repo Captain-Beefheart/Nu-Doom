@@ -25,11 +25,11 @@
 #include "d_event.h"
 #include "m_cheat.h"
 
-// Size of statusbar.
-// Now sensitive for scaling.
+// Size of statusbar, in the 320x200 logical space (V_ scaling maps it to the
+// hi-res buffer). Was SCREENWIDTH/SCREENHEIGHT-based, which broke at hi-res.
 #define ST_HEIGHT	32
-#define ST_WIDTH	SCREENWIDTH
-#define ST_Y		(SCREENHEIGHT - ST_HEIGHT)
+#define ST_WIDTH	ORIGWIDTH
+#define ST_Y		(ORIGHEIGHT - ST_HEIGHT)
 
 
 //

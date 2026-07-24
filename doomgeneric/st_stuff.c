@@ -1411,6 +1411,9 @@ void ST_Stop (void)
 void ST_Init (void)
 {
     ST_loadData();
-    st_backing_screen = (byte *) Z_Malloc(ST_WIDTH * ST_HEIGHT, PU_STATIC, 0);
+    // Full hi-res size: the bar is drawn into this buffer via the scaling
+    // V_DrawPatch (stride SCREENWIDTH), so reserve SCREENWIDTH x (ST_HEIGHT<<HIRES).
+    st_backing_screen =
+        (byte *) Z_Malloc(SCREENWIDTH * (ST_HEIGHT << HIRES), PU_STATIC, 0);
 }
 

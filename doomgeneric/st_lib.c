@@ -113,7 +113,7 @@ STlib_drawNum
     x = n->x - numdigits*w;
 
     if (n->y - ST_Y < 0)
-	return;  // TEMP hi-res: skip until status-bar is hi-res'd
+	I_Error("drawNum: n->y - ST_Y < 0");
 
     V_CopyRect(x, n->y - ST_Y, st_backing_screen, w*numdigits, h, x, n->y);
 
@@ -221,7 +221,7 @@ STlib_updateMultIcon
 	    h = SHORT(mi->p[mi->oldinum]->height);
 
 	    if (y - ST_Y < 0)
-		{ mi->oldinum = *mi->inum; return; }  // TEMP hi-res
+		I_Error("updateMultIcon: y - ST_Y < 0");
 
 	    V_CopyRect(x, y-ST_Y, st_backing_screen, w, h, x, y);
 	}
@@ -270,7 +270,7 @@ STlib_updateBinIcon
 	h = SHORT(bi->p->height);
 
 	if (y - ST_Y < 0)
-	    { bi->oldval = *bi->val; return; }  // TEMP hi-res
+	    I_Error("updateBinIcon: y - ST_Y < 0");
 
 	if (*bi->val)
 	    V_DrawPatch(bi->x, bi->y, bi->p);

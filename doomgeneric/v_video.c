@@ -103,18 +103,23 @@ void V_CopyRect(int srcx, int srcy, byte *source,
     }
 #endif 
 
-    V_MarkRect(destx, desty, width, height); 
- 
-    src = source + SCREENWIDTH * srcy + srcx; 
-    dest = dest_screen + SCREENWIDTH * desty + destx; 
+    V_MarkRect(destx, desty, width, height);
 
-    for ( ; height>0 ; height--) 
-    { 
-        memcpy(dest, src, width); 
-        src += SCREENWIDTH; 
-        dest += SCREENWIDTH; 
-    } 
-} 
+    // Coords/dimensions are in the 320x200 logical space; scale to the buffer.
+    srcx <<= HIRES;   srcy <<= HIRES;
+    destx <<= HIRES;  desty <<= HIRES;
+    width <<= HIRES;  height <<= HIRES;
+
+    src = source + SCREENWIDTH * srcy + srcx;
+    dest = dest_screen + SCREENWIDTH * desty + destx;
+
+    for ( ; height>0 ; height--)
+    {
+        memcpy(dest, src, width);
+        src += SCREENWIDTH;
+        dest += SCREENWIDTH;
+    }
+}
  
 //
 // V_SetPatchClipCallback
@@ -137,7 +142,7 @@ void V_SetPatchClipCallback(vpatchclipfunc_t func)
 //
 
 void V_DrawPatch(int x, int y, patch_t *patch)
-{ 
+{
     int count;
     int col;
     column_t *column;
@@ -145,6 +150,10 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     byte *dest;
     byte *source;
     int w;
+
+    // Patches are authored in the 320x200 logical space; scale each source
+    // pixel up to a (1<<HIRES)x(1<<HIRES) block in the render buffer.
+    const int f = 1 << HIRES;
 
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);
@@ -158,9 +167,9 @@ void V_DrawPatch(int x, int y, patch_t *patch)
 
 #ifdef RANGECHECK
     if (x < 0
-     || x + SHORT(patch->width) > SCREENWIDTH
+     || x + SHORT(patch->width) > ORIGWIDTH
      || y < 0
-     || y + SHORT(patch->height) > SCREENHEIGHT)
+     || y + SHORT(patch->height) > ORIGHEIGHT)
     {
         I_Error("Bad V_DrawPatch x=%i y=%i patch.width=%i patch.height=%i topoffset=%i leftoffset=%i", x, y, patch->width, patch->height, patch->topoffset, patch->leftoffset);
     }
@@ -169,25 +178,29 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
-    desttop = dest_screen + y * SCREENWIDTH + x;
+    desttop = dest_screen + (y << HIRES) * SCREENWIDTH + (x << HIRES);
 
     w = SHORT(patch->width);
 
-    for ( ; col<w ; x++, col++, desttop++)
+    for ( ; col<w ; x++, col++, desttop += f)
     {
         column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
 
         // step through the posts in a column
         while (column->topdelta != 0xff)
         {
+            int dx, dy;
             source = (byte *)column + 3;
-            dest = desttop + column->topdelta*SCREENWIDTH;
+            dest = desttop + (column->topdelta << HIRES) * SCREENWIDTH;
             count = column->length;
 
             while (count--)
             {
-                *dest = *source++;
-                dest += SCREENWIDTH;
+                byte pix = *source++;
+                for (dy = 0; dy < f; dy++)
+                    for (dx = 0; dx < f; dx++)
+                        dest[dy*SCREENWIDTH + dx] = pix;
+                dest += SCREENWIDTH << HIRES;
             }
             column = (column_t *)((byte *)column + column->length + 4);
         }
