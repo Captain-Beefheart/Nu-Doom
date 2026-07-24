@@ -245,8 +245,11 @@ void D_Display (void)
     	R_RenderPlayerView (&players[displayplayer]);
 
     if (gamestate == GS_LEVEL && gametic)
+    {
     	HU_Drawer ();
-    
+    	Crispy_DrawCrosshair ();
+    }
+
     // clean up border stuff
     if (gamestate != oldgamestate && gamestate != GS_LEVEL)
     	I_SetPalette (W_CacheLumpName (DEH_String("PLAYPAL"),PU_CACHE));
@@ -296,6 +299,7 @@ void D_Display (void)
 
     // menus go directly to the screen
     M_Drawer ();          // menu is drawn even on top of everything
+    Crispy_DrawFPS ();     // crispness: framerate counter (on top)
     NetUpdate ();         // send out any new accumulation
 
 
