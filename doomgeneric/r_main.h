@@ -32,6 +32,10 @@
 extern fixed_t		viewcos;
 extern fixed_t		viewsin;
 
+// Uncapped framerate (Crispness): sub-tic interpolation.
+extern fixed_t		fractionaltic;
+void			R_SaveOldView (player_t* player);
+
 extern int		viewwindowx;
 extern int		viewwindowy;
 

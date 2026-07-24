@@ -281,6 +281,10 @@ typedef struct mobj_s
     // NULL = no translation. Not persisted; loaded mobjs reset to NULL.
     byte*		translation;
 
+    // Crispness (uncapped framerate): position at the start of the current
+    // tic, for sub-tic sprite interpolation.
+    fixed_t		oldx, oldy, oldz;
+
 } mobj_t;
 
 

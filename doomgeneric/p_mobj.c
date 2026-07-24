@@ -441,6 +441,12 @@ P_NightmareRespawn (mobj_t* mobj)
 //
 void P_MobjThinker (mobj_t* mobj)
 {
+    // Uncapped framerate: remember the start-of-tic position so the renderer
+    // can interpolate this thing's sprite between tics.
+    mobj->oldx = mobj->x;
+    mobj->oldy = mobj->y;
+    mobj->oldz = mobj->z;
+
     // momentum movement
     if (mobj->momx
 	|| mobj->momy
@@ -552,6 +558,12 @@ P_SpawnMobj
 	mobj->z = mobj->ceilingz - mobj->info->height;
     else 
 	mobj->z = z;
+
+    // Uncapped framerate: start with old == current so the first frame
+    // doesn't interpolate from the origin.
+    mobj->oldx = mobj->x;
+    mobj->oldy = mobj->y;
+    mobj->oldz = mobj->z;
 
     mobj->thinker.function.acp1 = (actionf_p1)P_MobjThinker;
 	

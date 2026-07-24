@@ -496,10 +496,22 @@ void R_ProjectSprite (mobj_t* thing)
     angle_t		ang;
     fixed_t		iscale;
     
+    // Uncapped framerate: interpolate the thing's position between tics
+    // (snap on large jumps such as teleport / respawn).
+    fixed_t ix = thing->x, iy = thing->y, iz = thing->z;
+    if (crispy.uncapped
+	&& abs(thing->x - thing->oldx) < (128<<FRACBITS)
+	&& abs(thing->y - thing->oldy) < (128<<FRACBITS))
+    {
+	ix = thing->oldx + FixedMul(fractionaltic, thing->x - thing->oldx);
+	iy = thing->oldy + FixedMul(fractionaltic, thing->y - thing->oldy);
+	iz = thing->oldz + FixedMul(fractionaltic, thing->z - thing->oldz);
+    }
+
     // transform the origin point
-    tr_x = thing->x - viewx;
-    tr_y = thing->y - viewy;
-	
+    tr_x = ix - viewx;
+    tr_y = iy - viewy;
+
     gxt = FixedMul(tr_x,viewcos); 
     gyt = -FixedMul(tr_y,viewsin);
     
@@ -536,7 +548,7 @@ void R_ProjectSprite (mobj_t* thing)
     if (sprframe->rotate)
     {
 	// choose a different rotation based on player view
-	ang = R_PointToAngle (thing->x, thing->y);
+	ang = R_PointToAngle (ix, iy);
 	rot = (ang-thing->angle+(unsigned)(ANG45/2)*9)>>29;
 	lump = sprframe->lump[rot];
 	flip = (boolean)sprframe->flip[rot];
@@ -574,10 +586,10 @@ void R_ProjectSprite (mobj_t* thing)
 	 thing->type == MT_PLASMA     || thing->type == MT_BFG);
     vis->translation = thing->translation;	// Crispness: colored blood
     vis->scale = xscale<<detailshift;
-    vis->gx = thing->x;
-    vis->gy = thing->y;
-    vis->gz = thing->z;
-    vis->gzt = thing->z + spritetopoffset[lump];
+    vis->gx = ix;
+    vis->gy = iy;
+    vis->gz = iz;
+    vis->gzt = iz + spritetopoffset[lump];
     vis->texturemid = vis->gzt - viewz;
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;	

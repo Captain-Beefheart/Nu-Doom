@@ -28,6 +28,8 @@
 
 #include "doomdef.h"
 #include "d_loop.h"
+#include "i_timer.h"
+#include "crispy.h"
 
 #include "m_bbox.h"
 #include "m_menu.h"
@@ -827,18 +829,56 @@ R_PointInSubsector
 //
 // R_SetupFrame
 //
+// Uncapped framerate (Crispness): sub-tic view interpolation.
+fixed_t		fractionaltic;
+fixed_t		oldviewx, oldviewy, oldviewz;
+angle_t		oldviewangle;
+
+// Save the display player's view state at the start of a game tic (called from
+// P_PlayerThink) so the renderer can interpolate toward the new state.
+void R_SaveOldView (player_t* player)
+{
+    oldviewx = player->mo->x;
+    oldviewy = player->mo->y;
+    oldviewz = player->viewz;
+    oldviewangle = player->mo->angle;
+}
+
 void R_SetupFrame (player_t* player)
-{		
+{
     int		i;
-    
+
     viewplayer = player;
-    viewx = player->mo->x;
-    viewy = player->mo->y;
-    viewangle = player->mo->angle + viewangleoffset;
+
+    // How far (0..FRACUNIT) the current render frame is between game tics.
+    if (crispy.uncapped && !singletics)
+	fractionaltic = (fixed_t)
+	    (((long long) I_GetTimeMS() * TICRATE % 1000) * FRACUNIT / 1000);
+    else
+	fractionaltic = FRACUNIT;
+
+    // Interpolate the camera between the previous and current tic. Snap on
+    // large jumps (teleport / level change) and while timing demos.
+    if (crispy.uncapped && !singletics
+	&& abs(player->mo->x - oldviewx) < (128<<FRACBITS)
+	&& abs(player->mo->y - oldviewy) < (128<<FRACBITS))
+    {
+	viewx = oldviewx + FixedMul(fractionaltic, player->mo->x - oldviewx);
+	viewy = oldviewy + FixedMul(fractionaltic, player->mo->y - oldviewy);
+	viewz = oldviewz + FixedMul(fractionaltic, player->viewz - oldviewz);
+	viewangle = oldviewangle
+	    + FixedMul(fractionaltic, (int)(player->mo->angle - oldviewangle))
+	    + viewangleoffset;
+    }
+    else
+    {
+	viewx = player->mo->x;
+	viewy = player->mo->y;
+	viewz = player->viewz;
+	viewangle = player->mo->angle + viewangleoffset;
+    }
     extralight = player->extralight;
 
-    viewz = player->viewz;
-    
     viewsin = finesine[viewangle>>ANGLETOFINESHIFT];
     viewcos = finecosine[viewangle>>ANGLETOFINESHIFT];
 	
