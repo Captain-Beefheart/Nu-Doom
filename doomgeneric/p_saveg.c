@@ -419,6 +419,11 @@ static void saveg_read_mobj_t(mobj_t *str)
 
     // byte* translation (Crispness): not persisted; reset for safety.
     str->translation = NULL;
+
+    // Uncapped-framerate interpolation positions: start from the loaded pos.
+    str->oldx = str->x;
+    str->oldy = str->y;
+    str->oldz = str->z;
 }
 
 static void saveg_write_mobj_t(mobj_t *str)

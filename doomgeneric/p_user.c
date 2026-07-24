@@ -27,6 +27,8 @@
 #include "p_local.h"
 
 #include "doomstat.h"
+#include "r_main.h"
+#include "crispy.h"
 
 
 
@@ -230,7 +232,11 @@ void P_PlayerThink (player_t* player)
 {
     ticcmd_t*		cmd;
     weapontype_t	newweapon;
-	
+
+    // Uncapped framerate: remember this tic's starting view for interpolation.
+    if (crispy.uncapped && (player - players) == displayplayer)
+	R_SaveOldView (player);
+
     // fixme: do this in the cheat code
     if (player->cheats & CF_NOCLIP)
 	player->mo->flags |= MF_NOCLIP;
