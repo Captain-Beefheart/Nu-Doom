@@ -47,6 +47,7 @@
 
 #include "m_argv.h"
 #include "m_config.h"
+#include "crispy.h"
 #include "m_controls.h"
 #include "m_misc.h"
 #include "m_menu.h"
@@ -367,6 +368,9 @@ void D_BindVariables(void)
     M_BindVariable("vanilla_savegame_limit", &vanilla_savegame_limit);
     M_BindVariable("vanilla_demo_limit",     &vanilla_demo_limit);
     M_BindVariable("show_endoom",            &show_endoom);
+
+    // Nu-Doom crispness settings (crispy-doom.cfg)
+    M_BindCrispnessVariables();
 
     // Multiplayer chat macros
 
@@ -1355,7 +1359,7 @@ void D_DoomMain (void)
 
     // Load configuration files before initialising other subsystems.
     DEH_printf("M_LoadDefaults: Load system defaults.\n");
-    M_SetConfigFilenames("default.cfg", PROGRAM_PREFIX "doom.cfg");
+    M_SetConfigFilenames("default.cfg", "crispy-doom.cfg");
     D_BindVariables();
     M_LoadDefaults();
 
