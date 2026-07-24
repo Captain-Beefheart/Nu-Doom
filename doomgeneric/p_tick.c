@@ -22,6 +22,7 @@
 #include "p_local.h"
 
 #include "doomstat.h"
+#include "r_state.h"
 
 
 int	leveltime;
@@ -138,6 +139,14 @@ void P_Ticker (void)
     }
     
 		
+    // Uncapped framerate: snapshot sector heights at the start of the tic so
+    // the renderer can interpolate moving floors / ceilings between tics.
+    for (i=0 ; i<numsectors ; i++)
+    {
+	sectors[i].oldfloorheight = sectors[i].floorheight;
+	sectors[i].oldceilingheight = sectors[i].ceilingheight;
+    }
+
     for (i=0 ; i<MAXPLAYERS ; i++)
 	if (playeringame[i])
 	    P_PlayerThink (&players[i]);

@@ -98,6 +98,12 @@ typedef	struct
 {
     fixed_t	floorheight;
     fixed_t	ceilingheight;
+
+    // Crispness (uncapped framerate): start-of-tic heights and the per-frame
+    // interpolated heights the renderer reads (doors / lifts move smoothly).
+    fixed_t	oldfloorheight, oldceilingheight;
+    fixed_t	interpfloorheight, interpceilingheight;
+
     short	floorpic;
     short	ceilingpic;
     short	lightlevel;

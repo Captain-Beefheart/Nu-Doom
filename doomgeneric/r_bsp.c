@@ -323,13 +323,13 @@ void R_AddLine (seg_t*	line)
 	goto clipsolid;		
 
     // Closed door.
-    if (backsector->ceilingheight <= frontsector->floorheight
-	|| backsector->floorheight >= frontsector->ceilingheight)
+    if (backsector->interpceilingheight <= frontsector->interpfloorheight
+	|| backsector->interpfloorheight >= frontsector->interpceilingheight)
 	goto clipsolid;		
 
     // Window.
-    if (backsector->ceilingheight != frontsector->ceilingheight
-	|| backsector->floorheight != frontsector->floorheight)
+    if (backsector->interpceilingheight != frontsector->interpceilingheight
+	|| backsector->interpfloorheight != frontsector->interpfloorheight)
 	goto clippass;	
 		
     // Reject empty lines used for triggers
@@ -512,19 +512,19 @@ void R_Subsector (int num)
     count = sub->numlines;
     line = &segs[sub->firstline];
 
-    if (frontsector->floorheight < viewz)
+    if (frontsector->interpfloorheight < viewz)
     {
-	floorplane = R_FindPlane (frontsector->floorheight,
+	floorplane = R_FindPlane (frontsector->interpfloorheight,
 				  frontsector->floorpic,
 				  frontsector->lightlevel);
     }
     else
 	floorplane = NULL;
     
-    if (frontsector->ceilingheight > viewz 
+    if (frontsector->interpceilingheight > viewz 
 	|| frontsector->ceilingpic == skyflatnum)
     {
-	ceilingplane = R_FindPlane (frontsector->ceilingheight,
+	ceilingplane = R_FindPlane (frontsector->interpceilingheight,
 				    frontsector->ceilingpic,
 				    frontsector->lightlevel);
     }

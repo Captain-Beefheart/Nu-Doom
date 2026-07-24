@@ -857,6 +857,31 @@ void R_SetupFrame (player_t* player)
     else
 	fractionaltic = FRACUNIT;
 
+    // Uncapped framerate: interpolate moving sector floors/ceilings so doors
+    // and lifts render smoothly. Populated every frame so the renderer's
+    // interp* reads are always valid; snap on large jumps.
+    {
+	int s;
+	for (s = 0 ; s < numsectors ; s++)
+	{
+	    sector_t *sec = &sectors[s];
+
+	    if (crispy.uncapped && !singletics
+		&& abs(sec->floorheight - sec->oldfloorheight) < (128<<FRACBITS))
+		sec->interpfloorheight = sec->oldfloorheight
+		    + FixedMul(fractionaltic, sec->floorheight - sec->oldfloorheight);
+	    else
+		sec->interpfloorheight = sec->floorheight;
+
+	    if (crispy.uncapped && !singletics
+		&& abs(sec->ceilingheight - sec->oldceilingheight) < (128<<FRACBITS))
+		sec->interpceilingheight = sec->oldceilingheight
+		    + FixedMul(fractionaltic, sec->ceilingheight - sec->oldceilingheight);
+	    else
+		sec->interpceilingheight = sec->ceilingheight;
+	}
+    }
+
     // Interpolate the camera between the previous and current tic. Snap on
     // large jumps (teleport / level change) and while timing demos.
     if (crispy.uncapped && !singletics
