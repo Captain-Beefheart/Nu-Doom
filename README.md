@@ -110,7 +110,7 @@ keep the DLLs from `setup_dist.sh` next to the executable.
 - [x] Crispness features: Crosshair, Show FPS, Translucency, Colored blood,
   Smooth pixel scaling.
 - [ ] Uncapped / interpolated framerate (render-rate decoupling + interpolation).
-- [ ] Incremental C++ modernization of subsystems.
+- [ ] Further rendering and quality-of-life enhancements.
 
 ## Credits & License
 
