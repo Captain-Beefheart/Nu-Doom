@@ -47,6 +47,7 @@
 
 #include "m_argv.h"
 #include "m_controls.h"
+#include "crispy.h"
 #include "p_saveg.h"
 
 #include "s_sound.h"
@@ -192,6 +193,8 @@ void M_ChangeDetail(int choice);
 void M_SizeDisplay(int choice);
 void M_StartGame(int choice);
 void M_Sound(int choice);
+void M_Crispness(int choice);
+void M_DrawCrispness(void);
 
 void M_FinishReadThis(int choice);
 void M_LoadSelect(int choice);
@@ -338,6 +341,7 @@ enum
     mousesens,
     option_empty2,
     soundvol,
+    crispness,
     opt_end
 } options_e;
 
@@ -350,7 +354,8 @@ menuitem_t OptionsMenu[]=
     {-1,"",0,'\0'},
     {2,"M_MSENS",	M_ChangeSensitivity,'m'},
     {-1,"",0,'\0'},
-    {1,"M_SVOL",	M_Sound,'s'}
+    {1,"M_SVOL",	M_Sound,'s'},
+    {1,"",		M_Crispness,'c'}	// text item, drawn by M_DrawOptions
 };
 
 menu_t  OptionsDef =
@@ -360,6 +365,47 @@ menu_t  OptionsDef =
     OptionsMenu,
     M_DrawOptions,
     60,37,
+    0
+};
+
+//
+// CRISPNESS MENU (Nu-Doom enhancement toggles, saved to crispy-doom.cfg)
+//
+enum
+{
+    crisp_uncapped,
+    crisp_smoothscaling,
+    crisp_translucency,
+    crisp_coloredblood,
+    crisp_crosshair,
+    crisp_showfps,
+    crisp_end
+} crispness_e;
+
+static void M_CrispUncapped(int choice)      { crispy.uncapped      = !crispy.uncapped; }
+static void M_CrispSmoothScaling(int choice) { crispy.smoothscaling = !crispy.smoothscaling; }
+static void M_CrispTranslucency(int choice)  { crispy.translucency  = !crispy.translucency; }
+static void M_CrispColoredBlood(int choice)  { crispy.coloredblood  = !crispy.coloredblood; }
+static void M_CrispCrosshair(int choice)     { crispy.crosshair     = !crispy.crosshair; }
+static void M_CrispShowFPS(int choice)       { crispy.showfps       = !crispy.showfps; }
+
+menuitem_t CrispnessMenu[]=
+{
+    {1,"",M_CrispUncapped,'u'},
+    {1,"",M_CrispSmoothScaling,'s'},
+    {1,"",M_CrispTranslucency,'t'},
+    {1,"",M_CrispColoredBlood,'b'},
+    {1,"",M_CrispCrosshair,'c'},
+    {1,"",M_CrispShowFPS,'f'}
+};
+
+menu_t  CrispnessDef =
+{
+    crisp_end,
+    &OptionsDef,	// back returns to Options
+    CrispnessMenu,
+    M_DrawCrispness,
+    48,48,
     0
 };
 
@@ -1002,11 +1048,43 @@ void M_DrawOptions(void)
 
     M_DrawThermo(OptionsDef.x,OptionsDef.y+LINEHEIGHT*(scrnsize+1),
 		 9,screenSize);
+
+    // "Crispness" submenu entry (drawn as text; no WAD patch for it)
+    M_WriteText(OptionsDef.x, OptionsDef.y + LINEHEIGHT*crispness, "Crispness");
 }
 
 void M_Options(int choice)
 {
     M_SetupNextMenu(&OptionsDef);
+}
+
+//
+// M_Crispness
+//
+static char *crispOnOff[2] = { "Off", "On" };
+
+static void M_DrawCrispnessItem(int row, char *label, int value)
+{
+    int y = CrispnessDef.y + LINEHEIGHT * row;
+    M_WriteText(CrispnessDef.x, y, label);
+    M_WriteText(CrispnessDef.x + 176, y, crispOnOff[value != 0]);
+}
+
+void M_DrawCrispness(void)
+{
+    M_WriteText(CrispnessDef.x, CrispnessDef.y - 20, "CRISPNESS");
+
+    M_DrawCrispnessItem(crisp_uncapped,      "Uncapped framerate",   crispy.uncapped);
+    M_DrawCrispnessItem(crisp_smoothscaling, "Smooth pixel scaling", crispy.smoothscaling);
+    M_DrawCrispnessItem(crisp_translucency,  "Translucency",         crispy.translucency);
+    M_DrawCrispnessItem(crisp_coloredblood,  "Colored blood",        crispy.coloredblood);
+    M_DrawCrispnessItem(crisp_crosshair,     "Crosshair",            crispy.crosshair);
+    M_DrawCrispnessItem(crisp_showfps,       "Show FPS",             crispy.showfps);
+}
+
+void M_Crispness(int choice)
+{
+    M_SetupNextMenu(&CrispnessDef);
 }
 
 

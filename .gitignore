@@ -23,3 +23,6 @@ shot.*
 # hi-res verification screenshots at repo root (dev artifacts)
 /baseline_*.png
 /stage*.png
+# runtime config/savegames written into the source tree during testing
+*.cfg
+.savegame/

@@ -1549,6 +1549,18 @@ static default_t extra_defaults_list[] =
     //
 
     CONFIG_VARIABLE_KEY(key_multi_msgplayer8),
+
+    //!
+    // Nu-Doom "Crispness" settings (see the Crispness menu). Stored in
+    // crispy-doom.cfg.
+    //
+
+    CONFIG_VARIABLE_INT(crispy_uncapped),
+    CONFIG_VARIABLE_INT(crispy_smoothscaling),
+    CONFIG_VARIABLE_INT(crispy_translucency),
+    CONFIG_VARIABLE_INT(crispy_coloredblood),
+    CONFIG_VARIABLE_INT(crispy_crosshair),
+    CONFIG_VARIABLE_INT(crispy_showfps),
 };
 
 static default_collection_t extra_defaults =
@@ -1608,7 +1620,7 @@ static const int scantokey[128] =
 
 static void SaveDefaultCollection(default_collection_t *collection)
 {
-#if ORIGCODE
+    // Nu-Doom: config saving enabled (doomgeneric had it #if ORIGCODE'd out).
     default_t *defaults;
     int i, v;
     FILE *f;
@@ -1708,7 +1720,6 @@ static void SaveDefaultCollection(default_collection_t *collection)
     }
 
     fclose (f);
-#endif
 }
 
 // Parses integer values in the configuration file
@@ -1770,7 +1781,7 @@ static void SetVariable(default_t *def, char *value)
 
 static void LoadDefaultCollection(default_collection_t *collection)
 {
-#if ORIGCODE
+    // Nu-Doom: config loading enabled (doomgeneric had it #if ORIGCODE'd out).
     FILE *f;
     default_t *def;
     char defname[80];
@@ -1828,7 +1839,6 @@ static void LoadDefaultCollection(default_collection_t *collection)
     }
 
     fclose (f);
-#endif
 }
 
 // Set the default filenames to use for configuration files.
@@ -1901,8 +1911,14 @@ void M_LoadDefaults (void)
     }
     else
     {
+        // Insert a directory separator when configdir is non-empty and does
+        // not already end with one (e.g. configdir="." would otherwise yield
+        // the malformed path ".default.cfg", which never got written).
         doom_defaults.filename
-            = M_StringJoin(configdir, default_main_config, NULL);
+            = M_StringJoin(configdir,
+                (configdir[0] && configdir[strlen(configdir) - 1] != DIR_SEPARATOR)
+                    ? DIR_SEPARATOR_S : "",
+                default_main_config, NULL);
     }
 
     printf("saving config in %s\n", doom_defaults.filename);
@@ -1925,7 +1941,10 @@ void M_LoadDefaults (void)
     else
     {
         extra_defaults.filename
-            = M_StringJoin(configdir, default_extra_config, NULL);
+            = M_StringJoin(configdir,
+                (configdir[0] && configdir[strlen(configdir) - 1] != DIR_SEPARATOR)
+                    ? DIR_SEPARATOR_S : "",
+                default_extra_config, NULL);
     }
 
     LoadDefaultCollection(&doom_defaults);

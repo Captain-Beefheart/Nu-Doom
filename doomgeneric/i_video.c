@@ -32,6 +32,7 @@ rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 #include "d_main.h"
 #include "i_video.h"
 #include "i_system.h"
+#include "m_config.h"
 #include "z_zone.h"
 
 #include "tables.h"
@@ -373,6 +374,7 @@ static void I_ShotQuitCheck (void)
             fclose(f);
             printf("Nu-Doom: wrote shot.bmp (%dx%d)\n", w, h);
         }
+        M_SaveDefaults();  // flush config (incl. crispy-doom.cfg) before exit
         exit(0);
     }
 }
