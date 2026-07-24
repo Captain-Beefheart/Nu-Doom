@@ -37,9 +37,11 @@ dynamically instead of crashing on complex maps:
 - A dedicated **Crispness** submenu (Options → Crispness) with toggles saved to
   **`crispy-doom.cfg`** (config persistence, which the base doomgeneric had
   disabled, is enabled here).
-- Working toggles: **Crosshair** (center crosshair) and **Show FPS** (framerate
-  counter). Additional toggles (uncapped framerate, translucency, colored blood,
-  smooth scaling) are present and persist; their rendering is in progress.
+- Working toggles: **Crosshair**, **Show FPS**, **Translucency** (energy
+  projectiles), **Colored blood** (cacodemon → blue, baron/knight → green), and
+  **Smooth pixel scaling** (linear filtering when the window is resized).
+  **Uncapped framerate** persists but is not yet implemented (a core-loop
+  interpolation change; see roadmap).
 
 ## Why doomgeneric?
 
@@ -104,9 +106,10 @@ keep the DLLs from `setup_dist.sh` next to the executable.
   openings).
 - [x] Remove playsim limits (intercepts / spechit / plats / buttons / ceilings).
 - [x] Native 640×400 high-resolution rendering.
-- [x] Crispness menu + persistent `crispy-doom.cfg`; Crosshair and Show FPS.
-- [ ] More Crispness features: uncapped/interpolated framerate, translucency,
-  colored blood, smooth pixel scaling.
+- [x] Crispness menu + persistent `crispy-doom.cfg`.
+- [x] Crispness features: Crosshair, Show FPS, Translucency, Colored blood,
+  Smooth pixel scaling.
+- [ ] Uncapped / interpolated framerate (render-rate decoupling + interpolation).
 - [ ] Incremental C++ modernization of subsystems.
 
 ## Credits & License
