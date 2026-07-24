@@ -108,10 +108,47 @@ keep the DLLs from `setup_dist.sh` next to the executable.
 - [x] Remove playsim limits (intercepts / spechit / plats / buttons / ceilings).
 - [x] Native 640×400 high-resolution rendering.
 - [x] Crispness menu + persistent `crispy-doom.cfg`.
-- [x] Crispness features: Crosshair, Show FPS, Translucency, Colored blood,
-  Smooth pixel scaling, Uncapped/interpolated framerate (camera + sprites +
-  moving sectors).
-- [ ] Further rendering and quality-of-life enhancements.
+- [x] Crispness menu (initial set): Crosshair, Show FPS, Translucency, Colored
+  blood, Smooth pixel scaling, Uncapped/interpolated framerate (camera +
+  sprites + moving sectors).
+
+### Crispness menu — build out the full feature set
+
+Goal: implement the complete Crispy Doom-style Crispness menu. Remaining
+features, grouped by menu category:
+
+**Rendering / Visual**
+- [ ] Widescreen rendering (16:9 / 21:9 field of view)
+- [ ] Aspect-ratio correction (4:3 pixel-perfect)
+- [ ] Framerate limit + VSync options
+- [ ] Brightmaps (self-lit texture/sprite pixels)
+- [ ] Smooth diminishing lighting
+- [ ] Colored HUD numbers (health / armor / ammo by value)
+- [ ] Extended "Crispy" fullscreen HUD layout
+- [ ] Gamma / level brightness control
+
+**Tactical**
+- [ ] Crosshair type, shape and color (+ target highlight)
+- [ ] Configurable weapon bob
+- [ ] Weapon recoil pitch
+- [ ] Centered weapon when firing
+- [ ] Squat weapon on hard landing
+
+**Audio**
+- [ ] More sound channels
+- [ ] Full sound-effect pitch shifting
+- [ ] Mono / stereo SFX toggle
+- [ ] Play sounds in full length (no cutoffs)
+
+**Navigational / Automap**
+- [ ] Automap overlay mode, rotate mode and extended colors
+- [ ] Secret-wall highlighting on the automap
+- [ ] "Secret revealed" notification
+- [ ] Show player coordinates / level stats / level time
+
+**Demos / misc**
+- [ ] Demo timer and progress bar
+- [ ] Extended savegame slots
 
 ## Credits & License
 
