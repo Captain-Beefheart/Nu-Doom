@@ -315,6 +315,69 @@ void I_UpdateNoBlit (void)
 }
 
 //
+// I_ShotQuitCheck
+// Dev/verification harness: with "-shotquit N" on the command line, dump the
+// final framebuffer (DG_ScreenBuffer, 32bpp) to shot.bmp after N frames and
+// exit. Lets us capture the actual rendered image to a file for inspection.
+//
+static void I_ShotQuitCheck (void)
+{
+    static int shot_parm = -1;  // -1 = uninitialised, 0 = disabled, >0 = tics left
+
+    if (shot_parm == -1)
+    {
+        int p = M_CheckParmWithArgs("-shotquit", 1);
+        shot_parm = p ? atoi(myargv[p + 1]) : 0;
+    }
+    if (shot_parm <= 0)
+        return;
+    if (--shot_parm > 0)
+        return;
+
+    {
+        int w = s_Fb.xres, h = s_Fb.yres, x, y;
+        int rowsize = (3 * w + 3) & ~3;
+        int datasize = rowsize * h;
+        int filesize = 54 + datasize;
+        unsigned char hdr[54];
+        unsigned char *row;
+        uint32_t *fb = (uint32_t *) DG_ScreenBuffer;
+        FILE *f = fopen("shot.bmp", "wb");
+
+        if (f)
+        {
+            memset(hdr, 0, sizeof(hdr));
+            hdr[0]='B'; hdr[1]='M';
+            hdr[2]=filesize; hdr[3]=filesize>>8; hdr[4]=filesize>>16; hdr[5]=filesize>>24;
+            hdr[10]=54; hdr[14]=40;
+            hdr[18]=w; hdr[19]=w>>8; hdr[20]=w>>16; hdr[21]=w>>24;
+            hdr[22]=h; hdr[23]=h>>8; hdr[24]=h>>16; hdr[25]=h>>24;
+            hdr[26]=1; hdr[28]=24;
+            hdr[34]=datasize; hdr[35]=datasize>>8; hdr[36]=datasize>>16; hdr[37]=datasize>>24;
+            fwrite(hdr, 1, 54, f);
+
+            row = malloc(rowsize);
+            memset(row, 0, rowsize);
+            for (y = h - 1; y >= 0; y--)   // BMP rows are bottom-up
+            {
+                for (x = 0; x < w; x++)
+                {
+                    uint32_t px = fb[y * w + x];  // 0x00RRGGBB
+                    row[x*3+0] = px & 0xff;         // B
+                    row[x*3+1] = (px >> 8) & 0xff;  // G
+                    row[x*3+2] = (px >> 16) & 0xff; // R
+                }
+                fwrite(row, 1, rowsize, f);
+            }
+            free(row);
+            fclose(f);
+            printf("Nu-Doom: wrote shot.bmp (%dx%d)\n", w, h);
+        }
+        exit(0);
+    }
+}
+
+//
 // I_FinishUpdate
 //
 
@@ -367,6 +430,8 @@ void I_FinishUpdate (void)
     }
 
 	DG_DrawFrame();
+
+	I_ShotQuitCheck();
 }
 
 //

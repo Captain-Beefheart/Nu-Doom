@@ -23,10 +23,12 @@
 
 
 #include <stdlib.h>
+#include <stdio.h>
 
 
 #include "m_bbox.h"
 
+#include "i_system.h"
 #include "doomdef.h"
 #include "doomstat.h"
 #include "p_local.h"
@@ -536,8 +538,25 @@ P_BlockThingsIterator
 //
 // INTERCEPT ROUTINES
 //
-intercept_t	intercepts[MAXINTERCEPTS];
+intercept_t*	intercepts = NULL;	// dynamically grown (was intercepts[MAXINTERCEPTS])
+int		maxintercepts = 0;	// current capacity
 intercept_t*	intercept_p;
+
+//
+// P_GrowIntercepts
+// Ensure there is room for at least one more intercept, growing the
+// buffer (and rebasing intercept_p) instead of overflowing it.
+//
+static void P_GrowIntercepts (void)
+{
+    if (intercept_p - intercepts >= maxintercepts)
+    {
+	size_t pos = intercept_p - intercepts;
+	maxintercepts = maxintercepts ? maxintercepts * 2 : MAXINTERCEPTS;
+	intercepts = I_Realloc(intercepts, maxintercepts * sizeof(*intercepts));
+	intercept_p = intercepts + pos;
+    }
+}
 
 divline_t 	trace;
 boolean 	earlyout;
@@ -597,10 +616,10 @@ PIT_AddLineIntercepts (line_t* ld)
     }
     
 	
+    P_GrowIntercepts ();
     intercept_p->frac = frac;
     intercept_p->isaline = true;
     intercept_p->d.line = ld;
-    InterceptsOverrun(intercept_p - intercepts, intercept_p);
     intercept_p++;
 
     return true;	// continue
@@ -663,10 +682,10 @@ boolean PIT_AddThingIntercepts (mobj_t* thing)
     if (frac < 0)
 	return true;		// behind source
 
+    P_GrowIntercepts ();
     intercept_p->frac = frac;
     intercept_p->isaline = false;
     intercept_p->d.thing = thing;
-    InterceptsOverrun(intercept_p - intercepts, intercept_p);
     intercept_p++;
 
     return true;		// keep going
@@ -823,8 +842,11 @@ static void InterceptsMemoryOverrun(int location, int value)
 }
 
 // Emulate overruns of the intercepts[] array.
+// No longer called now that intercepts[] grows dynamically (kept for
+// reference / possible vanilla-compat mode); marked unused to avoid warnings.
 
-static void InterceptsOverrun(int num_intercepts, intercept_t *intercept)
+static void __attribute__((unused))
+InterceptsOverrun(int num_intercepts, intercept_t *intercept)
 {
     int location;
 

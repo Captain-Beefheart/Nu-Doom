@@ -26,6 +26,9 @@
 
 
 // Visplane related.
+#define MAXOPENINGS	(SCREENWIDTH*64)	// initial openings capacity
+extern  short*		openings;	// dynamically grown
+extern  unsigned	maxopenings;	// current capacity
 extern  short*		lastopening;
 
 

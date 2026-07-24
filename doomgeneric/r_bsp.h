@@ -39,7 +39,8 @@ extern boolean		markceiling;
 
 extern boolean		skymap;
 
-extern drawseg_t	drawsegs[MAXDRAWSEGS];
+extern drawseg_t*	drawsegs;	// dynamically grown (was drawsegs[MAXDRAWSEGS])
+extern unsigned		maxdrawsegs;	// current capacity
 extern drawseg_t*	ds_p;
 
 extern lighttable_t**	hscalelight;

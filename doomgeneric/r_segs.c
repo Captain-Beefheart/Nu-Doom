@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 #include "i_system.h"
 
@@ -379,10 +380,52 @@ R_StoreWallRange
     fixed_t		vtop;
     int			lightnum;
 
-    // don't overflow and crash
-    if (ds_p == &drawsegs[MAXDRAWSEGS])
-	return;		
-		
+    // Grow the drawsegs array instead of overflowing/dropping the seg.
+    if (ds_p - drawsegs >= (int) maxdrawsegs)
+    {
+	unsigned pos = ds_p - drawsegs;
+	maxdrawsegs *= 2;
+	drawsegs = I_Realloc(drawsegs, maxdrawsegs * sizeof(*drawsegs));
+	ds_p = drawsegs + pos;
+    }
+
+    // Grow the openings array up front, with enough headroom for the worst
+    // case this call can reserve (maskedtexturecol + sprtopclip + sprbottomclip,
+    // each up to viewwidth). Rebase lastopening and every openings pointer
+    // already stored in the drawsegs (but not the shared clip arrays).
+    if ((lastopening - openings) + 3 * SCREENWIDTH > (int) maxopenings)
+    {
+	int pos = lastopening - openings;
+	short *oldopenings = openings;
+
+	while (pos + 3 * SCREENWIDTH > (int) maxopenings)
+	    maxopenings = maxopenings ? maxopenings * 2 : (MAXOPENINGS);
+	openings = I_Realloc(openings, maxopenings * sizeof(*openings));
+
+	if (openings != oldopenings)
+	{
+	    ptrdiff_t delta = openings - oldopenings;
+	    drawseg_t *ds;
+
+	    lastopening = openings + pos;
+
+	    for (ds = drawsegs ; ds < ds_p ; ds++)
+	    {
+		if (ds->maskedtexturecol)
+		    ds->maskedtexturecol += delta;
+		if (ds->sprtopclip
+		    && ds->sprtopclip != screenheightarray
+		    && ds->sprtopclip != negonearray)
+		    ds->sprtopclip += delta;
+		if (ds->sprbottomclip
+		    && ds->sprbottomclip != screenheightarray
+		    && ds->sprbottomclip != negonearray)
+		    ds->sprbottomclip += delta;
+	    }
+	}
+    }
+
+	
 #ifdef RANGECHECK
     if (start >=viewwidth || start > stop)
 	I_Error ("Bad R_RenderWallRange: %i to %i", start , stop);

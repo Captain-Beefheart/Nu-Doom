@@ -152,9 +152,10 @@ typedef struct
 // Extended MAXINTERCEPTS, to allow for intercepts overrun emulation.
 
 #define MAXINTERCEPTS_ORIGINAL 128
-#define MAXINTERCEPTS          (MAXINTERCEPTS_ORIGINAL + 61)
+#define MAXINTERCEPTS          (MAXINTERCEPTS_ORIGINAL + 61)	// initial capacity
 
-extern intercept_t	intercepts[MAXINTERCEPTS];
+extern intercept_t*	intercepts;	// dynamically grown (was intercepts[MAXINTERCEPTS])
+extern int		maxintercepts;	// current capacity
 extern intercept_t*	intercept_p;
 
 typedef boolean (*traverser_t) (intercept_t *in);
@@ -216,11 +217,12 @@ extern	line_t*		ceilingline;
 // We keep the original limit, to detect what variables in memory were
 // overwritten (see SpechitOverrun())
 
-#define MAXSPECIALCROSS 		20
+#define MAXSPECIALCROSS 		20	// initial capacity
 #define MAXSPECIALCROSS_ORIGINAL	8
 
-extern	line_t*	spechit[MAXSPECIALCROSS];
-extern	int	numspechit;
+extern	line_t**	spechit;	// dynamically grown (was spechit[MAXSPECIALCROSS])
+extern	int		maxspechit;	// current capacity
+extern	int		numspechit;
 
 boolean P_CheckPosition (mobj_t *thing, fixed_t x, fixed_t y);
 boolean P_TryMove (mobj_t* thing, fixed_t x, fixed_t y);

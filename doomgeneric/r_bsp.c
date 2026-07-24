@@ -43,7 +43,8 @@ line_t*		linedef;
 sector_t*	frontsector;
 sector_t*	backsector;
 
-drawseg_t	drawsegs[MAXDRAWSEGS];
+drawseg_t*	drawsegs = NULL;	// dynamically grown (was drawsegs[MAXDRAWSEGS])
+unsigned	maxdrawsegs = 0;	// current capacity
 drawseg_t*	ds_p;
 
 
@@ -60,6 +61,11 @@ R_StoreWallRange
 //
 void R_ClearDrawSegs (void)
 {
+    if (drawsegs == NULL)
+    {
+	maxdrawsegs = MAXDRAWSEGS;
+	drawsegs = I_Realloc(NULL, maxdrawsegs * sizeof(*drawsegs));
+    }
     ds_p = drawsegs;
 }
 

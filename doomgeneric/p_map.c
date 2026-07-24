@@ -82,7 +82,8 @@ line_t*		ceilingline;
 // keep track of special lines as they are hit,
 // but don't process them until the move is proven valid
 
-line_t*		spechit[MAXSPECIALCROSS];
+line_t**	spechit = NULL;		// dynamically grown (was spechit[MAXSPECIALCROSS])
+int		maxspechit = 0;		// current capacity
 int		numspechit;
 
 
@@ -256,14 +257,14 @@ boolean PIT_CheckLine (line_t* ld)
     // if contacted a special line, add it to the list
     if (ld->special)
     {
+        // grow the spechit array instead of overflowing it
+        if (numspechit >= maxspechit)
+        {
+            maxspechit = maxspechit ? maxspechit * 2 : MAXSPECIALCROSS;
+            spechit = I_Realloc(spechit, maxspechit * sizeof(*spechit));
+        }
         spechit[numspechit] = ld;
 	numspechit++;
-
-        // fraggle: spechits overrun emulation code from prboom-plus
-        if (numspechit > MAXSPECIALCROSS_ORIGINAL)
-        {
-            SpechitOverrun(ld);
-        }
     }
 
     return true;
@@ -1388,7 +1389,9 @@ P_ChangeSector
 // of the spechit array.  This is by Andrey Budko (e6y) and comes from his
 // PrBoom plus port.  A big thanks to Andrey for this.
 
-static void SpechitOverrun(line_t *ld)
+// No longer called now that spechit[] grows dynamically; kept for reference
+// and marked unused to avoid warnings.
+static void __attribute__((unused)) SpechitOverrun(line_t *ld)
 {
     static unsigned int baseaddr = 0;
     unsigned int addr;
