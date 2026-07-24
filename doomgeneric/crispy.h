@@ -20,6 +20,8 @@
 #ifndef __CRISPY_H__
 #define __CRISPY_H__
 
+#include "doomtype.h"
+
 typedef struct
 {
     int uncapped;      // uncapped / interpolated framerate
@@ -40,5 +42,9 @@ void M_BindCrispnessVariables(void);
 // Per-frame overlays gated by the crispness toggles (called from D_Display).
 void Crispy_DrawCrosshair(void);  // crispy.crosshair
 void Crispy_DrawFPS(void);        // crispy.showfps
+
+// Colored-blood translation tables (crispy.coloredblood).
+extern byte crispy_bloodtrans_blue[256];
+extern byte crispy_bloodtrans_green[256];
 
 #endif // __CRISPY_H__

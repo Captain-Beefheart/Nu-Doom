@@ -420,6 +420,12 @@ R_DrawVisSprite
 	// NULL colormap = shadow draw
 	colfunc = fuzzcolfunc;
     }
+    else if (vis->translation)
+    {
+	// Crispness: custom color translation (e.g. colored blood)
+	colfunc = transcolfunc;
+	dc_translation = vis->translation;
+    }
     else if (vis->mobjflags & MF_TRANSLATION)
     {
 	colfunc = transcolfunc;
@@ -566,6 +572,7 @@ void R_ProjectSprite (mobj_t* thing)
 	 thing->type == MT_BRUISERSHOT || thing->type == MT_TRACER  ||
 	 thing->type == MT_FATSHOT    || thing->type == MT_ARACHPLAZ ||
 	 thing->type == MT_PLASMA     || thing->type == MT_BFG);
+    vis->translation = thing->translation;	// Crispness: colored blood
     vis->scale = xscale<<detailshift;
     vis->gx = thing->x;
     vis->gy = thing->y;
@@ -710,6 +717,7 @@ void R_DrawPSprite (pspdef_t* psp)
     vis = &avis;
     vis->mobjflags = 0;
     vis->translucent = 0;
+    vis->translation = NULL;
     vis->texturemid = (BASEYCENTER<<FRACBITS)+FRACUNIT/2-(psp->sy-spritetopoffset[lump]);
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;	

@@ -372,6 +372,9 @@ typedef struct vissprite_s
     // Crispness: draw this sprite through the translucency tint map.
     boolean		translucent;
 
+    // Crispness: optional custom color-translation table (colored blood).
+    byte*		translation;
+
 } vissprite_t;
 
 

@@ -275,8 +275,12 @@ typedef struct mobj_s
     mapthing_t		spawnpoint;	
 
     // Thing being chased/attacked for tracers.
-    struct mobj_s*	tracer;	
-    
+    struct mobj_s*	tracer;
+
+    // Crispness: optional sprite color-translation table (e.g. colored blood).
+    // NULL = no translation. Not persisted; loaded mobjs reset to NULL.
+    byte*		translation;
+
 } mobj_t;
 
 

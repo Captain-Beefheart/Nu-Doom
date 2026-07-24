@@ -29,6 +29,25 @@ extern void M_WriteText(int x, int y, char *string);
 // All settings default to 0 (off), matching vanilla behaviour.
 crispy_t crispy = { 0 };
 
+// Colored-blood translation tables: identity except the red blood gradient
+// (palette 0xB0-0xBF) remapped to blue / green.
+byte crispy_bloodtrans_blue[256];
+byte crispy_bloodtrans_green[256];
+
+static void Crispy_InitColoredBlood(void)
+{
+    int i;
+
+    for (i = 0; i < 256; i++)
+        crispy_bloodtrans_blue[i] = crispy_bloodtrans_green[i] = (byte) i;
+
+    for (i = 0; i < 16; i++)
+    {
+        crispy_bloodtrans_blue[0xB0 + i]  = (byte) (0xC0 + i);  // -> blue
+        crispy_bloodtrans_green[0xB0 + i] = (byte) (0x70 + i);  // -> green
+    }
+}
+
 void M_BindCrispnessVariables(void)
 {
     M_BindVariable("crispy_uncapped",      &crispy.uncapped);
@@ -37,6 +56,8 @@ void M_BindCrispnessVariables(void)
     M_BindVariable("crispy_coloredblood",  &crispy.coloredblood);
     M_BindVariable("crispy_crosshair",     &crispy.crosshair);
     M_BindVariable("crispy_showfps",       &crispy.showfps);
+
+    Crispy_InitColoredBlood();
 }
 
 //
