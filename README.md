@@ -35,8 +35,8 @@ dynamically instead of crashing on complex maps:
 
 ### Crispness menu & config
 A dedicated **Crispness** submenu (Options → Crispness) spanning **four pages**
-with **22 working toggles**, all saved to **`crispy-doom.cfg`** (config
-persistence, which the base doomgeneric had disabled, is enabled here):
+of working toggles, all saved to **`crispy-doom.cfg`** (config persistence,
+which the base doomgeneric had disabled, is enabled here):
 
 - **Rendering / display:** Uncapped framerate (sub-tic interpolation of camera,
   sprites, and moving sectors), Smooth pixel scaling, VSync, Framerate limit,
