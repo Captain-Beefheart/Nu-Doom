@@ -9,7 +9,7 @@
 Debug/
 Release/
 Build/
-doomgeneric
+/doomgeneric/doomgeneric
 doomgeneric.map
 
 # Nu-Doom build/runtime artifacts

@@ -11,30 +11,23 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// DESCRIPTION:
-//     List of features which can be enabled/disabled to slim down the
-//     program.
+//
+// Dehacked I/O code (does all reads from dehacked files)
 //
 
-#ifndef DOOM_FEATURES_H
-#define DOOM_FEATURES_H
+#ifndef DEH_IO_H
+#define DEH_IO_H
 
-// Enables wad merging (the '-merge' command line parameter)
+#include "deh_defs.h"
 
-#define FEATURE_WAD_MERGE
+deh_context_t *DEH_OpenFile(char *filename);
+deh_context_t *DEH_OpenLump(int lumpnum);
+void DEH_CloseFile(deh_context_t *context);
+int DEH_GetChar(deh_context_t *context);
+char *DEH_ReadLine(deh_context_t *context, boolean extended);
+void DEH_Error(deh_context_t *context, char *msg, ...);
+void DEH_Warning(deh_context_t *context, char *msg, ...);
+boolean DEH_HadError(deh_context_t *context);
 
-// Enables dehacked support ('-deh')
-
-#define FEATURE_DEHACKED
-
-// Enables multiplayer support (network games)
-
-#undef FEATURE_MULTIPLAYER
-
-// Enables sound output
-
-//#undef FEATURE_SOUND
-
-#endif /* #ifndef DOOM_FEATURES_H */
-
+#endif /* #ifndef DEH_IO_H */
 

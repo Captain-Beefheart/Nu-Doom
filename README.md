@@ -33,6 +33,26 @@ dynamically instead of crashing on complex maps:
 - **SDL2 audio backend** — SFX via `i_sdlsound.c`, music via `i_sdlmusic.c`
   (SDL2_mixer, `Mix_OpenAudioDevice`), enabled with `-DFEATURE_SOUND`.
 
+### Mod support
+doomgeneric shipped with DeHackEd and WAD-merging compiled out; Nu-Doom restores
+both (the Chocolate Doom subsystems), which is what most classic vanilla and
+limit-removing mods need:
+
+- **DeHackEd (`-deh`)** — load one or more `.deh` / `.bex` patches. The full
+  vanilla section set is supported: Thing, Frame, Pointer (code pointers),
+  Weapon, Ammo, Sound, Cheat, Misc, and `[Text]` string replacements. Embedded
+  `DEHACKED` lumps are loaded from PWADs with `-dehlump`, and automatically for
+  IWADs that require them (Freedoom, HACX, Chex Quest).
+- **Chocolate-style WAD merging (`-merge`)** — merge a PWAD's sprites, flats and
+  textures *into* the IWAD namespace (plus the NWT-style `-nwtmerge` / `-af` /
+  `-as` / `-aa`). This makes mods that replace individual sprites or flats —
+  without a full `S_START`/`F_START` marker set — render correctly, which plain
+  `-file` appending can't do.
+
+Because Nu-Doom's renderer/playsim is **vanilla + limit-removing** (not
+Boom/MBF/ZDoom), this targets vanilla-compatible and limit-removing mods;
+Boom/MBF/UMAPINFO and GZDoom (DECORATE/ZScript) mods are out of scope.
+
 ### Crispness menu & config
 A dedicated **Crispness** submenu (Options → Crispness) spanning **five pages**
 of working toggles, all saved to **`crispy-doom.cfg`** (config persistence,
@@ -113,6 +133,22 @@ dist/doomgeneric.exe -iwad /path/to/doom2.wad
 
 # shareware DOOM (episode + map)
 dist/doomgeneric.exe -iwad /path/to/doom1.wad -warp 1 1
+```
+
+Loading mods (see **Mod support** above):
+
+```sh
+# a map/megawad PWAD
+dist/doomgeneric.exe -iwad /path/to/doom2.wad -file mymegawad.wad
+
+# a mod that replaces individual sprites/flats (merge into the IWAD namespace)
+dist/doomgeneric.exe -iwad /path/to/doom2.wad -merge sprites.wad
+
+# a DeHackEd patch (gameplay/text changes)
+dist/doomgeneric.exe -iwad /path/to/doom2.wad -file maps.wad -deh patch.deh
+
+# a PWAD that embeds its own DEHACKED lump
+dist/doomgeneric.exe -iwad /path/to/doom2.wad -file mod.wad -dehlump
 ```
 
 Settings — including the Crispness toggles — are saved to `crispy-doom.cfg` and
