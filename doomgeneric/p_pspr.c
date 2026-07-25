@@ -232,20 +232,28 @@ boolean P_CheckAmmo (player_t* player)
 }
 
 
+// Nu-Doom weapon recoil: view-pitch kick applied on firing. Render/input-only
+// (never in the ticcmd), decayed once per tic, so demos stay deterministic.
+int recoil_pitch = 0;
+
 //
 // P_FireWeapon.
 //
 void P_FireWeapon (player_t* player)
 {
     statenum_t	newstate;
-	
+
     if (!P_CheckAmmo (player))
 	return;
-	
+
     P_SetMobjState (player->mo, S_PLAY_ATK1);
     newstate = weaponinfo[player->readyweapon].atkstate;
     P_SetPsprite (player, ps_weapon, newstate);
     P_NoiseAlert (player->mo, player->mo);
+
+    // kick the view up a little (only for the local player's view)
+    if (crispy.recoilpitch && player == &players[consoleplayer])
+	recoil_pitch = 10;
 }
 
 
@@ -895,6 +903,10 @@ void P_MovePsprites (player_t* player)
     
     player->psprites[ps_flash].sx = player->psprites[ps_weapon].sx;
     player->psprites[ps_flash].sy = player->psprites[ps_weapon].sy;
+
+    // Nu-Doom: recover the recoil view-kick a step each tic.
+    if (player == &players[consoleplayer] && recoil_pitch > 0)
+	recoil_pitch--;
 }
 
 

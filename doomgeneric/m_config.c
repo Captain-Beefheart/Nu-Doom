@@ -1582,6 +1582,7 @@ static default_t extra_defaults_list[] =
     CONFIG_VARIABLE_INT(crispy_crosshairtarget),
     CONFIG_VARIABLE_INT(crispy_mousecontrol),
     CONFIG_VARIABLE_INT(crispy_mouselook),
+    CONFIG_VARIABLE_INT(crispy_recoilpitch),
 };
 
 static default_collection_t extra_defaults =

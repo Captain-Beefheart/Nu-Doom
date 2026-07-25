@@ -930,7 +930,9 @@ void R_SetupFrame (player_t* player)
     // mouselook off (or pitch 0) this restores the vanilla centery, so demos
     // and the timedemo are unaffected.
     {
-	int desired = viewheight/2 + (crispy.mouselook ? mlookpitch : 0);
+	extern int recoil_pitch;   // p_pspr.c weapon-recoil view kick
+	int desired = viewheight/2 + (crispy.mouselook ? mlookpitch : 0)
+		    + (crispy.recoilpitch ? recoil_pitch : 0);
 
 	// keep the sheared horizon comfortably on screen
 	if (desired < viewheight/8)                desired = viewheight/8;

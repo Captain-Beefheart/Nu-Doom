@@ -80,6 +80,7 @@ void M_BindCrispnessVariables(void)
     M_BindVariable("crispy_crosshairtarget",&crispy.crosshairtarget);
     M_BindVariable("crispy_mousecontrol",   &crispy.mousecontrol);
     M_BindVariable("crispy_mouselook",      &crispy.mouselook);
+    M_BindVariable("crispy_recoilpitch",    &crispy.recoilpitch);
 
     // Weapon bob defaults to full (4) so gameplay is unchanged out of the box.
     crispy.weaponbob = 4;

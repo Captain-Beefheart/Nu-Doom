@@ -162,7 +162,7 @@ features, grouped by menu category:
 - [x] Crosshair type / shape (cross / X / dot)
 - [x] Crosshair target highlight
 - [x] Configurable weapon bob
-- [ ] Weapon recoil pitch
+- [x] Weapon recoil pitch
 - [x] Centered weapon when firing
 - [x] Squat weapon on hard landing
 
