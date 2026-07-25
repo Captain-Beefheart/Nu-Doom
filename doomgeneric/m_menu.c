@@ -221,7 +221,6 @@ void M_DrawEmptyCell(menu_t *menu,int item);
 void M_DrawSelCell(menu_t *menu,int item);
 void M_WriteText(int x, int y, char *string);
 static void M_WriteTextBig(int x, int y, char *string);
-static int  M_BigTextWidth(char *string);
 int  M_StringWidth(char *string);
 int  M_StringHeight(char *string);
 void M_StartMessage(char *string,void *routine,boolean input);
@@ -423,17 +422,11 @@ enum
     crisp4_fullsounds,
     crisp4_demotimer,
     crisp4_crosshairtarget,
+    crisp4_mousecontrol,
+    crisp4_mouselook,
     crisp4_nextpage,
     crisp4_end
 } crispness4_e;
-
-enum
-{
-    crisp5_mousecontrol,
-    crisp5_mouselook,
-    crisp5_nextpage,
-    crisp5_end
-} crispness5_e;
 
 // Boolean toggles.
 static void M_CrispUncapped(int choice)       { crispy.uncapped        = !crispy.uncapped; }
@@ -492,11 +485,9 @@ static void M_CrispFpsLimit(int choice)
 void M_DrawCrispness2(void);
 void M_DrawCrispness3(void);
 void M_DrawCrispness4(void);
-void M_DrawCrispness5(void);
 static void M_CrispnessPage2(int choice);
 static void M_CrispnessPage3(int choice);
 static void M_CrispnessPage4(int choice);
-static void M_CrispnessPage5(int choice);
 static void M_CrispnessPage1(int choice);
 
 menuitem_t CrispnessMenu[]=
@@ -543,11 +534,6 @@ menuitem_t Crispness4Menu[]=
     {1,"",M_CrispFullSounds,'u'},
     {1,"",M_CrispDemoTimer,'d'},
     {1,"",M_CrispCrosshairTarget,'t'},
-    {1,"",M_CrispnessPage5,'n'}
-};
-
-menuitem_t Crispness5Menu[]=
-{
     {1,"",M_CrispMouseControl,'c'},
     {1,"",M_CrispMouselook,'k'},
     {1,"",M_CrispnessPage1,'n'}
@@ -559,7 +545,7 @@ menu_t  CrispnessDef =
     &OptionsDef,	// back returns to Options
     CrispnessMenu,
     M_DrawCrispness,
-    48,48,
+    48,32,
     0
 };
 
@@ -569,7 +555,7 @@ menu_t  Crispness2Def =
     &CrispnessDef,	// back returns to page 1
     Crispness2Menu,
     M_DrawCrispness2,
-    48,48,
+    48,32,
     0
 };
 
@@ -579,7 +565,7 @@ menu_t  Crispness3Def =
     &Crispness2Def,	// back returns to page 2
     Crispness3Menu,
     M_DrawCrispness3,
-    48,48,
+    48,32,
     0
 };
 
@@ -589,24 +575,13 @@ menu_t  Crispness4Def =
     &Crispness3Def,	// back returns to page 3
     Crispness4Menu,
     M_DrawCrispness4,
-    48,48,
-    0
-};
-
-menu_t  Crispness5Def =
-{
-    crisp5_end,
-    &Crispness4Def,	// back returns to page 4
-    Crispness5Menu,
-    M_DrawCrispness5,
-    48,48,
+    48,32,
     0
 };
 
 static void M_CrispnessPage2(int choice) { M_SetupNextMenu(&Crispness2Def); }
 static void M_CrispnessPage3(int choice) { M_SetupNextMenu(&Crispness3Def); }
 static void M_CrispnessPage4(int choice) { M_SetupNextMenu(&Crispness4Def); }
-static void M_CrispnessPage5(int choice) { M_SetupNextMenu(&Crispness5Def); }
 static void M_CrispnessPage1(int choice) { M_SetupNextMenu(&CrispnessDef); }
 
 //
@@ -1266,17 +1241,13 @@ static char *crispOnOff[2] = { "Off", "On" };
 static char *crispBob[5]   = { "Off", "25%", "50%", "75%", "Full" };
 static char *crispXhair[3] = { "Cross", "X", "Dot" };
 
-// The Crispness menu is drawn with the 2x hu_font (M_WriteTextBig) so its text
-// matches the size of the other option menus. Labels sit on the left; values
-// are right-aligned to this edge.
-#define CRISP_RIGHT 300
-
-// Draw a menu row: big-font label on the left, big-font value right-aligned.
+// The Crispness submenu is drawn with the standard small hu_font (its original
+// size). Labels sit on the left; values line up in a fixed right-hand column.
 static void M_DrawCrispnessStr(int row, char *label, char *value)
 {
     int y = CrispnessDef.y + LINEHEIGHT * row;
-    M_WriteTextBig(CrispnessDef.x, y, label);
-    M_WriteTextBig(CRISP_RIGHT - M_BigTextWidth(value), y, value);
+    M_WriteText(CrispnessDef.x, y, label);
+    M_WriteText(CrispnessDef.x + 176, y, value);
 }
 
 static void M_DrawCrispnessItem(int row, char *label, int value)
@@ -1286,52 +1257,52 @@ static void M_DrawCrispnessItem(int row, char *label, int value)
 
 static void M_DrawCrispnessNav(int row, char *label)
 {
-    M_WriteTextBig(CrispnessDef.x, CrispnessDef.y + LINEHEIGHT * row, label);
+    M_WriteText(CrispnessDef.x, CrispnessDef.y + LINEHEIGHT * row, label);
 }
 
 void M_DrawCrispness(void)
 {
     char buf[16];
 
-    M_WriteTextBig(CrispnessDef.x, CrispnessDef.y - 20, "CRISPNESS 1/5");
+    M_WriteText(CrispnessDef.x, CrispnessDef.y - 16, "CRISPNESS  1/4");
 
-    M_DrawCrispnessItem(crisp_uncapped,      "Uncapped FPS",  crispy.uncapped);
-    M_DrawCrispnessItem(crisp_smoothscaling, "Smooth pixels", crispy.smoothscaling);
-    M_DrawCrispnessItem(crisp_vsync,         "Vertical sync", crispy.vsync);
+    M_DrawCrispnessItem(crisp_uncapped,      "Uncapped framerate",   crispy.uncapped);
+    M_DrawCrispnessItem(crisp_smoothscaling, "Smooth pixel scaling", crispy.smoothscaling);
+    M_DrawCrispnessItem(crisp_vsync,         "Vertical sync",        crispy.vsync);
     snprintf(buf, sizeof(buf), "%d", usegamma);
-    M_DrawCrispnessStr (crisp_gamma,         "Gamma",         usegamma ? buf : "Off");
-    M_DrawCrispnessItem(crisp_translucency,  "Translucency",  crispy.translucency);
-    M_DrawCrispnessItem(crisp_coloredblood,  "Colored blood", crispy.coloredblood);
+    M_DrawCrispnessStr (crisp_gamma,         "Gamma correction",     usegamma ? buf : "Off");
+    M_DrawCrispnessItem(crisp_translucency,  "Translucency",         crispy.translucency);
+    M_DrawCrispnessItem(crisp_coloredblood,  "Colored blood",        crispy.coloredblood);
     snprintf(buf, sizeof(buf), "%d", snd_channels);
-    M_DrawCrispnessStr (crisp_soundchannels, "Sfx channels",  buf);
+    M_DrawCrispnessStr (crisp_soundchannels, "Sound channels",       buf);
     M_DrawCrispnessNav (crisp_nextpage,      "Next page >");
 }
 
 void M_DrawCrispness2(void)
 {
-    M_WriteTextBig(Crispness2Def.x, Crispness2Def.y - 20, "CRISPNESS 2/5");
+    M_WriteText(Crispness2Def.x, Crispness2Def.y - 16, "CRISPNESS  2/4");
 
-    M_DrawCrispnessItem(crisp2_centerweapon,   "Center weapon", crispy.centerweapon);
-    M_DrawCrispnessStr (crisp2_weaponbob,      "Weapon bob",    crispBob[crispy.weaponbob % 5]);
-    M_DrawCrispnessItem(crisp2_weaponsquat,    "Weapon squat",  crispy.weaponsquat);
-    M_DrawCrispnessItem(crisp2_crosshair,      "Crosshair",     crispy.crosshair);
-    M_DrawCrispnessItem(crisp2_crosshairhealth,"Health xhair",  crispy.crosshairhealth);
-    M_DrawCrispnessStr (crisp2_crosshairtype,  "Xhair type",    crispXhair[crispy.crosshairtype % 3]);
-    M_DrawCrispnessItem(crisp2_showfps,        "Show FPS",      crispy.showfps);
+    M_DrawCrispnessItem(crisp2_centerweapon,   "Center weapon",    crispy.centerweapon);
+    M_DrawCrispnessStr (crisp2_weaponbob,      "Weapon bob",       crispBob[crispy.weaponbob % 5]);
+    M_DrawCrispnessItem(crisp2_weaponsquat,    "Weapon squat",     crispy.weaponsquat);
+    M_DrawCrispnessItem(crisp2_crosshair,      "Crosshair",        crispy.crosshair);
+    M_DrawCrispnessItem(crisp2_crosshairhealth,"Health crosshair", crispy.crosshairhealth);
+    M_DrawCrispnessStr (crisp2_crosshairtype,  "Crosshair type",   crispXhair[crispy.crosshairtype % 3]);
+    M_DrawCrispnessItem(crisp2_showfps,        "Show FPS",         crispy.showfps);
     M_DrawCrispnessNav (crisp2_nextpage,       "Next page >");
 }
 
 void M_DrawCrispness3(void)
 {
-    M_WriteTextBig(Crispness3Def.x, Crispness3Def.y - 20, "CRISPNESS 3/5");
+    M_WriteText(Crispness3Def.x, Crispness3Def.y - 16, "CRISPNESS  3/4");
 
-    M_DrawCrispnessItem(crisp3_showcoords,     "Coordinates",   crispy.showcoords);
-    M_DrawCrispnessItem(crisp3_showstats,      "Level stats",   crispy.showstats);
-    M_DrawCrispnessItem(crisp3_showleveltime,  "Level time",    crispy.showleveltime);
-    M_DrawCrispnessItem(crisp3_secretmessage,  "Report secret", crispy.secretmessage);
-    M_DrawCrispnessItem(crisp3_automapoverlay, "Map overlay",   crispy.automapoverlay);
-    M_DrawCrispnessItem(crisp3_automaprotate,  "Map rotate",    crispy.automaprotate);
-    M_DrawCrispnessItem(crisp3_automapsecrets, "Map secrets",   crispy.automapsecrets);
+    M_DrawCrispnessItem(crisp3_showcoords,     "Show coordinates", crispy.showcoords);
+    M_DrawCrispnessItem(crisp3_showstats,      "Show level stats", crispy.showstats);
+    M_DrawCrispnessItem(crisp3_showleveltime,  "Show level time",  crispy.showleveltime);
+    M_DrawCrispnessItem(crisp3_secretmessage,  "Report secrets",   crispy.secretmessage);
+    M_DrawCrispnessItem(crisp3_automapoverlay, "Automap overlay",  crispy.automapoverlay);
+    M_DrawCrispnessItem(crisp3_automaprotate,  "Automap rotate",   crispy.automaprotate);
+    M_DrawCrispnessItem(crisp3_automapsecrets, "Automap secrets",  crispy.automapsecrets);
     M_DrawCrispnessNav (crisp3_nextpage,       "Next page >");
 }
 
@@ -1339,27 +1310,20 @@ void M_DrawCrispness4(void)
 {
     char buf[16];
 
-    M_WriteTextBig(Crispness4Def.x, Crispness4Def.y - 20, "CRISPNESS 4/5");
+    M_WriteText(Crispness4Def.x, Crispness4Def.y - 16, "CRISPNESS  4/4");
 
-    M_DrawCrispnessItem(crisp4_automapcolors,   "Map colors",   crispy.automapcolors);
+    M_DrawCrispnessItem(crisp4_automapcolors,   "Automap ext. colors", crispy.automapcolors);
     if (crispy.fpslimit > 0)
         snprintf(buf, sizeof(buf), "%d", crispy.fpslimit);
-    M_DrawCrispnessStr (crisp4_fpslimit,        "FPS limit",    crispy.fpslimit ? buf : "Off");
-    M_DrawCrispnessItem(crisp4_monosfx,         "Mono SFX",     crispy.monosfx);
-    M_DrawCrispnessItem(crisp4_fullsounds,      "Full sounds",  crispy.fullsounds);
-    M_DrawCrispnessItem(crisp4_demotimer,       "Demo timer",   crispy.demotimer);
-    M_DrawCrispnessItem(crisp4_crosshairtarget, "Target xhair", crispy.crosshairtarget);
-    M_DrawCrispnessNav (crisp4_nextpage,        "Next page >");
-}
-
-void M_DrawCrispness5(void)
-{
-    M_WriteTextBig(Crispness5Def.x, Crispness5Def.y - 20, "CRISPNESS 5/5");
-
-    M_DrawCrispnessStr (crisp5_mousecontrol, "Controls",
+    M_DrawCrispnessStr (crisp4_fpslimit,        "Framerate limit",     crispy.fpslimit ? buf : "Off");
+    M_DrawCrispnessItem(crisp4_monosfx,         "Mono SFX",            crispy.monosfx);
+    M_DrawCrispnessItem(crisp4_fullsounds,      "Full-length sounds",  crispy.fullsounds);
+    M_DrawCrispnessItem(crisp4_demotimer,       "Demo timer",          crispy.demotimer);
+    M_DrawCrispnessItem(crisp4_crosshairtarget, "Target crosshair",    crispy.crosshairtarget);
+    M_DrawCrispnessStr (crisp4_mousecontrol,    "Controls",
 			crispy.mousecontrol ? "Kb+Mouse" : "Keyboard");
-    M_DrawCrispnessItem(crisp5_mouselook,    "Mouselook", crispy.mouselook);
-    M_DrawCrispnessNav (crisp5_nextpage,     "< First page");
+    M_DrawCrispnessItem(crisp4_mouselook,       "Mouselook",           crispy.mouselook);
+    M_DrawCrispnessNav (crisp4_nextpage,        "< First page");
 }
 
 void M_Crispness(int choice)
@@ -1753,12 +1717,6 @@ M_WriteText
 	V_DrawPatchDirect(cx, cy, hu_font[c]);
 	cx+=w;
     }
-}
-
-// Width of a string drawn with M_WriteTextBig (double the hu_font width).
-static int M_BigTextWidth(char *string)
-{
-    return 2 * M_StringWidth(string);
 }
 
 // Write a string using the hu_font at 2x size (matches the big menu font

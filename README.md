@@ -53,15 +53,12 @@ persistence, which the base doomgeneric had disabled, is enabled here):
 ### Controls
 - **WASD** move/strafe by default (W/S forward-back, A/D strafe; arrow keys
   still turn).
-- A **Controls** toggle (Crispness page 5) switches between **Keyboard** and
+- A **Controls** toggle (Crispness page 4) switches between **Keyboard** and
   **Keyboard + Mouse**; with the mouse on, it is captured to the window and
   turns you left/right (and fires).
 - A **Mouselook** toggle beneath it tilts the view up/down via horizon
   y-shear, with the weapon kept anchored to the HUD. Free look is view-only —
   shots keep vanilla auto-aim, so demo playback stays bit-for-bit deterministic.
-
-The Crispness menu itself is drawn at the same font size as the other option
-menus.
 
 ## Why doomgeneric?
 
