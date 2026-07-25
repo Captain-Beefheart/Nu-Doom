@@ -924,6 +924,11 @@ void R_SetupFrame (player_t* player)
     }
     else
 	fixedcolormap = 0;
+
+    // Brightmaps: full-bright pixels use the brightest colormap normally, or
+    // the fixed colormap (invulnerability / light amp) when one is active so
+    // they don't break those effects.
+    dc_colormap_bright = fixedcolormap ? fixedcolormap : colormaps;
 		
     // Nu-Doom mouselook: shift the horizon (centery) by the view pitch and
     // rebuild yslope so floors/ceilings project to the tilted center. With

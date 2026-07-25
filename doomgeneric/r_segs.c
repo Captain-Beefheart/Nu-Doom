@@ -151,7 +151,9 @@ R_RenderMaskedSegRange
 			
     if (fixedcolormap)
 	dc_colormap = fixedcolormap;
-    
+
+    dc_brightmap = R_BrightmapForTexture(texnum);
+
     // draw the columns
     for (dc_x = x1 ; dc_x <= x2 ; dc_x++)
     {
@@ -282,6 +284,7 @@ void R_RenderSegLoop (void)
 	    dc_yh = yh;
 	    dc_texturemid = rw_midtexturemid;
 	    dc_source = R_GetColumn(midtexture,texturecolumn);
+	    dc_brightmap = R_BrightmapForTexture(midtexture);
 	    colfunc ();
 	    ceilingclip[rw_x] = viewheight;
 	    floorclip[rw_x] = -1;
@@ -304,6 +307,7 @@ void R_RenderSegLoop (void)
 		    dc_yh = mid;
 		    dc_texturemid = rw_toptexturemid;
 		    dc_source = R_GetColumn(toptexture,texturecolumn);
+		    dc_brightmap = R_BrightmapForTexture(toptexture);
 		    colfunc ();
 		    ceilingclip[rw_x] = mid;
 		}
@@ -334,6 +338,7 @@ void R_RenderSegLoop (void)
 		    dc_texturemid = rw_bottomtexturemid;
 		    dc_source = R_GetColumn(bottomtexture,
 					    texturecolumn);
+		    dc_brightmap = R_BrightmapForTexture(bottomtexture);
 		    colfunc ();
 		    floorclip[rw_x] = mid;
 		}

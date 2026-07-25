@@ -30,6 +30,7 @@
 #include "doomdef.h"
 #include "m_misc.h"
 #include "r_local.h"
+#include "crispy.h"
 #include "p_local.h"
 
 #include "doomstat.h"
@@ -443,6 +444,8 @@ static void GenerateTextureHashTable(void)
 }
 
 
+void R_InitBrightmaps(void);   // defined below, called from R_InitTextures
+
 //
 // R_InitTextures
 // Initializes the texture list
@@ -623,6 +626,67 @@ void R_InitTextures (void)
 	texturetranslation[i] = i;
 
     GenerateTextureHashTable();
+
+    R_InitBrightmaps();
+}
+
+//
+// R_InitBrightmaps
+// Build a bright-pixel mask for each texture. Textures whose name marks them
+// as light sources (computers, wall lights, switches, exit signs) get a mask
+// that flags their brightest pixels; everything else gets nobrightmap. The
+// column drawer renders flagged pixels full-bright.
+//
+static byte     brightmap_lit[256];
+byte          **texturebrightmap;
+
+static boolean R_TextureIsEmissive(const char *name)
+{
+    static const char *prefixes[] =
+        { "COMP", "TEK", "LITE", "SPACEW", "EXIT", "SW1", "SW2" };
+    int i;
+
+    for (i = 0; i < (int)(sizeof(prefixes)/sizeof(prefixes[0])); i++)
+    {
+        size_t n = strlen(prefixes[i]);
+        if (!strncmp(name, prefixes[i], n))   // WAD texture names are uppercase
+            return true;
+    }
+    return false;
+}
+
+void R_InitBrightmaps(void)
+{
+    byte *pal = W_CacheLumpName(DEH_String("PLAYPAL"), PU_STATIC);
+    int i;
+
+    // A palette index counts as emissive if it is both bright AND highly
+    // saturated (a pure red/green/blue/yellow light) — that excludes the
+    // brown/tan/gray/white pixels that make up the rest of a tech texture.
+    for (i = 0; i < 256; i++)
+    {
+        int r = pal[i*3+0], g = pal[i*3+1], b = pal[i*3+2];
+        int mx = r > g ? r : g;  if (b > mx) mx = b;
+        int mn = r < g ? r : g;  if (b < mn) mn = b;
+        brightmap_lit[i] = (mx >= 180 && (mx - mn) >= 120) ? 1 : 0;
+    }
+
+    texturebrightmap = Z_Malloc(numtextures * sizeof(*texturebrightmap), PU_STATIC, 0);
+    for (i = 0; i < numtextures; i++)
+    {
+        char nm[9];
+        memcpy(nm, textures[i]->name, 8);
+        nm[8] = '\0';
+        texturebrightmap[i] = R_TextureIsEmissive(nm) ? brightmap_lit : nobrightmap;
+    }
+}
+
+// Brightmap table for a texture (nobrightmap when the feature is off).
+byte *R_BrightmapForTexture(int texnum)
+{
+    if (!crispy.brightmaps || texnum < 0 || texnum >= numtextures)
+        return nobrightmap;
+    return texturebrightmap[texnum];
 }
 
 

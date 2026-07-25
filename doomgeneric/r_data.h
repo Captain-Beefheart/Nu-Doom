@@ -32,6 +32,9 @@ R_GetColumn
   int		col );
 
 
+// Nu-Doom brightmaps: bright-pixel mask for a texture (nobrightmap if off).
+byte* R_BrightmapForTexture (int texnum);
+
 // I/O, setting up the stuff.
 void R_InitData (void);
 void R_PrecacheLevel (void);

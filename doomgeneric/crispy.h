@@ -57,6 +57,7 @@ typedef struct
     int aspectratio;    // present the image at a corrected 4:3 aspect ratio
     int sfxpitch;       // randomize sound-effect pitch for variety
     int coloredhud;     // tint the status-bar numbers by their value
+    int brightmaps;     // draw self-lit texture pixels (screens/lights) full-bright
 } crispy_t;
 
 // Colored-HUD translation tables (built from PLAYPAL) and the value->table

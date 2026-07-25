@@ -24,6 +24,9 @@
 
 
 extern lighttable_t*	dc_colormap;
+extern lighttable_t*	dc_colormap_bright;   // full-bright map for brightmap pixels
+extern byte*		dc_brightmap;         // per-texture bright-pixel mask
+extern byte		nobrightmap[256];     // all-zero default (no bright pixels)
 extern int		dc_x;
 extern int		dc_yl;
 extern int		dc_yh;

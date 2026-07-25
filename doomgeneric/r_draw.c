@@ -79,11 +79,17 @@ static byte *background_buffer = NULL;
 // R_DrawColumn
 // Source is the top of the column to scale.
 //
-lighttable_t*		dc_colormap; 
-int			dc_x; 
-int			dc_yl; 
-int			dc_yh; 
-fixed_t			dc_iscale; 
+lighttable_t*		dc_colormap;
+// Nu-Doom brightmaps: dc_brightmap[srcpixel] != 0 means draw that pixel
+// full-bright (via dc_colormap_bright) instead of the light-diminished
+// dc_colormap. nobrightmap is the all-zero default (no bright pixels).
+byte			nobrightmap[256];
+byte*			dc_brightmap = nobrightmap;
+lighttable_t*		dc_colormap_bright;
+int			dc_x;
+int			dc_yl;
+int			dc_yh;
+fixed_t			dc_iscale;
 fixed_t			dc_texturemid;
 
 // first pixel in a column (possibly virtual) 
@@ -132,17 +138,19 @@ void R_DrawColumn (void)
     // Inner loop that does the actual texture mapping,
     //  e.g. a DDA-lile scaling.
     // This is as fast as it gets.
-    do 
+    do
     {
 	// Re-map color indices from wall texture column
-	//  using a lighting/special effects LUT.
-	*dest = dc_colormap[dc_source[(frac>>FRACBITS)&127]];
-	
-	dest += SCREENWIDTH; 
+	//  using a lighting/special effects LUT. Brightmap pixels use the
+	//  full-bright colormap so they glow regardless of sector light.
+	byte s = dc_source[(frac>>FRACBITS)&127];
+	*dest = dc_brightmap[s] ? dc_colormap_bright[s] : dc_colormap[s];
+
+	dest += SCREENWIDTH;
 	frac += fracstep;
-	
-    } while (count--); 
-} 
+
+    } while (count--);
+}
 
 
 
@@ -306,13 +314,14 @@ void R_DrawColumnLow (void)
     fracstep = dc_iscale; 
     frac = dc_texturemid + (dc_yl-centery)*fracstep;
     
-    do 
+    do
     {
 	// Hack. Does not work corretly.
-	*dest2 = *dest = dc_colormap[dc_source[(frac>>FRACBITS)&127]];
+	byte s = dc_source[(frac>>FRACBITS)&127];
+	*dest2 = *dest = dc_brightmap[s] ? dc_colormap_bright[s] : dc_colormap[s];
 	dest += SCREENWIDTH;
 	dest2 += SCREENWIDTH;
-	frac += fracstep; 
+	frac += fracstep;
 
     } while (count--);
 }

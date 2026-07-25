@@ -414,7 +414,8 @@ R_DrawVisSprite
     patch = W_CacheLumpNum (vis->patch+firstspritelump, PU_CACHE);
 
     dc_colormap = vis->colormap;
-    
+    dc_brightmap = nobrightmap;   // sprites are not brightmapped
+
     if (!dc_colormap)
     {
 	// NULL colormap = shadow draw

@@ -151,7 +151,7 @@ features, grouped by menu category:
 - [x] Aspect-ratio correction (4:3 letterbox)
 - [x] VSync toggle
 - [x] Framerate limit
-- [ ] Brightmaps (self-lit texture/sprite pixels)
+- [x] Brightmaps (self-lit texture pixels)
 - [ ] Smooth diminishing lighting
 - [x] Colored HUD numbers (health / armor / ammo by value)
 - [ ] Extended "Crispy" fullscreen HUD layout

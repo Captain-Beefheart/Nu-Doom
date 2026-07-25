@@ -435,6 +435,7 @@ enum
     crisp5_aspectratio,
     crisp5_sfxpitch,
     crisp5_coloredhud,
+    crisp5_brightmaps,
     crisp5_nextpage,
     crisp5_end
 } crispness5_e;
@@ -475,6 +476,7 @@ static void M_CrispDemoBar(int choice)        { crispy.demobar        = !crispy.
 static void M_CrispAspectRatio(int choice)    { crispy.aspectratio    = !crispy.aspectratio; }
 static void M_CrispSfxPitch(int choice)       { crispy.sfxpitch       = !crispy.sfxpitch; }
 static void M_CrispColoredHUD(int choice)     { crispy.coloredhud     = !crispy.coloredhud; }
+static void M_CrispBrightmaps(int choice)     { crispy.brightmaps     = !crispy.brightmaps; }
 
 // Multi-value settings.
 static void M_CrispGamma(int choice)
@@ -564,6 +566,7 @@ menuitem_t Crispness5Menu[]=
     {1,"",M_CrispAspectRatio,'a'},
     {1,"",M_CrispSfxPitch,'p'},
     {1,"",M_CrispColoredHUD,'h'},
+    {1,"",M_CrispBrightmaps,'b'},
     {1,"",M_CrispnessPage1,'n'}
 };
 
@@ -1380,6 +1383,7 @@ void M_DrawCrispness5(void)
     M_DrawCrispnessItem(crisp5_aspectratio, "Aspect ratio 4:3", crispy.aspectratio);
     M_DrawCrispnessItem(crisp5_sfxpitch,    "SFX pitch shift",  crispy.sfxpitch);
     M_DrawCrispnessItem(crisp5_coloredhud,  "Colored HUD nums", crispy.coloredhud);
+    M_DrawCrispnessItem(crisp5_brightmaps,  "Brightmaps",       crispy.brightmaps);
     M_DrawCrispnessNav (crisp5_nextpage,    "< First page");
 }
 
