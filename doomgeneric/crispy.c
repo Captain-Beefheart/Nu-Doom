@@ -23,6 +23,7 @@
 #include "i_timer.h"
 #include "m_fixed.h"
 #include "doomstat.h"
+#include "p_local.h"   // P_AimLineAttack + linetarget for the target crosshair
 
 // State owned by the renderer / menu that the overlays need.
 extern int  viewwindowx, viewwindowy, viewwidth, viewheight;
@@ -69,8 +70,14 @@ void M_BindCrispnessVariables(void)
     M_BindVariable("crispy_automapoverlay", &crispy.automapoverlay);
     M_BindVariable("crispy_automaprotate",  &crispy.automaprotate);
     M_BindVariable("crispy_automapsecrets", &crispy.automapsecrets);
+    M_BindVariable("crispy_automapcolors",  &crispy.automapcolors);
     M_BindVariable("crispy_secretmessage",  &crispy.secretmessage);
     M_BindVariable("crispy_vsync",          &crispy.vsync);
+    M_BindVariable("crispy_fpslimit",       &crispy.fpslimit);
+    M_BindVariable("crispy_monosfx",        &crispy.monosfx);
+    M_BindVariable("crispy_fullsounds",     &crispy.fullsounds);
+    M_BindVariable("crispy_demotimer",      &crispy.demotimer);
+    M_BindVariable("crispy_crosshairtarget",&crispy.crosshairtarget);
 
     // Weapon bob defaults to full (4) so gameplay is unchanged out of the box.
     crispy.weaponbob = 4;
@@ -99,6 +106,17 @@ void Crispy_DrawCrosshair(void)
         if (h < 34)         col = 176;  // red
         else if (h < 67)    col = 231;  // yellow
         else                col = 112;  // green
+    }
+
+    // Optionally highlight the crosshair when a shootable target is in view.
+    // P_AimLineAttack only queries the world (it rebuilds its own globals),
+    // so calling it from the render path does not perturb the playsim.
+    if (crispy.crosshairtarget && players[displayplayer].mo)
+    {
+        mobj_t *mo = players[displayplayer].mo;
+        P_AimLineAttack(mo, mo->angle, 16 * 64 * FRACUNIT);
+        if (linetarget)
+            col = 112;  // green: on target
     }
 
     cx = viewwindowx + (viewwidth >> 1);
@@ -197,6 +215,24 @@ void Crispy_DrawStats(void)
         snprintf(buf, sizeof(buf), "T %d:%02d", secs / 60, secs % 60);
         M_WriteText(2, 36, buf);
     }
+}
+
+//
+// Crispy_DrawDemoTimer
+// During demo playback, shows the elapsed demo time (bottom-left, above the
+// status bar) so demo length is visible.
+//
+void Crispy_DrawDemoTimer(void)
+{
+    int secs;
+    char buf[24];
+
+    if (!crispy.demotimer || !demoplayback || gamestate != GS_LEVEL)
+        return;
+
+    secs = leveltime / TICRATE;
+    snprintf(buf, sizeof(buf), "DEMO %d:%02d", secs / 60, secs % 60);
+    M_WriteText(2, ORIGHEIGHT - 40, buf);
 }
 
 //

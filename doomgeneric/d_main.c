@@ -306,6 +306,7 @@ void D_Display (void)
     Crispy_DrawFPS ();     // crispness overlays (on top)
     Crispy_DrawStats ();
     Crispy_DrawCoords ();
+    Crispy_DrawDemoTimer ();
     NetUpdate ();         // send out any new accumulation
 
 

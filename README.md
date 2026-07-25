@@ -117,6 +117,9 @@ keep the DLLs from `setup_dist.sh` next to the executable.
 - [x] Crispness menu (third page): VSync, Gamma correction, Sound channels
   (8/16/32), Configurable weapon bob, Weapon squat on landing, Crosshair
   type (cross/X/dot), Show level time, Automap secret highlighting.
+- [x] Crispness menu (fourth page): Framerate limit, Mono SFX, Full-length
+  sounds, Demo timer, Target-highlight crosshair, Automap extended colors
+  (exit lines).
 
 ### Crispness menu — build out the full feature set
 
@@ -127,7 +130,7 @@ features, grouped by menu category:
 - [ ] Widescreen rendering (16:9 / 21:9 field of view)
 - [ ] Aspect-ratio correction (4:3 pixel-perfect)
 - [x] VSync toggle
-- [ ] Framerate limit
+- [x] Framerate limit
 - [ ] Brightmaps (self-lit texture/sprite pixels)
 - [ ] Smooth diminishing lighting
 - [ ] Colored HUD numbers (health / armor / ammo by value)
@@ -137,7 +140,7 @@ features, grouped by menu category:
 **Tactical**
 - [x] Health-colored crosshair
 - [x] Crosshair type / shape (cross / X / dot)
-- [ ] Crosshair target highlight
+- [x] Crosshair target highlight
 - [x] Configurable weapon bob
 - [ ] Weapon recoil pitch
 - [x] Centered weapon when firing
@@ -146,20 +149,21 @@ features, grouped by menu category:
 **Audio**
 - [x] More sound channels (8 / 16 / 32)
 - [ ] Full sound-effect pitch shifting
-- [ ] Mono / stereo SFX toggle
-- [ ] Play sounds in full length (no cutoffs)
+- [x] Mono SFX toggle
+- [x] Play sounds in full length (no cutoffs)
 
 **Navigational / Automap**
 - [x] Automap overlay mode
 - [x] Automap rotate mode
 - [x] Secret-sector highlighting on the automap
-- [ ] Automap extended colors (full recolor scheme)
+- [x] Automap extended colors (exit-line highlighting)
 - [x] "Secret revealed" notification
 - [x] Show player coordinates and level stats
 - [x] Show level time
 
 **Demos / misc**
-- [ ] Demo timer and progress bar
+- [x] Demo timer
+- [ ] Demo progress bar
 - [ ] Extended savegame slots
 
 ## Credits & License

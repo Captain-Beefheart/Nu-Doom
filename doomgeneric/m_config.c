@@ -1572,8 +1572,14 @@ static default_t extra_defaults_list[] =
     CONFIG_VARIABLE_INT(crispy_automapoverlay),
     CONFIG_VARIABLE_INT(crispy_automaprotate),
     CONFIG_VARIABLE_INT(crispy_automapsecrets),
+    CONFIG_VARIABLE_INT(crispy_automapcolors),
     CONFIG_VARIABLE_INT(crispy_secretmessage),
     CONFIG_VARIABLE_INT(crispy_vsync),
+    CONFIG_VARIABLE_INT(crispy_fpslimit),
+    CONFIG_VARIABLE_INT(crispy_monosfx),
+    CONFIG_VARIABLE_INT(crispy_fullsounds),
+    CONFIG_VARIABLE_INT(crispy_demotimer),
+    CONFIG_VARIABLE_INT(crispy_crosshairtarget),
 };
 
 static default_collection_t extra_defaults =

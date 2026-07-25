@@ -173,6 +173,19 @@ void DG_DrawFrame()
   SDL_RenderCopy(renderer, texture, NULL, NULL);
   SDL_RenderPresent(renderer);
 
+  // Crispness: cap the render framerate. Game logic stays at 35Hz (paced by
+  // I_GetTime), so this only throttles how often we present frames.
+  if (crispy.fpslimit > 0)
+  {
+    static uint32_t lastframe = 0;
+    uint32_t target = 1000u / (uint32_t) crispy.fpslimit;
+    uint32_t now = SDL_GetTicks();
+    uint32_t elapsed = now - lastframe;
+    if (elapsed < target)
+      SDL_Delay(target - elapsed);
+    lastframe = SDL_GetTicks();
+  }
+
   handleKeyInput();
 }
 

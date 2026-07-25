@@ -413,6 +413,18 @@ enum
     crisp3_end
 } crispness3_e;
 
+enum
+{
+    crisp4_automapcolors,
+    crisp4_fpslimit,
+    crisp4_monosfx,
+    crisp4_fullsounds,
+    crisp4_demotimer,
+    crisp4_crosshairtarget,
+    crisp4_nextpage,
+    crisp4_end
+} crispness4_e;
+
 // Boolean toggles.
 static void M_CrispUncapped(int choice)       { crispy.uncapped        = !crispy.uncapped; }
 static void M_CrispSmoothScaling(int choice)  { crispy.smoothscaling   = !crispy.smoothscaling; }
@@ -431,6 +443,11 @@ static void M_CrispSecretMessage(int choice)  { crispy.secretmessage   = !crispy
 static void M_CrispAutomapOverlay(int choice) { crispy.automapoverlay  = !crispy.automapoverlay; }
 static void M_CrispAutomapRotate(int choice)  { crispy.automaprotate   = !crispy.automaprotate; }
 static void M_CrispAutomapSecrets(int choice) { crispy.automapsecrets  = !crispy.automapsecrets; }
+static void M_CrispAutomapColors(int choice)  { crispy.automapcolors   = !crispy.automapcolors; }
+static void M_CrispMonoSFX(int choice)        { crispy.monosfx         = !crispy.monosfx; }
+static void M_CrispFullSounds(int choice)     { crispy.fullsounds      = !crispy.fullsounds; }
+static void M_CrispDemoTimer(int choice)      { crispy.demotimer       = !crispy.demotimer; }
+static void M_CrispCrosshairTarget(int choice){ crispy.crosshairtarget = !crispy.crosshairtarget; }
 
 // Multi-value settings.
 static void M_CrispGamma(int choice)
@@ -446,11 +463,20 @@ static void M_CrispSoundChannels(int choice)
     int n = (snd_channels < 16) ? 16 : (snd_channels < 32) ? 32 : 8;
     S_ReallocChannels(n);
 }
+static void M_CrispFpsLimit(int choice)
+{
+    static const int steps[6] = { 0, 35, 50, 60, 100, 200 };
+    int i, n = 0;
+    for (i = 0; i < 6; i++) { if (crispy.fpslimit == steps[i]) { n = i; break; } }
+    crispy.fpslimit = steps[(n + 1) % 6];
+}
 
 void M_DrawCrispness2(void);
 void M_DrawCrispness3(void);
+void M_DrawCrispness4(void);
 static void M_CrispnessPage2(int choice);
 static void M_CrispnessPage3(int choice);
+static void M_CrispnessPage4(int choice);
 static void M_CrispnessPage1(int choice);
 
 menuitem_t CrispnessMenu[]=
@@ -486,6 +512,17 @@ menuitem_t Crispness3Menu[]=
     {1,"",M_CrispAutomapOverlay,'a'},
     {1,"",M_CrispAutomapRotate,'r'},
     {1,"",M_CrispAutomapSecrets,'e'},
+    {1,"",M_CrispnessPage4,'n'}
+};
+
+menuitem_t Crispness4Menu[]=
+{
+    {1,"",M_CrispAutomapColors,'x'},
+    {1,"",M_CrispFpsLimit,'l'},
+    {1,"",M_CrispMonoSFX,'m'},
+    {1,"",M_CrispFullSounds,'u'},
+    {1,"",M_CrispDemoTimer,'d'},
+    {1,"",M_CrispCrosshairTarget,'t'},
     {1,"",M_CrispnessPage1,'n'}
 };
 
@@ -519,8 +556,19 @@ menu_t  Crispness3Def =
     0
 };
 
+menu_t  Crispness4Def =
+{
+    crisp4_end,
+    &Crispness3Def,	// back returns to page 3
+    Crispness4Menu,
+    M_DrawCrispness4,
+    48,48,
+    0
+};
+
 static void M_CrispnessPage2(int choice) { M_SetupNextMenu(&Crispness2Def); }
 static void M_CrispnessPage3(int choice) { M_SetupNextMenu(&Crispness3Def); }
+static void M_CrispnessPage4(int choice) { M_SetupNextMenu(&Crispness4Def); }
 static void M_CrispnessPage1(int choice) { M_SetupNextMenu(&CrispnessDef); }
 
 //
@@ -1201,7 +1249,7 @@ void M_DrawCrispness(void)
 {
     char buf[16];
 
-    M_WriteText(CrispnessDef.x, CrispnessDef.y - 20, "CRISPNESS  1/3");
+    M_WriteText(CrispnessDef.x, CrispnessDef.y - 20, "CRISPNESS  1/4");
 
     M_DrawCrispnessItem(crisp_uncapped,      "Uncapped framerate",   crispy.uncapped);
     M_DrawCrispnessItem(crisp_smoothscaling, "Smooth pixel scaling", crispy.smoothscaling);
@@ -1217,7 +1265,7 @@ void M_DrawCrispness(void)
 
 void M_DrawCrispness2(void)
 {
-    M_WriteText(Crispness2Def.x, Crispness2Def.y - 20, "CRISPNESS  2/3");
+    M_WriteText(Crispness2Def.x, Crispness2Def.y - 20, "CRISPNESS  2/4");
 
     M_DrawCrispnessItem(crisp2_centerweapon,   "Center weapon",     crispy.centerweapon);
     M_DrawCrispnessStr (crisp2_weaponbob,      "Weapon bob",        crispBob[crispy.weaponbob % 5]);
@@ -1231,7 +1279,7 @@ void M_DrawCrispness2(void)
 
 void M_DrawCrispness3(void)
 {
-    M_WriteText(Crispness3Def.x, Crispness3Def.y - 20, "CRISPNESS  3/3");
+    M_WriteText(Crispness3Def.x, Crispness3Def.y - 20, "CRISPNESS  3/4");
 
     M_DrawCrispnessItem(crisp3_showcoords,     "Show coordinates",  crispy.showcoords);
     M_DrawCrispnessItem(crisp3_showstats,      "Show level stats",  crispy.showstats);
@@ -1240,7 +1288,24 @@ void M_DrawCrispness3(void)
     M_DrawCrispnessItem(crisp3_automapoverlay, "Automap overlay",   crispy.automapoverlay);
     M_DrawCrispnessItem(crisp3_automaprotate,  "Automap rotate",    crispy.automaprotate);
     M_DrawCrispnessItem(crisp3_automapsecrets, "Automap secrets",   crispy.automapsecrets);
-    M_DrawCrispnessNav (crisp3_nextpage,       "< First page");
+    M_DrawCrispnessNav (crisp3_nextpage,       "Next page >");
+}
+
+void M_DrawCrispness4(void)
+{
+    char buf[16];
+
+    M_WriteText(Crispness4Def.x, Crispness4Def.y - 20, "CRISPNESS  4/4");
+
+    M_DrawCrispnessItem(crisp4_automapcolors,   "Automap ext. colors", crispy.automapcolors);
+    if (crispy.fpslimit > 0)
+        snprintf(buf, sizeof(buf), "%d", crispy.fpslimit);
+    M_DrawCrispnessStr (crisp4_fpslimit,        "Framerate limit",     crispy.fpslimit ? buf : "Off");
+    M_DrawCrispnessItem(crisp4_monosfx,         "Mono SFX",            crispy.monosfx);
+    M_DrawCrispnessItem(crisp4_fullsounds,      "Full-length sounds",  crispy.fullsounds);
+    M_DrawCrispnessItem(crisp4_demotimer,       "Demo timer",          crispy.demotimer);
+    M_DrawCrispnessItem(crisp4_crosshairtarget, "Target crosshair",    crispy.crosshairtarget);
+    M_DrawCrispnessNav (crisp4_nextpage,        "< First page");
 }
 
 void M_Crispness(int choice)

@@ -42,8 +42,14 @@ typedef struct
     int automapoverlay; // draw the automap over the game view
     int automaprotate;  // rotate the automap to the player's facing
     int automapsecrets; // highlight unfound secret sectors on the automap
+    int automapcolors;  // extended automap colors (highlight exit lines)
     int secretmessage;  // print a message when a secret is revealed
     int vsync;          // vertical sync on the display
+    int fpslimit;       // render framerate cap: 0 = off, else target fps
+    int monosfx;        // force mono (centered) sound effects
+    int fullsounds;     // let sound effects play in full (no cutoffs)
+    int demotimer;      // show a demo-playback timer
+    int crosshairtarget;// highlight the crosshair when aiming at a target
 } crispy_t;
 
 // The single global crispness settings block.
@@ -58,6 +64,7 @@ void Crispy_DrawCrosshair(void);  // crispy.crosshair (+ crispy.crosshairhealth)
 void Crispy_DrawFPS(void);        // crispy.showfps
 void Crispy_DrawCoords(void);     // crispy.showcoords
 void Crispy_DrawStats(void);      // crispy.showstats (+ crispy.showleveltime)
+void Crispy_DrawDemoTimer(void);  // crispy.demotimer (during demo playback)
 
 // Fixed-point bob multiplier (FRACUNIT = full) from crispy.weaponbob; used to
 // scale the render-only view/weapon bob without touching the playsim.

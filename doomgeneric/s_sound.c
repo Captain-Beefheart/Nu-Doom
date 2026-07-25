@@ -25,6 +25,7 @@
 #include "deh_str.h"
 
 #include "doomstat.h"
+#include "crispy.h"
 #include "doomtype.h"
 
 #include "sounds.h"
@@ -304,7 +305,9 @@ static int S_GetChannel(mobj_t *origin, sfxinfo_t *sfxinfo)
         {
             break;
         }
-        else if (origin && channels[cnum].origin == origin)
+        // Crispness: full-length playback leaves a same-origin sound running
+        // and looks for a free channel instead of cutting it off.
+        else if (origin && channels[cnum].origin == origin && !crispy.fullsounds)
         {
             S_StopChannel(cnum);
             break;
@@ -481,8 +484,17 @@ void S_StartSound(void *origin_p, int sfx_id)
         sep = NORM_SEP;
     }
 
-    // kill old sound
-    S_StopSound(origin);
+    // Crispness: force centered (mono) stereo separation.
+    if (crispy.monosfx)
+    {
+        sep = NORM_SEP;
+    }
+
+    // kill old sound (unless full-length playback keeps it going)
+    if (!crispy.fullsounds)
+    {
+        S_StopSound(origin);
+    }
 
     // try to find a channel
     cnum = S_GetChannel(origin, sfx);

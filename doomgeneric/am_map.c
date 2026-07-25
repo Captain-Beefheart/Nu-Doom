@@ -80,6 +80,8 @@
 #define SECRETWALLCOLORS WALLCOLORS
 // Crispness: bright green used to highlight unfound secret sectors.
 #define SECRETSECTORCOLORS (112)
+// Crispness: bright blue used to highlight level-exit lines (extended colors).
+#define EXITCOLORS (200)
 #define SECRETWALLRANGE WALLRANGE
 #define GRIDCOLORS	(GRAYS + GRAYSRANGE/2)
 #define GRIDRANGE	0
@@ -1180,6 +1182,14 @@ void AM_drawWalls(void)
 		 (lines[i].backsector  && lines[i].backsector->special  == 9)))
 	    {
 		AM_drawMline(&l, SECRETSECTORCOLORS);
+		continue;
+	    }
+	    // Crispness: extended colors — highlight level-exit lines.
+	    if (crispy.automapcolors &&
+		(lines[i].special == 11 || lines[i].special == 51 ||
+		 lines[i].special == 52 || lines[i].special == 124))
+	    {
+		AM_drawMline(&l, EXITCOLORS);
 		continue;
 	    }
 	    if (!lines[i].backsector)
