@@ -220,6 +220,11 @@ void D_Display (void)
 			redrawsbar = true;
 		if (inhelpscreensstate && !inhelpscreens)
 			redrawsbar = true;              // just put away the help screen
+		// A menu can draw text over the status-bar area (e.g. the tall
+		// Options menu's "Crispness" entry). Force the bar to repaint while a
+		// menu is open, and on the frame it closes, so nothing is left behind.
+		if (menuactive || menuactivestate)
+			redrawsbar = true;
 		ST_Drawer (viewheight == 200, redrawsbar );
 		fullscreen = viewheight == 200;
 		break;
