@@ -168,7 +168,7 @@ features, grouped by menu category:
 
 **Audio**
 - [x] More sound channels (8 / 16 / 32)
-- [ ] Full sound-effect pitch shifting
+- [x] Full sound-effect pitch shifting
 - [x] Mono SFX toggle
 - [x] Play sounds in full length (no cutoffs)
 

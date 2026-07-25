@@ -55,7 +55,12 @@ typedef struct
     int recoilpitch;    // kick the view up briefly when firing
     int demobar;        // show a demo-playback progress bar
     int aspectratio;    // present the image at a corrected 4:3 aspect ratio
+    int sfxpitch;       // randomize sound-effect pitch for variety
 } crispy_t;
+
+// Current sound pitch (128 = normal), set per-play by S_StartSound and read by
+// the SDL sound backend. Uses a non-playsim RNG so demos stay deterministic.
+extern int crispy_sfx_pitch;
 
 // The single global crispness settings block.
 extern crispy_t crispy;

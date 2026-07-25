@@ -433,6 +433,7 @@ enum
     crisp5_recoilpitch,
     crisp5_demobar,
     crisp5_aspectratio,
+    crisp5_sfxpitch,
     crisp5_nextpage,
     crisp5_end
 } crispness5_e;
@@ -471,6 +472,7 @@ static void M_CrispMouselook(int choice)
 static void M_CrispRecoilPitch(int choice)    { crispy.recoilpitch    = !crispy.recoilpitch; }
 static void M_CrispDemoBar(int choice)        { crispy.demobar        = !crispy.demobar; }
 static void M_CrispAspectRatio(int choice)    { crispy.aspectratio    = !crispy.aspectratio; }
+static void M_CrispSfxPitch(int choice)       { crispy.sfxpitch       = !crispy.sfxpitch; }
 
 // Multi-value settings.
 static void M_CrispGamma(int choice)
@@ -558,6 +560,7 @@ menuitem_t Crispness5Menu[]=
     {1,"",M_CrispRecoilPitch,'r'},
     {1,"",M_CrispDemoBar,'d'},
     {1,"",M_CrispAspectRatio,'a'},
+    {1,"",M_CrispSfxPitch,'p'},
     {1,"",M_CrispnessPage1,'n'}
 };
 
@@ -1372,6 +1375,7 @@ void M_DrawCrispness5(void)
     M_DrawCrispnessItem(crisp5_recoilpitch, "Weapon recoil",    crispy.recoilpitch);
     M_DrawCrispnessItem(crisp5_demobar,     "Demo progress bar",crispy.demobar);
     M_DrawCrispnessItem(crisp5_aspectratio, "Aspect ratio 4:3", crispy.aspectratio);
+    M_DrawCrispnessItem(crisp5_sfxpitch,    "SFX pitch shift",  crispy.sfxpitch);
     M_DrawCrispnessNav (crisp5_nextpage,    "< First page");
 }
 

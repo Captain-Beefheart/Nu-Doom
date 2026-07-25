@@ -32,6 +32,9 @@ extern void M_WriteText(int x, int y, char *string);
 // All settings default to 0 (off), matching vanilla behaviour.
 crispy_t crispy = { 0 };
 
+// Per-play SFX pitch (128 = normal); set by S_StartSound, read by i_sdlsound.c.
+int crispy_sfx_pitch = 128;
+
 // Colored-blood translation tables: identity except the red blood gradient
 // (palette 0xB0-0xBF) remapped to blue / green.
 byte crispy_bloodtrans_blue[256];
@@ -83,6 +86,7 @@ void M_BindCrispnessVariables(void)
     M_BindVariable("crispy_recoilpitch",    &crispy.recoilpitch);
     M_BindVariable("crispy_demobar",        &crispy.demobar);
     M_BindVariable("crispy_aspectratio",    &crispy.aspectratio);
+    M_BindVariable("crispy_sfxpitch",       &crispy.sfxpitch);
 
     // Weapon bob defaults to full (4) so gameplay is unchanged out of the box.
     crispy.weaponbob = 4;

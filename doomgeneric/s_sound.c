@@ -515,8 +515,12 @@ void S_StartSound(void *origin_p, int sfx_id)
         sfx->lumpnum = I_GetSfxLumpNum(sfx);
     }
 
+    // Crispness: randomize the pitch a little for variety. rand() (not the
+    // playsim RNG) keeps demos deterministic; pitch is presentation-only.
+    crispy_sfx_pitch = crispy.sfxpitch ? 128 + (rand() % 33) - 16 : 128;
+
     channels[cnum].handle = I_StartSound(sfx, cnum, volume, sep);
-}        
+}
 
 //
 // Stop and resume music, during game PAUSE.

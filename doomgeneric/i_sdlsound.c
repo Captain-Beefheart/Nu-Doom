@@ -41,6 +41,7 @@
 #include "z_zone.h"
 
 #include "doomtype.h"
+#include "crispy.h"
 
 #define LOW_PASS_FILTER 1
 //#define DEBUG_DUMP_WAVS
@@ -61,6 +62,10 @@ static boolean setpanning_workaround = false;
 static boolean sound_initialized = false;
 
 static sfxinfo_t *channels_playing[NUM_CHANNELS];
+
+// Crispness SFX pitch: per-channel resampled copies of the played chunk.
+static byte      *pitch_buf[NUM_CHANNELS];
+static Mix_Chunk  pitch_chunk[NUM_CHANNELS];
 
 static int mixer_freq;
 static Uint16 mixer_format;
@@ -864,9 +869,46 @@ static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep)
 
     snd = sfxinfo->driver_data;
 
-    // play sound
+    // play sound (optionally pitch-shifted by resampling into a channel buffer)
+    if (crispy_sfx_pitch != 128 && snd->chunk.alen >= 4)
+    {
+        int pitch = crispy_sfx_pitch;
+        int in_frames = snd->chunk.alen / 4;                 // stereo 16-bit
+        int out_frames = (int)((long long) in_frames * 128 / pitch);
+        Sint16 *in = (Sint16 *) snd->chunk.abuf;
+        Sint16 *out;
 
-    Mix_PlayChannelTimed(channel, &snd->chunk, 0, -1);
+        if (out_frames < 1) out_frames = 1;
+
+        Mix_HaltChannel(channel);   // stop prior play before reusing the buffer
+        out = realloc(pitch_buf[channel], (size_t) out_frames * 4);
+
+        if (out != NULL)
+        {
+            int i, src;
+            pitch_buf[channel] = (byte *) out;
+            for (i = 0; i < out_frames; i++)
+            {
+                src = (int)((long long) i * pitch / 128);
+                if (src >= in_frames) src = in_frames - 1;
+                out[i*2]     = in[src*2];
+                out[i*2 + 1] = in[src*2 + 1];
+            }
+            pitch_chunk[channel].allocated = 0;
+            pitch_chunk[channel].abuf   = pitch_buf[channel];
+            pitch_chunk[channel].alen   = out_frames * 4;
+            pitch_chunk[channel].volume = MIX_MAX_VOLUME;
+            Mix_PlayChannelTimed(channel, &pitch_chunk[channel], 0, -1);
+        }
+        else
+        {
+            Mix_PlayChannelTimed(channel, &snd->chunk, 0, -1);
+        }
+    }
+    else
+    {
+        Mix_PlayChannelTimed(channel, &snd->chunk, 0, -1);
+    }
 
     channels_playing[channel] = sfxinfo;
 
