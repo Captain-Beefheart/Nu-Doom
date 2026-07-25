@@ -119,7 +119,11 @@ keep the DLLs from `setup_dist.sh` next to the executable.
   type (cross/X/dot), Show level time, Automap secret highlighting.
 - [x] Crispness menu (fourth page): Framerate limit, Mono SFX, Full-length
   sounds, Demo timer, Target-highlight crosshair, Automap extended colors
-  (exit lines).
+  (exit lines), Mouselook.
+- [x] Modern controls: WASD move/strafe by default, and a **Mouselook**
+  toggle (mouse turns left/right, mouse up/down tilts the view via y-shear;
+  the weapon stays anchored to the HUD). View-only free look — shots keep
+  vanilla auto-aim, so demos stay deterministic.
 
 ### Crispness menu — build out the full feature set
 

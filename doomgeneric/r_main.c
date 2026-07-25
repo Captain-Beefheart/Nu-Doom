@@ -844,6 +844,8 @@ void R_SaveOldView (player_t* player)
     oldviewangle = player->mo->angle;
 }
 
+extern int mlookpitch;   // Nu-Doom mouselook view pitch (g_game.c)
+
 void R_SetupFrame (player_t* player)
 {
     int		i;
@@ -923,6 +925,31 @@ void R_SetupFrame (player_t* player)
     else
 	fixedcolormap = 0;
 		
+    // Nu-Doom mouselook: shift the horizon (centery) by the view pitch and
+    // rebuild yslope so floors/ceilings project to the tilted center. With
+    // mouselook off (or pitch 0) this restores the vanilla centery, so demos
+    // and the timedemo are unaffected.
+    {
+	int desired = viewheight/2 + (crispy.mouselook ? mlookpitch : 0);
+
+	// keep the sheared horizon comfortably on screen
+	if (desired < viewheight/8)                desired = viewheight/8;
+	if (desired > viewheight - viewheight/8)   desired = viewheight - viewheight/8;
+
+	if (desired != centery)
+	{
+	    fixed_t dy;
+	    centery = desired;
+	    centeryfrac = centery<<FRACBITS;
+	    for (i=0 ; i<viewheight ; i++)
+	    {
+		dy = ((i-centery)<<FRACBITS)+FRACUNIT/2;
+		dy = abs(dy);
+		yslope[i] = FixedDiv ( (viewwidth<<detailshift)/2*FRACUNIT, dy);
+	    }
+	}
+    }
+
     framecount++;
     validcount++;
 }

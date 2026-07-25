@@ -50,6 +50,7 @@ typedef struct
     int fullsounds;     // let sound effects play in full (no cutoffs)
     int demotimer;      // show a demo-playback timer
     int crosshairtarget;// highlight the crosshair when aiming at a target
+    int mouselook;      // mouse Y tilts the view up/down (y-shear freelook)
 } crispy_t;
 
 // The single global crispness settings block.

@@ -783,8 +783,21 @@ void R_DrawPSprite (pspdef_t* psp)
 	// local light
 	vis->colormap = spritelights[MAXLIGHTSCALE-1];
     }
-	
-    R_DrawVisSprite (vis, vis->x1, vis->x2);
+
+    // Nu-Doom: the weapon sprite is anchored to the HUD, so draw it at the
+    // un-pitched screen center — otherwise mouselook's y-shear (which moves
+    // centeryfrac) floats it up/down away from the bottom of the screen.
+    {
+	int     saved_centery     = centery;
+	fixed_t saved_centeryfrac = centeryfrac;
+	centery     = viewheight / 2;
+	centeryfrac = centery << FRACBITS;
+
+	R_DrawVisSprite (vis, vis->x1, vis->x2);
+
+	centery     = saved_centery;
+	centeryfrac = saved_centeryfrac;
+    }
 }
 
 

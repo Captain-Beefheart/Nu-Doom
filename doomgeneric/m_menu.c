@@ -421,6 +421,7 @@ enum
     crisp4_fullsounds,
     crisp4_demotimer,
     crisp4_crosshairtarget,
+    crisp4_mouselook,
     crisp4_nextpage,
     crisp4_end
 } crispness4_e;
@@ -448,6 +449,13 @@ static void M_CrispMonoSFX(int choice)        { crispy.monosfx         = !crispy
 static void M_CrispFullSounds(int choice)     { crispy.fullsounds      = !crispy.fullsounds; }
 static void M_CrispDemoTimer(int choice)      { crispy.demotimer       = !crispy.demotimer; }
 static void M_CrispCrosshairTarget(int choice){ crispy.crosshairtarget = !crispy.crosshairtarget; }
+static void M_CrispMouselook(int choice)
+{
+    extern int mlookpitch;
+    crispy.mouselook = !crispy.mouselook;
+    if (!crispy.mouselook)
+	mlookpitch = 0;   // recenter the view when turning mouselook off
+}
 
 // Multi-value settings.
 static void M_CrispGamma(int choice)
@@ -523,6 +531,7 @@ menuitem_t Crispness4Menu[]=
     {1,"",M_CrispFullSounds,'u'},
     {1,"",M_CrispDemoTimer,'d'},
     {1,"",M_CrispCrosshairTarget,'t'},
+    {1,"",M_CrispMouselook,'k'},
     {1,"",M_CrispnessPage1,'n'}
 };
 
@@ -1305,6 +1314,7 @@ void M_DrawCrispness4(void)
     M_DrawCrispnessItem(crisp4_fullsounds,      "Full-length sounds",  crispy.fullsounds);
     M_DrawCrispnessItem(crisp4_demotimer,       "Demo timer",          crispy.demotimer);
     M_DrawCrispnessItem(crisp4_crosshairtarget, "Target crosshair",    crispy.crosshairtarget);
+    M_DrawCrispnessItem(crisp4_mouselook,       "Mouselook",           crispy.mouselook);
     M_DrawCrispnessNav (crisp4_nextpage,        "< First page");
 }
 

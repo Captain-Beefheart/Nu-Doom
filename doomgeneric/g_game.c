@@ -24,6 +24,7 @@
 #include "doomdef.h" 
 #include "doomkeys.h"
 #include "doomstat.h"
+#include "crispy.h"
 
 #include "deh_main.h"
 #include "deh_misc.h"
@@ -201,9 +202,15 @@ static int      turnheld;		// for accelerative turning
 static boolean  mousearray[MAX_MOUSE_BUTTONS + 1];
 static boolean *mousebuttons = &mousearray[1];  // allow [-1]
 
-// mouse values are used once 
+// mouse values are used once
 int             mousex;
-int             mousey;         
+int             mousey;
+
+// Nu-Doom mouselook: accumulated view pitch in screen rows (render-only, not
+// part of the ticcmd, so demo playback stays deterministic). Clamped so the
+// sheared horizon stays on screen.
+int             mlookpitch = 0;
+#define MLOOKPITCH_MAX 100
 
 static int      dclicktime;
 static boolean  dclickstate;
@@ -534,12 +541,20 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         } 
     }
 
-    forward += mousey; 
+    // Nu-Doom mouselook: mouse Y tilts the view instead of walking forward.
+    if (crispy.mouselook)
+    {
+	mlookpitch += mousey;
+	if (mlookpitch >  MLOOKPITCH_MAX) mlookpitch =  MLOOKPITCH_MAX;
+	if (mlookpitch < -MLOOKPITCH_MAX) mlookpitch = -MLOOKPITCH_MAX;
+    }
+    else
+	forward += mousey;
 
-    if (strafe) 
-	side += mousex*2; 
-    else 
-	cmd->angleturn -= mousex*0x8; 
+    if (strafe)
+	side += mousex*2;
+    else
+	cmd->angleturn -= mousex*0x8;
 
     if (mousex == 0)
     {

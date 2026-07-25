@@ -78,6 +78,7 @@ void M_BindCrispnessVariables(void)
     M_BindVariable("crispy_fullsounds",     &crispy.fullsounds);
     M_BindVariable("crispy_demotimer",      &crispy.demotimer);
     M_BindVariable("crispy_crosshairtarget",&crispy.crosshairtarget);
+    M_BindVariable("crispy_mouselook",      &crispy.mouselook);
 
     // Weapon bob defaults to full (4) so gameplay is unchanged out of the box.
     crispy.weaponbob = 4;
