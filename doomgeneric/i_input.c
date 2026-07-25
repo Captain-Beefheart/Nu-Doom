@@ -324,15 +324,23 @@ void I_GetEvent(void)
     }
 
 
-                /*
-            case SDL_MOUSEMOTION:
-                event.type = ev_mouse;
-                event.data1 = mouse_button_state;
-                event.data2 = AccelerateMouse(sdlevent.motion.xrel);
-                event.data3 = -AccelerateMouse(sdlevent.motion.yrel);
-                D_PostEvent(&event);
-                break;
-                */
+    // Combine this frame's accumulated mouse motion + buttons into a single
+    // ev_mouse (Doom convention: data2 = x delta, data3 = forward = -y delta).
+    {
+        static int lastbuttons = 0;
+        int buttons, dx, dy;
+
+        if (DG_GetMouse(&buttons, &dx, &dy)
+            && (dx != 0 || dy != 0 || buttons != lastbuttons))
+        {
+            event.type = ev_mouse;
+            event.data1 = buttons;
+            event.data2 = dx;
+            event.data3 = -dy;
+            D_PostEvent(&event);
+            lastbuttons = buttons;
+        }
+    }
 }
 
 void I_InitInput(void)

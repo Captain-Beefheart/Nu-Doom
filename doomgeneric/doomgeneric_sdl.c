@@ -4,6 +4,7 @@
 #include "m_argv.h"
 #include "doomgeneric.h"
 #include "crispy.h"
+#include "doomstat.h"   // gamestate / paused for mouse-grab decisions
 
 #include <stdio.h>
 #include <unistd.h>
@@ -20,6 +21,11 @@ SDL_Texture* texture;
 static unsigned short s_KeyQueue[KEYQUEUE_SIZE];
 static unsigned int s_KeyQueueWriteIndex = 0;
 static unsigned int s_KeyQueueReadIndex = 0;
+
+// Mouse: relative (grabbed) mode is used so the pointer is captured to the
+// window and we get raw motion deltas to drive turning / mouselook.
+static int s_MouseGrabbed = 0;
+static int s_WindowFocused = 1;
 
 static unsigned char convertToDoomKey(unsigned int key){
   switch (key)
@@ -111,6 +117,22 @@ static void addKeyToQueue(int pressed, unsigned int keyCode){
   s_KeyQueueWriteIndex++;
   s_KeyQueueWriteIndex %= KEYQUEUE_SIZE;
 }
+// The mouse is grabbed only while actually playing a level with no menu open,
+// so the pointer is free at the title screen, in menus, and while paused.
+static void UpdateMouseGrab(void)
+{
+  extern boolean menuactive;   // m_menu.c
+  int want = s_WindowFocused && !menuactive && !paused
+             && gamestate == GS_LEVEL;
+
+  if (want != s_MouseGrabbed)
+  {
+    SDL_SetRelativeMouseMode(want ? SDL_TRUE : SDL_FALSE);
+    SDL_GetRelativeMouseState(NULL, NULL);   // flush any pending delta
+    s_MouseGrabbed = want;
+  }
+}
+
 static void handleKeyInput(){
   SDL_Event e;
   while (SDL_PollEvent(&e)){
@@ -127,8 +149,38 @@ static void handleKeyInput(){
       //KeySym sym = XKeycodeToKeysym(s_Display, e.xkey.keycode, 0);
       //printf("KeyRelease:%d sym:%d\n", e.xkey.keycode, sym);
       addKeyToQueue(0, e.key.keysym.sym);
+    } else if (e.type == SDL_WINDOWEVENT) {
+      if (e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+        s_WindowFocused = 1;
+      else if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+        s_WindowFocused = 0;
     }
   }
+
+  UpdateMouseGrab();
+}
+
+// Read the accumulated mouse motion and button state for this frame. Returns
+// 1 when the mouse is grabbed (values valid), 0 otherwise (all zeroed). Doom
+// button bits: 0=left(fire), 1=right, 2=middle.
+int DG_GetMouse(int* buttons, int* dx, int* dy)
+{
+  int x, y;
+  Uint32 state = SDL_GetRelativeMouseState(&x, &y);   // also flushes the delta
+
+  if (!s_MouseGrabbed)
+  {
+    *buttons = 0; *dx = 0; *dy = 0;
+    return 0;
+  }
+
+  *buttons = 0;
+  if (state & SDL_BUTTON(SDL_BUTTON_LEFT))   *buttons |= 1;
+  if (state & SDL_BUTTON(SDL_BUTTON_RIGHT))  *buttons |= 2;
+  if (state & SDL_BUTTON(SDL_BUTTON_MIDDLE)) *buttons |= 4;
+  *dx = x;
+  *dy = y;
+  return 1;
 }
 
 
