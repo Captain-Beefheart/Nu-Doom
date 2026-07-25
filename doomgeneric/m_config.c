@@ -1580,6 +1580,7 @@ static default_t extra_defaults_list[] =
     CONFIG_VARIABLE_INT(crispy_fullsounds),
     CONFIG_VARIABLE_INT(crispy_demotimer),
     CONFIG_VARIABLE_INT(crispy_crosshairtarget),
+    CONFIG_VARIABLE_INT(crispy_mousecontrol),
     CONFIG_VARIABLE_INT(crispy_mouselook),
 };
 

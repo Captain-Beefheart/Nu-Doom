@@ -208,6 +208,57 @@ void V_DrawPatch(int x, int y, patch_t *patch)
 }
 
 //
+// V_DrawPatchBig
+// Like V_DrawPatch but draws each source pixel at 2x logical size, so the
+// small hu_font renders at roughly the height of the big menu word-patches.
+// Used for the Crispness menu so its text matches the other menus.
+//
+void V_DrawPatchBig(int x, int y, patch_t *patch)
+{
+    int count, col, w;
+    column_t *column;
+    byte *desttop, *dest, *source;
+    const int f = 2 << HIRES;   // 2x logical, then HIRES buffer scaling
+
+    y -= SHORT(patch->topoffset);
+    x -= SHORT(patch->leftoffset);
+
+    // Skip silently if the doubled glyph would fall outside the logical frame.
+    if (x < 0 || x + 2*SHORT(patch->width) > ORIGWIDTH
+     || y < 0 || y + 2*SHORT(patch->height) > ORIGHEIGHT)
+    {
+        return;
+    }
+
+    col = 0;
+    desttop = dest_screen + (y << HIRES) * SCREENWIDTH + (x << HIRES);
+    w = SHORT(patch->width);
+
+    for ( ; col<w ; x++, col++, desttop += f)
+    {
+        column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+
+        while (column->topdelta != 0xff)
+        {
+            int dx, dy;
+            source = (byte *)column + 3;
+            dest = desttop + (column->topdelta * f) * SCREENWIDTH;
+            count = column->length;
+
+            while (count--)
+            {
+                byte pix = *source++;
+                for (dy = 0; dy < f; dy++)
+                    for (dx = 0; dx < f; dx++)
+                        dest[dy*SCREENWIDTH + dx] = pix;
+                dest += SCREENWIDTH * f;
+            }
+            column = (column_t *)((byte *)column + column->length + 4);
+        }
+    }
+}
+
+//
 // V_DrawPatchFlipped
 // Masks a column based masked pic to the screen.
 // Flips horizontally, e.g. to mirror face.

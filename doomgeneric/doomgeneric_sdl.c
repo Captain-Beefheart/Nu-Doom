@@ -122,7 +122,7 @@ static void addKeyToQueue(int pressed, unsigned int keyCode){
 static void UpdateMouseGrab(void)
 {
   extern boolean menuactive;   // m_menu.c
-  int want = s_WindowFocused && !menuactive && !paused
+  int want = crispy.mousecontrol && s_WindowFocused && !menuactive && !paused
              && gamestate == GS_LEVEL;
 
   if (want != s_MouseGrabbed)
