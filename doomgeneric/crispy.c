@@ -81,6 +81,7 @@ void M_BindCrispnessVariables(void)
     M_BindVariable("crispy_mousecontrol",   &crispy.mousecontrol);
     M_BindVariable("crispy_mouselook",      &crispy.mouselook);
     M_BindVariable("crispy_recoilpitch",    &crispy.recoilpitch);
+    M_BindVariable("crispy_demobar",        &crispy.demobar);
 
     // Weapon bob defaults to full (4) so gameplay is unchanged out of the box.
     crispy.weaponbob = 4;
@@ -229,15 +230,37 @@ void Crispy_DrawStats(void)
 //
 void Crispy_DrawDemoTimer(void)
 {
-    int secs;
-    char buf[24];
-
-    if (!crispy.demotimer || !demoplayback || gamestate != GS_LEVEL)
+    if (!demoplayback || gamestate != GS_LEVEL)
         return;
 
-    secs = leveltime / TICRATE;
-    snprintf(buf, sizeof(buf), "DEMO %d:%02d", secs / 60, secs % 60);
-    M_WriteText(2, ORIGHEIGHT - 40, buf);
+    if (crispy.demotimer)
+    {
+        char buf[24];
+        int secs = leveltime / TICRATE;
+        snprintf(buf, sizeof(buf), "DEMO %d:%02d", secs / 60, secs % 60);
+        M_WriteText(2, ORIGHEIGHT - 40, buf);
+    }
+
+    // Progress bar across the top: bright portion = played, gray = remaining.
+    if (crispy.demobar)
+    {
+        extern byte *demobuffer, *demo_p, *demoend;
+        if (demoend > demobuffer)
+        {
+            int total = demoend - demobuffer;
+            int done  = demo_p - demobuffer;
+            int w = done * SCREENWIDTH / total;
+            byte *fb = I_VideoBuffer;
+            int x, y;
+
+            if (w < 0) w = 0;
+            if (w > SCREENWIDTH) w = SCREENWIDTH;
+
+            for (y = 0; y < (2 << HIRES); y++)
+                for (x = 0; x < SCREENWIDTH; x++)
+                    fb[y * SCREENWIDTH + x] = (x < w) ? 4 : 96;  // done / track
+        }
+    }
 }
 
 //

@@ -2170,8 +2170,11 @@ void G_DoPlayDemo (void)
     int             i, episode, map; 
     int demoversion;
 	 
-    gameaction = ga_nothing; 
-    demobuffer = demo_p = W_CacheLumpName (defdemoname, PU_STATIC); 
+    gameaction = ga_nothing;
+    demobuffer = demo_p = W_CacheLumpName (defdemoname, PU_STATIC);
+
+    // Nu-Doom: remember the demo's end so the progress bar knows the length.
+    demoend = demobuffer + W_LumpLength (W_GetNumForName (defdemoname));
 
     demoversion = *demo_p++;
 

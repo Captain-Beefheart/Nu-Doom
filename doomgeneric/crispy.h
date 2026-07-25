@@ -53,6 +53,7 @@ typedef struct
     int mousecontrol;   // 0 = keyboard only, 1 = keyboard + mouse control
     int mouselook;      // mouse Y tilts the view up/down (y-shear freelook)
     int recoilpitch;    // kick the view up briefly when firing
+    int demobar;        // show a demo-playback progress bar
 } crispy_t;
 
 // The single global crispness settings block.

@@ -431,6 +431,7 @@ enum
 enum
 {
     crisp5_recoilpitch,
+    crisp5_demobar,
     crisp5_nextpage,
     crisp5_end
 } crispness5_e;
@@ -467,6 +468,7 @@ static void M_CrispMouselook(int choice)
 	mlookpitch = 0;   // recenter the view when turning mouselook off
 }
 static void M_CrispRecoilPitch(int choice)    { crispy.recoilpitch    = !crispy.recoilpitch; }
+static void M_CrispDemoBar(int choice)        { crispy.demobar        = !crispy.demobar; }
 
 // Multi-value settings.
 static void M_CrispGamma(int choice)
@@ -552,6 +554,7 @@ menuitem_t Crispness4Menu[]=
 menuitem_t Crispness5Menu[]=
 {
     {1,"",M_CrispRecoilPitch,'r'},
+    {1,"",M_CrispDemoBar,'d'},
     {1,"",M_CrispnessPage1,'n'}
 };
 
@@ -1357,7 +1360,8 @@ void M_DrawCrispness5(void)
 {
     M_WriteText(Crispness5Def.x, Crispness5Def.y - 16, "CRISPNESS  5/5");
 
-    M_DrawCrispnessItem(crisp5_recoilpitch, "Weapon recoil", crispy.recoilpitch);
+    M_DrawCrispnessItem(crisp5_recoilpitch, "Weapon recoil",    crispy.recoilpitch);
+    M_DrawCrispnessItem(crisp5_demobar,     "Demo progress bar",crispy.demobar);
     M_DrawCrispnessNav (crisp5_nextpage,    "< First page");
 }
 
