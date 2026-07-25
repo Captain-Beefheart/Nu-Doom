@@ -184,7 +184,7 @@ features, grouped by menu category:
 **Demos / misc**
 - [x] Demo timer
 - [x] Demo progress bar
-- [ ] Extended savegame slots
+- [x] Extended savegame slots (8)
 
 ## Credits & License
 
