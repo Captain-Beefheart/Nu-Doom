@@ -50,6 +50,7 @@
 
 // Needs access to LFB.
 #include "v_video.h"
+#include "crispy.h"
 
 // State.
 #include "doomstat.h"
@@ -1008,7 +1009,14 @@ void ST_drawWidgets(boolean refresh)
     // used by w_frags widget
     st_fragson = deathmatch && st_statusbaron; 
 
+    // Crispness: tint the ready-ammo number by how much ammo is left.
+    {
+	ammotype_t at = weaponinfo[plyr->readyweapon].ammo;
+	if (at != am_noammo)
+	    dp_translation = Crispy_AmmoColor(plyr->ammo[at], plyr->maxammo[at]);
+    }
     STlib_updateNum(&w_ready, refresh);
+    dp_translation = NULL;
 
     for (i=0;i<4;i++)
     {
@@ -1016,8 +1024,12 @@ void ST_drawWidgets(boolean refresh)
 	STlib_updateNum(&w_maxammo[i], refresh);
     }
 
+    // Crispness: tint the health/armor percentages by value.
+    dp_translation = Crispy_HealthColor(plyr->health);
     STlib_updatePercent(&w_health, refresh);
+    dp_translation = Crispy_HealthColor(plyr->armorpoints);
     STlib_updatePercent(&w_armor, refresh);
+    dp_translation = NULL;
 
     STlib_updateBinIcon(&w_armsbg, refresh);
 

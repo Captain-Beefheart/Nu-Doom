@@ -56,7 +56,13 @@ typedef struct
     int demobar;        // show a demo-playback progress bar
     int aspectratio;    // present the image at a corrected 4:3 aspect ratio
     int sfxpitch;       // randomize sound-effect pitch for variety
+    int coloredhud;     // tint the status-bar numbers by their value
 } crispy_t;
+
+// Colored-HUD translation tables (built from PLAYPAL) and the value->table
+// selectors used by the status bar. Return NULL to leave the default red.
+byte *Crispy_HealthColor(int health);
+byte *Crispy_AmmoColor(int ammo, int maxammo);
 
 // Current sound pitch (128 = normal), set per-play by S_StartSound and read by
 // the SDL sound backend. Uses a non-playsim RNG so demos stay deterministic.

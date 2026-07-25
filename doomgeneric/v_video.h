@@ -56,6 +56,9 @@ void V_CopyRect(int srcx, int srcy, byte *source,
 
 void V_DrawPatch(int x, int y, patch_t *patch);
 void V_DrawPatchBig(int x, int y, patch_t *patch);
+
+// Nu-Doom: optional pixel-remap table honored by V_DrawPatch (NULL = none).
+extern byte *dp_translation;
 void V_DrawPatchFlipped(int x, int y, patch_t *patch);
 void V_DrawTLPatch(int x, int y, patch_t *patch);
 void V_DrawAltTLPatch(int x, int y, patch_t * patch);

@@ -24,6 +24,8 @@
 #include "m_fixed.h"
 #include "doomstat.h"
 #include "p_local.h"   // P_AimLineAttack + linetarget for the target crosshair
+#include "w_wad.h"     // PLAYPAL for the colored-HUD tint tables
+#include "z_zone.h"
 
 // State owned by the renderer / menu that the overlays need.
 extern int  viewwindowx, viewwindowy, viewwidth, viewheight;
@@ -52,6 +54,64 @@ static void Crispy_InitColoredBlood(void)
         crispy_bloodtrans_blue[0xB0 + i]  = (byte) (0xC0 + i);  // -> blue
         crispy_bloodtrans_green[0xB0 + i] = (byte) (0x70 + i);  // -> green
     }
+}
+
+// Colored HUD numbers: brightness-preserving recolor tables, built once from
+// the palette so they work whatever indices the status-bar font uses.
+static byte crispy_hud_green[256];
+static byte crispy_hud_gold[256];
+static boolean crispy_hud_tables_built = false;
+
+static void Crispy_BuildHUDColor(byte *table, int keep_r, int keep_g, int keep_b)
+{
+    byte *pal = W_CacheLumpName("PLAYPAL", PU_STATIC);
+    int i, j;
+
+    for (i = 0; i < 256; i++)
+    {
+        int lum = (pal[i*3+0]*77 + pal[i*3+1]*151 + pal[i*3+2]*28) >> 8;
+        int tr = keep_r ? lum : 0;
+        int tg = keep_g ? lum : 0;
+        int tb = keep_b ? lum : 0;
+        int best = 0, bestd = 1 << 30;
+
+        for (j = 0; j < 256; j++)
+        {
+            int dr = pal[j*3+0] - tr, dg = pal[j*3+1] - tg, db = pal[j*3+2] - tb;
+            int d = dr*dr + dg*dg + db*db;
+            if (d < bestd) { bestd = d; best = j; }
+        }
+        table[i] = (byte) best;
+    }
+}
+
+static void Crispy_EnsureHUDTables(void)
+{
+    if (crispy_hud_tables_built)
+        return;
+    Crispy_BuildHUDColor(crispy_hud_green, 0, 1, 0);   // green
+    Crispy_BuildHUDColor(crispy_hud_gold,  1, 1, 0);   // yellow / gold
+    crispy_hud_tables_built = true;
+}
+
+byte *Crispy_HealthColor(int health)
+{
+    if (!crispy.coloredhud)
+        return NULL;
+    Crispy_EnsureHUDTables();
+    if (health > 66) return crispy_hud_green;
+    if (health > 33) return crispy_hud_gold;
+    return NULL;   // low: leave the default red
+}
+
+byte *Crispy_AmmoColor(int ammo, int maxammo)
+{
+    if (!crispy.coloredhud || maxammo <= 0)
+        return NULL;
+    Crispy_EnsureHUDTables();
+    if (ammo * 4 >= maxammo)  return crispy_hud_green;   // >= 25%
+    if (ammo * 8 >= maxammo)  return crispy_hud_gold;    // 12.5-25%
+    return NULL;   // low
 }
 
 void M_BindCrispnessVariables(void)
@@ -87,6 +147,7 @@ void M_BindCrispnessVariables(void)
     M_BindVariable("crispy_demobar",        &crispy.demobar);
     M_BindVariable("crispy_aspectratio",    &crispy.aspectratio);
     M_BindVariable("crispy_sfxpitch",       &crispy.sfxpitch);
+    M_BindVariable("crispy_coloredhud",     &crispy.coloredhud);
 
     // Weapon bob defaults to full (4) so gameplay is unchanged out of the box.
     crispy.weaponbob = 4;

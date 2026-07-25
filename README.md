@@ -153,7 +153,7 @@ features, grouped by menu category:
 - [x] Framerate limit
 - [ ] Brightmaps (self-lit texture/sprite pixels)
 - [ ] Smooth diminishing lighting
-- [ ] Colored HUD numbers (health / armor / ammo by value)
+- [x] Colored HUD numbers (health / armor / ammo by value)
 - [ ] Extended "Crispy" fullscreen HUD layout
 - [x] Gamma / level brightness control
 

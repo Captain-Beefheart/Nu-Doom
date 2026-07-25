@@ -53,6 +53,10 @@ byte *tinttable = NULL;
 // villsa [STRIFE] Blending table used for Strife
 byte *xlatab = NULL;
 
+// Nu-Doom: when non-NULL, V_DrawPatch remaps each pixel through this 256-entry
+// table (used to tint the status-bar numbers). Callers set it, draw, clear it.
+byte *dp_translation = NULL;
+
 // The screen buffer that the v_video.c code draws to.
 
 static byte *dest_screen = NULL;
@@ -197,6 +201,8 @@ void V_DrawPatch(int x, int y, patch_t *patch)
             while (count--)
             {
                 byte pix = *source++;
+                if (dp_translation)
+                    pix = dp_translation[pix];
                 for (dy = 0; dy < f; dy++)
                     for (dx = 0; dx < f; dx++)
                         dest[dy*SCREENWIDTH + dx] = pix;
