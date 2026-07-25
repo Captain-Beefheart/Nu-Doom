@@ -222,7 +222,21 @@ void DG_DrawFrame()
       crispy.smoothscaling ? SDL_ScaleModeLinear : SDL_ScaleModeNearest);
 
   SDL_RenderClear(renderer);
-  SDL_RenderCopy(renderer, texture, NULL, NULL);
+  if (crispy.aspectratio)
+  {
+    // Present into the largest 4:3 rectangle centred in the window (letterbox),
+    // so the 320x200-derived image shows at its intended 4:3 aspect.
+    int ww = 0, wh = 0;
+    SDL_GetRendererOutputSize(renderer, &ww, &wh);
+    int tw = ww, th = ww * 3 / 4;
+    if (th > wh) { th = wh; tw = wh * 4 / 3; }
+    SDL_Rect dst = { (ww - tw) / 2, (wh - th) / 2, tw, th };
+    SDL_RenderCopy(renderer, texture, NULL, &dst);
+  }
+  else
+  {
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+  }
   SDL_RenderPresent(renderer);
 
   // Crispness: cap the render framerate. Game logic stays at 35Hz (paced by

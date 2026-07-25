@@ -148,7 +148,7 @@ features, grouped by menu category:
 
 **Rendering / Visual**
 - [ ] Widescreen rendering (16:9 / 21:9 field of view)
-- [ ] Aspect-ratio correction (4:3 pixel-perfect)
+- [x] Aspect-ratio correction (4:3 letterbox)
 - [x] VSync toggle
 - [x] Framerate limit
 - [ ] Brightmaps (self-lit texture/sprite pixels)

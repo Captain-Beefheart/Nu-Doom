@@ -54,6 +54,7 @@ typedef struct
     int mouselook;      // mouse Y tilts the view up/down (y-shear freelook)
     int recoilpitch;    // kick the view up briefly when firing
     int demobar;        // show a demo-playback progress bar
+    int aspectratio;    // present the image at a corrected 4:3 aspect ratio
 } crispy_t;
 
 // The single global crispness settings block.
