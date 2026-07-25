@@ -34,21 +34,23 @@ dynamically instead of crashing on complex maps:
   (SDL2_mixer, `Mix_OpenAudioDevice`), enabled with `-DFEATURE_SOUND`.
 
 ### Crispness menu & config
-A dedicated **Crispness** submenu (Options → Crispness) spanning **four pages**
+A dedicated **Crispness** submenu (Options → Crispness) spanning **five pages**
 of working toggles, all saved to **`crispy-doom.cfg`** (config persistence,
 which the base doomgeneric had disabled, is enabled here):
 
 - **Rendering / display:** Uncapped framerate (sub-tic interpolation of camera,
   sprites, and moving sectors), Smooth pixel scaling, VSync, Framerate limit,
-  Gamma correction, Translucency, Colored blood, Sound channels (8/16/32).
+  Gamma correction, 4:3 aspect-ratio correction, Brightmaps (self-lit screens
+  and lights), Translucency, Colored blood, Sound channels (8/16/32).
 - **Weapon & crosshair:** Centered weapon, Configurable weapon bob, Weapon
-  squat on landing, Crosshair with shape (cross/X/dot), health tint, and
-  target-highlight.
+  squat on landing, Weapon recoil pitch, Crosshair with shape (cross/X/dot),
+  health tint, and target-highlight.
 - **HUD:** Show FPS, coordinates, level stats, level time, demo timer,
-  "secret revealed" message.
+  Colored HUD numbers (by value), "secret revealed" message.
 - **Automap:** Overlay mode, rotate mode, secret-sector highlighting, extended
   (exit-line) colors.
-- **Audio:** Mono SFX, full-length sounds (no cut-offs).
+- **Audio:** Mono SFX, full-length sounds (no cut-offs), SFX pitch shifting.
+- **Demos / misc:** Demo progress bar, 8 savegame slots.
 
 ### Controls
 - **WASD** move/strafe by default (W/S forward-back, A/D strafe; arrow keys
