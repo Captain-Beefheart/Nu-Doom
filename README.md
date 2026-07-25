@@ -34,15 +34,29 @@ dynamically instead of crashing on complex maps:
   (SDL2_mixer, `Mix_OpenAudioDevice`), enabled with `-DFEATURE_SOUND`.
 
 ### Crispness menu & config
-- A dedicated **Crispness** submenu (Options → Crispness) with toggles saved to
-  **`crispy-doom.cfg`** (config persistence, which the base doomgeneric had
-  disabled, is enabled here).
-- Working toggles: **Crosshair**, **Show FPS**, **Translucency** (energy
-  projectiles), **Colored blood** (cacodemon → blue, baron/knight → green),
-  **Smooth pixel scaling** (linear filtering when the window is resized), and
-  **Uncapped framerate** (sub-tic interpolation of the camera, sprites, and
-  moving sectors, so all motion — including doors and lifts — is smooth above
-  35 fps).
+A dedicated **Crispness** submenu (Options → Crispness) spanning **four pages**
+with **22 working toggles**, all saved to **`crispy-doom.cfg`** (config
+persistence, which the base doomgeneric had disabled, is enabled here):
+
+- **Rendering / display:** Uncapped framerate (sub-tic interpolation of camera,
+  sprites, and moving sectors), Smooth pixel scaling, VSync, Framerate limit,
+  Gamma correction, Translucency, Colored blood, Sound channels (8/16/32).
+- **Weapon & crosshair:** Centered weapon, Configurable weapon bob, Weapon
+  squat on landing, Crosshair with shape (cross/X/dot), health tint, and
+  target-highlight.
+- **HUD:** Show FPS, coordinates, level stats, level time, demo timer,
+  "secret revealed" message.
+- **Automap:** Overlay mode, rotate mode, secret-sector highlighting, extended
+  (exit-line) colors.
+- **Audio:** Mono SFX, full-length sounds (no cut-offs).
+
+### Controls
+- **WASD** move/strafe by default (W/S forward-back, A/D strafe; arrow keys
+  still turn).
+- **Mouselook** toggle (Crispness page 4): the mouse turns you left/right and
+  tilts the view up/down via horizon y-shear, with the weapon kept anchored to
+  the HUD. Free look is view-only — shots keep vanilla auto-aim, so demo
+  playback stays bit-for-bit deterministic.
 
 ## Why doomgeneric?
 
