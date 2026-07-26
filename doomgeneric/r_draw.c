@@ -950,42 +950,43 @@ void R_FillBackScreen (void)
 
     V_UseBuffer(background_buffer);
 
-    patch = W_CacheLumpName(DEH_String("brdr_t"),PU_CACHE);
+    // V_DrawPatch takes 320x200 logical coordinates and scales each source
+    // pixel up by HIRES itself. viewwindowx/y, scaledviewwidth and viewheight
+    // are in hi-res buffer space, so hand V_DrawPatch the logical equivalents;
+    // passing the buffer-space values double-scales and writes past the
+    // background buffer (a crash at any non-fullscreen size). The border
+    // patches (brdr_*) are authored in the 8-pixel logical grid.
+    {
+    int lvx = viewwindowx     >> HIRES;
+    int lvy = viewwindowy     >> HIRES;
+    int lvw = scaledviewwidth >> HIRES;
+    int lvh = viewheight      >> HIRES;
 
-    for (x=0 ; x<scaledviewwidth ; x+=8)
-	V_DrawPatch(viewwindowx+x, viewwindowy-8, patch);
+    patch = W_CacheLumpName(DEH_String("brdr_t"),PU_CACHE);
+    for (x=0 ; x<lvw ; x+=8)
+	V_DrawPatch(lvx+x, lvy-8, patch);
     patch = W_CacheLumpName(DEH_String("brdr_b"),PU_CACHE);
 
-    for (x=0 ; x<scaledviewwidth ; x+=8)
-	V_DrawPatch(viewwindowx+x, viewwindowy+viewheight, patch);
+    for (x=0 ; x<lvw ; x+=8)
+	V_DrawPatch(lvx+x, lvy+lvh, patch);
     patch = W_CacheLumpName(DEH_String("brdr_l"),PU_CACHE);
 
-    for (y=0 ; y<viewheight ; y+=8)
-	V_DrawPatch(viewwindowx-8, viewwindowy+y, patch);
+    for (y=0 ; y<lvh ; y+=8)
+	V_DrawPatch(lvx-8, lvy+y, patch);
     patch = W_CacheLumpName(DEH_String("brdr_r"),PU_CACHE);
 
-    for (y=0 ; y<viewheight ; y+=8)
-	V_DrawPatch(viewwindowx+scaledviewwidth, viewwindowy+y, patch);
+    for (y=0 ; y<lvh ; y+=8)
+	V_DrawPatch(lvx+lvw, lvy+y, patch);
 
-    // Draw beveled edge. 
-    V_DrawPatch(viewwindowx-8,
-                viewwindowy-8,
-                W_CacheLumpName(DEH_String("brdr_tl"),PU_CACHE));
-    
-    V_DrawPatch(viewwindowx+scaledviewwidth,
-                viewwindowy-8,
-                W_CacheLumpName(DEH_String("brdr_tr"),PU_CACHE));
-    
-    V_DrawPatch(viewwindowx-8,
-                viewwindowy+viewheight,
-                W_CacheLumpName(DEH_String("brdr_bl"),PU_CACHE));
-    
-    V_DrawPatch(viewwindowx+scaledviewwidth,
-                viewwindowy+viewheight,
-                W_CacheLumpName(DEH_String("brdr_br"),PU_CACHE));
+    // Draw beveled edge.
+    V_DrawPatch(lvx-8,   lvy-8,   W_CacheLumpName(DEH_String("brdr_tl"),PU_CACHE));
+    V_DrawPatch(lvx+lvw, lvy-8,   W_CacheLumpName(DEH_String("brdr_tr"),PU_CACHE));
+    V_DrawPatch(lvx-8,   lvy+lvh, W_CacheLumpName(DEH_String("brdr_bl"),PU_CACHE));
+    V_DrawPatch(lvx+lvw, lvy+lvh, W_CacheLumpName(DEH_String("brdr_br"),PU_CACHE));
+    }
 
     V_RestoreBuffer();
-} 
+}
  
 
 //

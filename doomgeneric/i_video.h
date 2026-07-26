@@ -32,7 +32,9 @@
 // 640x400 for a sharp native image. The actual pixel buffer / render target
 // size is SCREENWIDTH x SCREENHEIGHT.
 
+#ifndef HIRES
 #define HIRES 1
+#endif
 
 #define SCREENWIDTH  (ORIGWIDTH  << HIRES)
 #define SCREENHEIGHT (ORIGHEIGHT << HIRES)

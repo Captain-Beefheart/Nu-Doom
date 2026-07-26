@@ -197,7 +197,13 @@ void D_Display (void)
     }
 
     // save the current screen if about to wipe
-    if (gamestate != wipegamestate)
+    //
+    // The -shotquit capture harness advances by counting I_FinishUpdate calls.
+    // The melt wipe runs a blocking loop that calls I_FinishUpdate once per melt
+    // step, so a low -shotquit value lands mid-melt and captures the transition
+    // (the old screen sliding over the new one) rather than a settled frame.
+    // Skip the wipe entirely when capturing so the shot is a real rendered view.
+    if (gamestate != wipegamestate && !M_CheckParm("-shotquit"))
 		{
 		wipe = true;
 		wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
@@ -216,7 +222,7 @@ void D_Display (void)
 			break;
 		if (automapactive && !crispy.automapoverlay)
 			AM_Drawer ();
-		if (wipe || (viewheight != 200 && fullscreen) )
+		if (wipe || (viewheight != SCREENHEIGHT && fullscreen) )
 			redrawsbar = true;
 		if (inhelpscreensstate && !inhelpscreens)
 			redrawsbar = true;              // just put away the help screen
@@ -225,8 +231,13 @@ void D_Display (void)
 		// menu is open, and on the frame it closes, so nothing is left behind.
 		if (menuactive || menuactivestate)
 			redrawsbar = true;
-		ST_Drawer (viewheight == 200, redrawsbar );
-		fullscreen = viewheight == 200;
+		// viewheight is in hi-res buffer space (SCREENHEIGHT at fullscreen),
+		// so the fullscreen test must compare against SCREENHEIGHT, not the
+		// old 320x200 literal 200 (which is never true at hi-res and left
+		// screenblocks 11 drawing the full status bar instead of the compact
+		// fullscreen HUD).
+		ST_Drawer (viewheight == SCREENHEIGHT, redrawsbar );
+		fullscreen = viewheight == SCREENHEIGHT;
 		break;
 
       case GS_INTERMISSION:
@@ -271,7 +282,10 @@ void D_Display (void)
     }
 
     // see if the border needs to be updated to the screen
-    if (gamestate == GS_LEVEL && !automapactive && scaledviewwidth != 320)
+    // (scaledviewwidth is hi-res buffer space; the view fills the screen when it
+    // equals SCREENWIDTH, not the old 320 literal — that miscounted screenblocks
+    // 5 as full and 11 as bordered).
+    if (gamestate == GS_LEVEL && !automapactive && scaledviewwidth != SCREENWIDTH)
     {
 		if (menuactive || menuactivestate || !viewactivestate)
 			borderdrawcount = 3;
