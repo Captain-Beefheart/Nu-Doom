@@ -1588,6 +1588,7 @@ static default_t extra_defaults_list[] =
     CONFIG_VARIABLE_INT(crispy_sfxpitch),
     CONFIG_VARIABLE_INT(crispy_coloredhud),
     CONFIG_VARIABLE_INT(crispy_brightmaps),
+    CONFIG_VARIABLE_INT(crispy_smoothlight),
 };
 
 static default_collection_t extra_defaults =

@@ -149,6 +149,7 @@ void M_BindCrispnessVariables(void)
     M_BindVariable("crispy_sfxpitch",       &crispy.sfxpitch);
     M_BindVariable("crispy_coloredhud",     &crispy.coloredhud);
     M_BindVariable("crispy_brightmaps",     &crispy.brightmaps);
+    M_BindVariable("crispy_smoothlight",    &crispy.smoothlight);
 
     // Weapon bob defaults to full (4) so gameplay is unchanged out of the box.
     crispy.weaponbob = 4;

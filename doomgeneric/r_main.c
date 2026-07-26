@@ -99,9 +99,13 @@ int			viewangletox[FINEANGLES/2];
 // from clipangle to -clipangle.
 angle_t			xtoviewangle[SCREENWIDTH+1];
 
-lighttable_t*		scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
+// [crispy] runtime light-level resolution: 16/4 = vanilla, 32/3 = smooth.
+int			LIGHTLEVELS = 16;
+int			LIGHTSEGSHIFT = 4;
+
+lighttable_t*		scalelight[LIGHTLEVELS_MAX][MAXLIGHTSCALE];
 lighttable_t*		scalelightfixed[MAXLIGHTSCALE];
-lighttable_t*		zlight[LIGHTLEVELS][MAXLIGHTZ];
+lighttable_t*		zlight[LIGHTLEVELS_MAX][MAXLIGHTZ];
 
 // bumped light from gun blasts
 int			extralight;			
@@ -765,6 +769,31 @@ void R_ExecuteSetViewSize (void)
 }
 
 
+//
+// R_SetSmoothLight
+// [crispy] Apply the smooth-lighting toggle: raise the light-level resolution
+// (16/shift-4 vanilla -> 32/shift-3) for a finer diminishing gradient, then
+// rebuild the light tables. Render-only; never touches the playsim, so demo
+// determinism is unaffected.
+//
+void R_SetSmoothLight (void)
+{
+    if (crispy.smoothlight)
+    {
+	LIGHTLEVELS = LIGHTLEVELS_MAX;	// 32
+	LIGHTSEGSHIFT = 3;		// 256 >> 3 == 32
+    }
+    else
+    {
+	LIGHTLEVELS = 16;
+	LIGHTSEGSHIFT = 4;		// 256 >> 4 == 16 (vanilla)
+    }
+
+    R_InitLightTables ();		// rebuild zlight now
+    setsizeneeded = true;		// rebuild scalelight on the next frame
+}
+
+
 
 //
 // R_Init
@@ -790,8 +819,9 @@ void R_Init (void)
     R_InitSkyMap ();
     R_InitTranslationTables ();
     R_InitTranMap ();		// Crispness: translucency tint map
+    R_SetSmoothLight ();	// Crispness: apply saved smooth-lighting setting
     printf (".");
-	
+
     framecount = 0;
 }
 

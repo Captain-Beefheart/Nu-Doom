@@ -61,18 +61,24 @@ extern int		loopcount;
 //
 
 // Lighting constants.
-// Now why not 32 levels here?
-#define LIGHTLEVELS	        16
-#define LIGHTSEGSHIFT	         4
+// [crispy] LIGHTLEVELS / LIGHTSEGSHIFT are now runtime variables so the
+// "smooth diminishing lighting" toggle can raise them (16/4 vanilla -> 32/3),
+// giving a finer light gradient. Tables are sized to LIGHTLEVELS_MAX.
+#define LIGHTLEVELS_MAX	        32
+extern int		LIGHTLEVELS;
+extern int		LIGHTSEGSHIFT;
 
 #define MAXLIGHTSCALE		48
 #define LIGHTSCALESHIFT		12
 #define MAXLIGHTZ	       128
 #define LIGHTZSHIFT		20
 
-extern lighttable_t*	scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
+extern lighttable_t*	scalelight[LIGHTLEVELS_MAX][MAXLIGHTSCALE];
 extern lighttable_t*	scalelightfixed[MAXLIGHTSCALE];
-extern lighttable_t*	zlight[LIGHTLEVELS][MAXLIGHTZ];
+extern lighttable_t*	zlight[LIGHTLEVELS_MAX][MAXLIGHTZ];
+
+// [crispy] apply the crispy.smoothlight setting and rebuild the light tables.
+void R_SetSmoothLight (void);
 
 extern int		extralight;
 extern lighttable_t*	fixedcolormap;

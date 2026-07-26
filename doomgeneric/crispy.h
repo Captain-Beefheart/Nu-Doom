@@ -58,6 +58,7 @@ typedef struct
     int sfxpitch;       // randomize sound-effect pitch for variety
     int coloredhud;     // tint the status-bar numbers by their value
     int brightmaps;     // draw self-lit texture pixels (screens/lights) full-bright
+    int smoothlight;    // finer light-diminishing gradient (32 levels vs 16)
 } crispy_t;
 
 // Colored-HUD translation tables (built from PLAYPAL) and the value->table

@@ -54,14 +54,15 @@ Boom/MBF/ZDoom), this targets vanilla-compatible and limit-removing mods;
 Boom/MBF/UMAPINFO and GZDoom (DECORATE/ZScript) mods are out of scope.
 
 ### Crispness menu & config
-A dedicated **Crispness** submenu (Options → Crispness) spanning **five pages**
+A dedicated **Crispness** submenu (Options → Crispness) spanning **six pages**
 of working toggles, all saved to **`crispy-doom.cfg`** (config persistence,
 which the base doomgeneric had disabled, is enabled here):
 
 - **Rendering / display:** Uncapped framerate (sub-tic interpolation of camera,
   sprites, and moving sectors), Smooth pixel scaling, VSync, Framerate limit,
   Gamma correction, 4:3 aspect-ratio correction, Brightmaps (self-lit screens
-  and lights), Translucency, Colored blood, Sound channels (8/16/32).
+  and lights), Smooth diminishing lighting, Translucency, Colored blood, Sound
+  channels (8/16/32).
 - **Weapon & crosshair:** Centered weapon, Configurable weapon bob, Weapon
   squat on landing, Weapon recoil pitch, Crosshair with shape (cross/X/dot),
   health tint, and target-highlight.
@@ -224,7 +225,7 @@ features, grouped by menu category:
 - [x] VSync toggle
 - [x] Framerate limit
 - [x] Brightmaps (self-lit texture pixels)
-- [ ] Smooth diminishing lighting
+- [x] Smooth diminishing lighting
 - [x] Colored HUD numbers (health / armor / ammo by value)
 - [ ] Extended "Crispy" fullscreen HUD layout
 - [x] Gamma / level brightness control

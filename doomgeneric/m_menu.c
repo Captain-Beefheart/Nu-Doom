@@ -440,6 +440,13 @@ enum
     crisp5_end
 } crispness5_e;
 
+enum
+{
+    crisp6_smoothlight,
+    crisp6_nextpage,
+    crisp6_end
+} crispness6_e;
+
 // Boolean toggles.
 static void M_CrispUncapped(int choice)       { crispy.uncapped        = !crispy.uncapped; }
 static void M_CrispSmoothScaling(int choice)  { crispy.smoothscaling   = !crispy.smoothscaling; }
@@ -477,6 +484,7 @@ static void M_CrispAspectRatio(int choice)    { crispy.aspectratio    = !crispy.
 static void M_CrispSfxPitch(int choice)       { crispy.sfxpitch       = !crispy.sfxpitch; }
 static void M_CrispColoredHUD(int choice)     { crispy.coloredhud     = !crispy.coloredhud; }
 static void M_CrispBrightmaps(int choice)     { crispy.brightmaps     = !crispy.brightmaps; }
+static void M_CrispSmoothLight(int choice)    { crispy.smoothlight    = !crispy.smoothlight; R_SetSmoothLight(); }
 
 // Multi-value settings.
 static void M_CrispGamma(int choice)
@@ -504,10 +512,12 @@ void M_DrawCrispness2(void);
 void M_DrawCrispness3(void);
 void M_DrawCrispness4(void);
 void M_DrawCrispness5(void);
+void M_DrawCrispness6(void);
 static void M_CrispnessPage2(int choice);
 static void M_CrispnessPage3(int choice);
 static void M_CrispnessPage4(int choice);
 static void M_CrispnessPage5(int choice);
+static void M_CrispnessPage6(int choice);
 static void M_CrispnessPage1(int choice);
 
 menuitem_t CrispnessMenu[]=
@@ -567,6 +577,12 @@ menuitem_t Crispness5Menu[]=
     {1,"",M_CrispSfxPitch,'p'},
     {1,"",M_CrispColoredHUD,'h'},
     {1,"",M_CrispBrightmaps,'b'},
+    {1,"",M_CrispnessPage6,'n'}
+};
+
+menuitem_t Crispness6Menu[]=
+{
+    {1,"",M_CrispSmoothLight,'s'},
     {1,"",M_CrispnessPage1,'n'}
 };
 
@@ -620,10 +636,21 @@ menu_t  Crispness5Def =
     0
 };
 
+menu_t  Crispness6Def =
+{
+    crisp6_end,
+    &Crispness5Def,	// back returns to page 5
+    Crispness6Menu,
+    M_DrawCrispness6,
+    48,32,
+    0
+};
+
 static void M_CrispnessPage2(int choice) { M_SetupNextMenu(&Crispness2Def); }
 static void M_CrispnessPage3(int choice) { M_SetupNextMenu(&Crispness3Def); }
 static void M_CrispnessPage4(int choice) { M_SetupNextMenu(&Crispness4Def); }
 static void M_CrispnessPage5(int choice) { M_SetupNextMenu(&Crispness5Def); }
+static void M_CrispnessPage6(int choice) { M_SetupNextMenu(&Crispness6Def); }
 static void M_CrispnessPage1(int choice) { M_SetupNextMenu(&CrispnessDef); }
 
 //
@@ -1312,7 +1339,7 @@ void M_DrawCrispness(void)
 {
     char buf[16];
 
-    M_WriteText(CrispnessDef.x, CrispnessDef.y - 16, "CRISPNESS  1/5");
+    M_WriteText(CrispnessDef.x, CrispnessDef.y - 16, "CRISPNESS  1/6");
 
     M_DrawCrispnessItem(crisp_uncapped,      "Uncapped framerate",   crispy.uncapped);
     M_DrawCrispnessItem(crisp_smoothscaling, "Smooth pixel scaling", crispy.smoothscaling);
@@ -1328,7 +1355,7 @@ void M_DrawCrispness(void)
 
 void M_DrawCrispness2(void)
 {
-    M_WriteText(Crispness2Def.x, Crispness2Def.y - 16, "CRISPNESS  2/5");
+    M_WriteText(Crispness2Def.x, Crispness2Def.y - 16, "CRISPNESS  2/6");
 
     M_DrawCrispnessItem(crisp2_centerweapon,   "Center weapon",    crispy.centerweapon);
     M_DrawCrispnessStr (crisp2_weaponbob,      "Weapon bob",       crispBob[crispy.weaponbob % 5]);
@@ -1342,7 +1369,7 @@ void M_DrawCrispness2(void)
 
 void M_DrawCrispness3(void)
 {
-    M_WriteText(Crispness3Def.x, Crispness3Def.y - 16, "CRISPNESS  3/5");
+    M_WriteText(Crispness3Def.x, Crispness3Def.y - 16, "CRISPNESS  3/6");
 
     M_DrawCrispnessItem(crisp3_showcoords,     "Show coordinates", crispy.showcoords);
     M_DrawCrispnessItem(crisp3_showstats,      "Show level stats", crispy.showstats);
@@ -1358,7 +1385,7 @@ void M_DrawCrispness4(void)
 {
     char buf[16];
 
-    M_WriteText(Crispness4Def.x, Crispness4Def.y - 16, "CRISPNESS  4/5");
+    M_WriteText(Crispness4Def.x, Crispness4Def.y - 16, "CRISPNESS  4/6");
 
     M_DrawCrispnessItem(crisp4_automapcolors,   "Automap ext. colors", crispy.automapcolors);
     if (crispy.fpslimit > 0)
@@ -1376,7 +1403,7 @@ void M_DrawCrispness4(void)
 
 void M_DrawCrispness5(void)
 {
-    M_WriteText(Crispness5Def.x, Crispness5Def.y - 16, "CRISPNESS  5/5");
+    M_WriteText(Crispness5Def.x, Crispness5Def.y - 16, "CRISPNESS  5/6");
 
     M_DrawCrispnessItem(crisp5_recoilpitch, "Weapon recoil",    crispy.recoilpitch);
     M_DrawCrispnessItem(crisp5_demobar,     "Demo progress bar",crispy.demobar);
@@ -1384,7 +1411,15 @@ void M_DrawCrispness5(void)
     M_DrawCrispnessItem(crisp5_sfxpitch,    "SFX pitch shift",  crispy.sfxpitch);
     M_DrawCrispnessItem(crisp5_coloredhud,  "Colored HUD nums", crispy.coloredhud);
     M_DrawCrispnessItem(crisp5_brightmaps,  "Brightmaps",       crispy.brightmaps);
-    M_DrawCrispnessNav (crisp5_nextpage,    "< First page");
+    M_DrawCrispnessNav (crisp5_nextpage,    "Next page >");
+}
+
+void M_DrawCrispness6(void)
+{
+    M_WriteText(Crispness6Def.x, Crispness6Def.y - 16, "CRISPNESS  6/6");
+
+    M_DrawCrispnessItem(crisp6_smoothlight,   "Smooth lighting", crispy.smoothlight);
+    M_DrawCrispnessNav (crisp6_nextpage,      "< First page");
 }
 
 void M_Crispness(int choice)
