@@ -155,6 +155,40 @@ Settings — including the Crispness toggles — are saved to `crispy-doom.cfg` 
 `default.cfg` in the working directory. If you run from outside the MinGW shell,
 keep the DLLs from `setup_dist.sh` next to the executable.
 
+## Compatible mods to try
+
+Because Nu-Doom is a **vanilla + limit-removing** engine (with DeHackEd and WAD
+merging — see **Mod support**), it runs the huge back catalogue of classic
+vanilla and limit-removing WADs, but **not** Boom/MBF/UMAPINFO or GZDoom
+(ZScript/DECORATE) mods. Here are ten popular, verified-compatible classics —
+all free from the [Doomworld /idgames archive](https://www.doomworld.com/idgames/)
+(or the author). Grab the `.zip`, unpack the `.wad`/`.deh`, and load as shown.
+
+| Mod | Kind | IWAD | Load with |
+|-----|------|------|-----------|
+| **[SIGIL](https://romero.com/sigil)** (2019) — John Romero's official 5th episode for Doom | limit-removing | Doom 1 | `-merge SIGIL.wad -deh SIGIL.deh` |
+| **[SIGIL II](https://www.doomworld.com/idgames/levels/doom/Ports/s-u/sigil_ii_v1_0)** (2023) — Romero's 30th-anniversary follow-up | limit-removing | Doom 1 | `-merge SIGIL_II.wad -deh SIGIL_II.deh` |
+| **[Alien Vendetta](https://www.doomworld.com/idgames/levels/doom2/megawads/av)** (2001) — one of the most influential megawads ever made | limit-removing | Doom II | `-merge av.wad -deh av.deh` |
+| **[Hell Revealed](https://www.doomworld.com/idgames/themes/hr/hr)** (1997) — the original high-monster-count "hard" megawad | vanilla | Doom II | `-file hr.wad` |
+| **[Scythe](https://www.doomworld.com/idgames/levels/doom2/megawads/scythe)** (2003) — Erik Alm's bite-sized, hugely influential 32-map set | vanilla | Doom II | `-file scythe.wad` |
+| **[Requiem](https://www.doomworld.com/idgames/levels/doom2/megawads/requiem)** (1997) — a defining late-'90s community megawad | vanilla | Doom II | `-merge requiem.wad reqmus.wad` |
+| **[Memento Mori](https://www.doomworld.com/idgames/themes/mm/mm_allup)** (1995) — foundational international community megawad | vanilla | Doom II | `-merge mm.wad` |
+| **[Icarus: Alien Vanguard](https://www.doomworld.com/idgames/themes/TeamTNT/icarus/icarus)** (1996) — TeamTNT's themed 32-map sister to TNT | vanilla | Doom II | `-merge icarus.wad` |
+| **[Doom the Way id Did](https://www.doomworld.com/idgames/levels/doom/megawads/dtwid)** (2012) — community tribute recreating id's original style | vanilla | Doom 1 | `-file dtwid.wad -deh dtwid.deh` |
+| **[Plutonia 2](https://www.doomworld.com/idgames/levels/doom2/megawads/pl2)** (2008) — the fan sequel to Final Doom's Plutonia | limit-removing | Doom II | `-merge pl2.wad -deh pl2.deh` |
+
+Notes:
+- **Filenames vary by release** — check each archive's `.txt`; the flags above
+  use the typical lump names. Use `-merge` when a mod adds textures/sprites/flats
+  (so they merge into the IWAD namespace), plain `-file` for pure map sets.
+- **SIGIL / SIGIL II** add Episodes 5/6. On a strict vanilla-lineage engine, if a
+  new episode doesn't appear, load the bundled `SIGIL_COMPAT.wad` instead (it
+  *replaces* Episode 3). Both variants ship in the romero.com download.
+- **Bonus DeHackEd showcase:** [Batman Doom](https://www.doomworld.com/idgames/themes/batman/batman)
+  (1999) is a landmark DeHackEd total conversion. Run it vanilla-style with the
+  [vbatman fix](https://www.doomworld.com/idgames/themes/batman/vbatman):
+  `-merge batman.wad -deh batman.deh vbatman.deh`.
+
 ## Roadmap
 
 - [x] Remove classic static renderer limits (visplanes / drawsegs / vissprites /
