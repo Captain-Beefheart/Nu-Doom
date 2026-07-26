@@ -196,6 +196,7 @@ void M_StartGame(int choice);
 void M_Sound(int choice);
 void M_Crispness(int choice);
 void M_DrawCrispness(void);
+void M_BindKeys(int choice);
 
 void M_FinishReadThis(int choice);
 void M_LoadSelect(int choice);
@@ -335,7 +336,7 @@ menu_t  NewDef =
 //
 enum
 {
-    endgame,
+    bindkeys,
     messages,
     detail,
     scrnsize,
@@ -349,7 +350,7 @@ enum
 
 menuitem_t OptionsMenu[]=
 {
-    {1,"M_ENDGAM",	M_EndGame,'e'},
+    {1,"",		M_BindKeys,'b'},	// text item, drawn by M_DrawOptions
     {1,"M_MESSG",	M_ChangeMessages,'m'},
     {1,"M_DETAIL",	M_ChangeDetail,'g'},
     {2,"M_SCRNSZ",	M_SizeDisplay,'s'},
@@ -1284,7 +1285,11 @@ void M_DrawOptions(void)
 {
     V_DrawPatchDirect(108, 15, W_CacheLumpName(DEH_String("M_OPTTTL"),
                                                PU_CACHE));
-	
+
+    // "Bind Keys" submenu entry (drawn as big text; replaces the End Game item,
+    // which stays reachable via its F-key shortcut).
+    M_WriteTextBig(OptionsDef.x, OptionsDef.y + LINEHEIGHT*bindkeys, "Bind Keys");
+
     V_DrawPatchDirect(OptionsDef.x + 175, OptionsDef.y + LINEHEIGHT * detail,
 		      W_CacheLumpName(DEH_String(detailNames[detailLevel]),
 			              PU_CACHE));
@@ -1299,8 +1304,8 @@ void M_DrawOptions(void)
     M_DrawThermo(OptionsDef.x,OptionsDef.y+LINEHEIGHT*(scrnsize+1),
 		 9,screenSize);
 
-    // "Crispness" submenu entry (drawn as big text; no WAD patch for it, but
-    // sized to match the other option items).
+    // "Crispness" submenu entry (drawn as big text; no WAD patch for it,
+    // but sized to match the other option items).
     M_WriteTextBig(OptionsDef.x, OptionsDef.y + LINEHEIGHT*crispness, "Crispness");
 }
 
@@ -1425,6 +1430,248 @@ void M_DrawCrispness6(void)
 void M_Crispness(int choice)
 {
     M_SetupNextMenu(&CrispnessDef);
+}
+
+//
+// BIND KEYS MENU (Options -> Bind Keys)
+// Lists the gameplay actions and the key each is bound to. Move the cursor with
+// up/down and press Enter to (re)bind: the row shows a prompt and the next key
+// pressed becomes the new binding (ESC cancels). Two pages; the last item on
+// each steps to the other. Rebindings are the same key_* config variables the
+// game reads, so they persist to default.cfg on exit.
+//
+
+// The bindable actions, in menu order. Page 1 shows [0..8], page 2 [9..17].
+// `mouseb` is the matching mouse-button variable (a button number, -1 = none),
+// or NULL for actions the engine can't drive from the mouse. Pressing a key
+// while binding sets `key`; pressing a mouse button sets `mouseb`.
+static struct
+{
+    char	*label;
+    int		*key;
+    int		*mouseb;
+} bindkey_actions[] =
+{
+    { "Fire",         &key_fire,        &mousebfire        },
+    { "Use / Open",   &key_use,         &mousebuse         },
+    { "Move Forward", &key_up,          &mousebforward     },
+    { "Move Back",    &key_down,        &mousebbackward    },
+    { "Strafe Left",  &key_strafeleft,  &mousebstrafeleft  },
+    { "Strafe Right", &key_straferight, &mousebstraferight },
+    { "Turn Left",    &key_left,        NULL               },
+    { "Turn Right",   &key_right,       NULL               },
+    { "Run",          &key_speed,       NULL               },
+    { "Strafe On",    &key_strafe,      &mousebstrafe      },
+    { "Jump",         &key_jump,        &mousebjump        },
+    { "Weapon 1",     &key_weapon1,     NULL               },
+    { "Weapon 2",     &key_weapon2,     NULL               },
+    { "Weapon 3",     &key_weapon3,     NULL               },
+    { "Weapon 4",     &key_weapon4,     NULL               },
+    { "Weapon 5",     &key_weapon5,     NULL               },
+    { "Weapon 6",     &key_weapon6,     NULL               },
+    { "Weapon 7",     &key_weapon7,     NULL               },
+};
+
+#define BINDKEY_PAGE1	9	// actions on page 1 (rest go on page 2)
+#define BINDKEY_COUNT	(int)(sizeof(bindkey_actions)/sizeof(bindkey_actions[0]))
+
+// While true, M_Responder captures the next input and assigns it to the
+// selected action instead of driving the menu. A keyboard press sets
+// *bindkey_target; a mouse button sets *bindkey_mouse (NULL = action has no
+// mouse binding).
+boolean		askforkey = false;
+static int	*bindkey_target = NULL;
+static int	*bindkey_mouse  = NULL;
+
+static void M_BindKeyPage1(int choice);
+static void M_BindKeyPage2(int choice);
+static void M_BindKeyStartA(int choice);
+static void M_BindKeyStartB(int choice);
+static void M_DrawBindKeys1(void);
+static void M_DrawBindKeys2(void);
+
+menuitem_t BindKeys1Menu[]=
+{
+    {1,"",M_BindKeyStartA,'f'},
+    {1,"",M_BindKeyStartA,'u'},
+    {1,"",M_BindKeyStartA,'w'},
+    {1,"",M_BindKeyStartA,'b'},
+    {1,"",M_BindKeyStartA,'a'},
+    {1,"",M_BindKeyStartA,'d'},
+    {1,"",M_BindKeyStartA,'l'},
+    {1,"",M_BindKeyStartA,'t'},
+    {1,"",M_BindKeyStartA,'r'},
+    {1,"",M_BindKeyPage2,  'n'}
+};
+
+menuitem_t BindKeys2Menu[]=
+{
+    {1,"",M_BindKeyStartB,'s'},
+    {1,"",M_BindKeyStartB,'j'},
+    {1,"",M_BindKeyStartB,'1'},
+    {1,"",M_BindKeyStartB,'2'},
+    {1,"",M_BindKeyStartB,'3'},
+    {1,"",M_BindKeyStartB,'4'},
+    {1,"",M_BindKeyStartB,'5'},
+    {1,"",M_BindKeyStartB,'6'},
+    {1,"",M_BindKeyStartB,'7'},
+    {1,"",M_BindKeyPage1,  'n'}
+};
+
+menu_t  BindKeys1Def =
+{
+    10,
+    &OptionsDef,	// back returns to Options
+    BindKeys1Menu,
+    M_DrawBindKeys1,
+    48,28,
+    0
+};
+
+menu_t  BindKeys2Def =
+{
+    10,
+    &BindKeys1Def,	// back returns to page 1
+    BindKeys2Menu,
+    M_DrawBindKeys2,
+    48,28,
+    0
+};
+
+static void M_BindKeyPage1(int choice) { M_SetupNextMenu(&BindKeys1Def); }
+static void M_BindKeyPage2(int choice) { M_SetupNextMenu(&BindKeys2Def); }
+
+// Begin capturing an input for action `idx` (global index into bindkey_actions).
+static void M_BindKeyStart(int idx)
+{
+    if (idx < 0 || idx >= BINDKEY_COUNT)
+	return;
+    askforkey      = true;
+    bindkey_target = bindkey_actions[idx].key;
+    bindkey_mouse  = bindkey_actions[idx].mouseb;
+}
+
+static void M_BindKeyStartA(int choice) { M_BindKeyStart(choice); }
+static void M_BindKeyStartB(int choice) { M_BindKeyStart(BINDKEY_PAGE1 + choice); }
+
+// Human-readable name for a DOOM key code (as stored in the key_* variables).
+static char *M_KeyName(int key)
+{
+    static char buf[8];
+
+    switch (key)
+    {
+      case 0:              return "---";
+      case KEY_RIGHTARROW: return "RIGHT";
+      case KEY_LEFTARROW:  return "LEFT";
+      case KEY_UPARROW:    return "UP";
+      case KEY_DOWNARROW:  return "DOWN";
+      case KEY_ENTER:      return "ENTER";
+      case KEY_TAB:        return "TAB";
+      case KEY_ESCAPE:     return "ESC";
+      case KEY_BACKSPACE:  return "BKSP";
+      case KEY_PAUSE:      return "PAUSE";
+      case KEY_RSHIFT:     return "SHIFT";
+      case KEY_RCTRL:      return "CTRL";
+      case KEY_RALT:       return "ALT";
+      case ' ':            return "SPACE";
+      // doomgeneric's platform layer sends these action codes for real keys
+      // (Space -> USE, Ctrl -> FIRE); name them for what the player presses.
+      case KEY_FIRE:       return "CTRL";
+      case KEY_USE:        return "SPACE";
+      case KEY_STRAFE_L:   return "STR.L";
+      case KEY_STRAFE_R:   return "STR.R";
+      case KEY_F1:  return "F1";  case KEY_F2:  return "F2";
+      case KEY_F3:  return "F3";  case KEY_F4:  return "F4";
+      case KEY_F5:  return "F5";  case KEY_F6:  return "F6";
+      case KEY_F7:  return "F7";  case KEY_F8:  return "F8";
+      case KEY_F9:  return "F9";  case KEY_F10: return "F10";
+      case KEY_F11: return "F11"; case KEY_F12: return "F12";
+      case KEY_HOME: return "HOME"; case KEY_END: return "END";
+      case KEY_PGUP: return "PGUP"; case KEY_PGDN: return "PGDN";
+      case KEY_INS:  return "INS";  case KEY_DEL: return "DEL";
+      case KEY_CAPSLOCK: return "CAPS";
+    }
+
+    if (key > ' ' && key < KEY_BACKSPACE)   // printable ASCII
+    {
+	buf[0] = toupper(key);
+	buf[1] = '\0';
+	return buf;
+    }
+
+    M_snprintf(buf, sizeof(buf), "#%d", key);
+    return buf;
+}
+
+// Current binding for action `idx`, as shown in the right-hand column:
+// the key name, plus "MBn" for a bound mouse button ("---" if neither).
+static char *M_BindValue(int idx)
+{
+    static char buf[24];
+
+    buf[0] = '\0';
+
+    if (*bindkey_actions[idx].key != 0)
+	M_StringCopy(buf, M_KeyName(*bindkey_actions[idx].key), sizeof(buf));
+
+    if (bindkey_actions[idx].mouseb != NULL && *bindkey_actions[idx].mouseb >= 0)
+    {
+	char mb[8];
+	M_snprintf(mb, sizeof(mb), "%sMB%d",
+		   buf[0] ? " " : "", *bindkey_actions[idx].mouseb + 1);
+	M_StringConcat(buf, mb, sizeof(buf));
+    }
+
+    if (buf[0] == '\0')
+	M_StringCopy(buf, "---", sizeof(buf));
+
+    return buf;
+}
+
+// Draw one page: title, then `count` action rows starting at global index
+// `base`, then the page-flip line.
+static void M_DrawBindKeysPage(menu_t *def, char *title, int base, int count,
+			       char *nav)
+{
+    int i, y;
+
+    M_WriteText(def->x, def->y - 16, title);
+
+    for (i = 0; i < count; i++)
+    {
+	int idx = base + i;
+	y = def->y + LINEHEIGHT * i;
+	M_WriteText(def->x, y, bindkey_actions[idx].label);
+	M_WriteText(def->x + 176, y,
+		    (askforkey && bindkey_target == bindkey_actions[idx].key)
+			? "<press>" : M_BindValue(idx));
+    }
+
+    M_WriteText(def->x, def->y + LINEHEIGHT * count, nav);
+
+    if (askforkey)
+	M_WriteText(def->x, def->y + LINEHEIGHT * (count + 1) + 4,
+		    "Press key or mouse button  -  ESC cancels");
+}
+
+static void M_DrawBindKeys1(void)
+{
+    M_DrawBindKeysPage(&BindKeys1Def, "BIND KEYS  1/2",
+		       0, BINDKEY_PAGE1, "Next page >");
+}
+
+static void M_DrawBindKeys2(void)
+{
+    M_DrawBindKeysPage(&BindKeys2Def, "BIND KEYS  2/2",
+		       BINDKEY_PAGE1, BINDKEY_COUNT - BINDKEY_PAGE1,
+		       "< First page");
+}
+
+void M_BindKeys(int choice)
+{
+    askforkey = false;
+    M_SetupNextMenu(&BindKeys1Def);
 }
 
 
@@ -2014,6 +2261,42 @@ boolean M_Responder (event_t* ev)
     
     if (key == -1)
 	return false;
+
+    // BIND KEYS: capture the next input as the new binding for the selected
+    // action. A keyboard press (incl. arrows) sets the key; a mouse button sets
+    // the mouse binding; ESC cancels. Everything else is swallowed so the menu
+    // stays put until a choice is made.
+    if (askforkey)
+    {
+	if (ev->type == ev_keydown)
+	{
+	    askforkey = false;
+	    if (key != KEY_ESCAPE && bindkey_target != NULL)
+	    {
+		*bindkey_target = key;
+		S_StartSound(NULL, sfx_pistol);
+	    }
+	    else
+		S_StartSound(NULL, sfx_swtchx);
+	}
+	else if (ev->type == ev_mouse && ev->data1 != 0)
+	{
+	    // data1 is a bitmask of held buttons; bind the lowest one.
+	    int b = 0;
+	    while (b < 16 && !(ev->data1 & (1 << b)))
+		b++;
+
+	    askforkey = false;
+	    if (bindkey_mouse != NULL && b < 16)
+	    {
+		*bindkey_mouse = b;
+		S_StartSound(NULL, sfx_pistol);
+	    }
+	    else
+		S_StartSound(NULL, sfx_swtchx);  // action takes no mouse button
+	}
+	return true;
+    }
 
     // Save Game string input
     if (saveStringEnter)
