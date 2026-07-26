@@ -1304,9 +1304,9 @@ void M_DrawOptions(void)
     M_DrawThermo(OptionsDef.x,OptionsDef.y+LINEHEIGHT*(scrnsize+1),
 		 9,screenSize);
 
-    // "Crispness" submenu entry (drawn as big text; no WAD patch for it,
+    // "Nu-Doom Options" submenu entry (drawn as big text; no WAD patch for it,
     // but sized to match the other option items).
-    M_WriteTextBig(OptionsDef.x, OptionsDef.y + LINEHEIGHT*crispness, "Crispness");
+    M_WriteTextBig(OptionsDef.x, OptionsDef.y + LINEHEIGHT*crispness, "Nu-Doom Options");
 }
 
 void M_Options(int choice)
@@ -1344,7 +1344,7 @@ void M_DrawCrispness(void)
 {
     char buf[16];
 
-    M_WriteText(CrispnessDef.x, CrispnessDef.y - 16, "CRISPNESS  1/6");
+    M_WriteText(CrispnessDef.x, CrispnessDef.y - 16, "NU-DOOM OPTIONS  1/6");
 
     M_DrawCrispnessItem(crisp_uncapped,      "Uncapped framerate",   crispy.uncapped);
     M_DrawCrispnessItem(crisp_smoothscaling, "Smooth pixel scaling", crispy.smoothscaling);
@@ -1360,7 +1360,7 @@ void M_DrawCrispness(void)
 
 void M_DrawCrispness2(void)
 {
-    M_WriteText(Crispness2Def.x, Crispness2Def.y - 16, "CRISPNESS  2/6");
+    M_WriteText(Crispness2Def.x, Crispness2Def.y - 16, "NU-DOOM OPTIONS  2/6");
 
     M_DrawCrispnessItem(crisp2_centerweapon,   "Center weapon",    crispy.centerweapon);
     M_DrawCrispnessStr (crisp2_weaponbob,      "Weapon bob",       crispBob[crispy.weaponbob % 5]);
@@ -1374,7 +1374,7 @@ void M_DrawCrispness2(void)
 
 void M_DrawCrispness3(void)
 {
-    M_WriteText(Crispness3Def.x, Crispness3Def.y - 16, "CRISPNESS  3/6");
+    M_WriteText(Crispness3Def.x, Crispness3Def.y - 16, "NU-DOOM OPTIONS  3/6");
 
     M_DrawCrispnessItem(crisp3_showcoords,     "Show coordinates", crispy.showcoords);
     M_DrawCrispnessItem(crisp3_showstats,      "Show level stats", crispy.showstats);
@@ -1390,7 +1390,7 @@ void M_DrawCrispness4(void)
 {
     char buf[16];
 
-    M_WriteText(Crispness4Def.x, Crispness4Def.y - 16, "CRISPNESS  4/6");
+    M_WriteText(Crispness4Def.x, Crispness4Def.y - 16, "NU-DOOM OPTIONS  4/6");
 
     M_DrawCrispnessItem(crisp4_automapcolors,   "Automap ext. colors", crispy.automapcolors);
     if (crispy.fpslimit > 0)
@@ -1408,7 +1408,7 @@ void M_DrawCrispness4(void)
 
 void M_DrawCrispness5(void)
 {
-    M_WriteText(Crispness5Def.x, Crispness5Def.y - 16, "CRISPNESS  5/6");
+    M_WriteText(Crispness5Def.x, Crispness5Def.y - 16, "NU-DOOM OPTIONS  5/6");
 
     M_DrawCrispnessItem(crisp5_recoilpitch, "Weapon recoil",    crispy.recoilpitch);
     M_DrawCrispnessItem(crisp5_demobar,     "Demo progress bar",crispy.demobar);
@@ -1421,7 +1421,7 @@ void M_DrawCrispness5(void)
 
 void M_DrawCrispness6(void)
 {
-    M_WriteText(Crispness6Def.x, Crispness6Def.y - 16, "CRISPNESS  6/6");
+    M_WriteText(Crispness6Def.x, Crispness6Def.y - 16, "NU-DOOM OPTIONS  6/6");
 
     M_DrawCrispnessItem(crisp6_smoothlight,   "Smooth lighting", crispy.smoothlight);
     M_DrawCrispnessNav (crisp6_nextpage,      "< First page");
