@@ -1790,12 +1790,19 @@ static void SetVariable(default_t *def, char *value)
             def->untranslated = intparm;
             if (intparm >= 0 && intparm < 128)
             {
+                // A DOS scan code (as written by vanilla configs and by our own
+                // reverse mapping on save): translate to the internal key code.
                 intparm = scantokey[intparm];
             }
-            else
+            else if (intparm < 0)
             {
                 intparm = 0;
             }
+            // else: already an internal doomgeneric key code (>= 128) with no
+            // DOS scan-code equivalent -- e.g. KEY_USE / KEY_FIRE / KEY_STRAFE_L
+            // (which SDLK_SPACE / Ctrl / etc. map to) and the arrow keys. Keep
+            // it verbatim; clamping these to 0 silently unbound Use/Fire/Strafe
+            // as soon as a config had been written back out.
 
             def->original_translated = intparm;
             * (int *) def->location = intparm;
