@@ -79,6 +79,11 @@ which the base doomgeneric had disabled, is enabled here):
 ### Controls
 - **WASD** move/strafe by default (W/S forward-back, A/D strafe; arrow keys
   still turn).
+- **Configurable bindings** — **Options → Bind Keys** lists every gameplay
+  action (fire, use, movement, run/strafe, jump, weapons 1–7) with its current
+  key and mouse button. Select an action, press Enter, then press a key
+  (arrow keys included) or a mouse button to rebind it; bindings persist to
+  `default.cfg`.
 - A **Controls** toggle (Nu-Doom Options page 4) switches between **Keyboard** and
   **Keyboard + Mouse**; with the mouse on, it is captured to the window and
   turns you left/right (and fires).
@@ -216,6 +221,10 @@ Notes:
   toggle (mouse turns left/right, mouse up/down tilts the view via y-shear;
   the weapon stays anchored to the HUD). View-only free look — shots keep
   vanilla auto-aim, so demos stay deterministic.
+- [x] **Bind Keys** menu (Options → Bind Keys): rebind every action to a key
+  (arrows included) or mouse button, saved to `default.cfg`.
+- [x] Extended fullscreen HUD (big-number health / armor / ammo at
+  screenblocks 11).
 
 ### Nu-Doom Options menu — build out the full feature set
 
@@ -230,7 +239,7 @@ features, grouped by menu category:
 - [x] Brightmaps (self-lit texture pixels)
 - [x] Smooth diminishing lighting
 - [x] Colored HUD numbers (health / armor / ammo by value)
-- [ ] Extended "Crispy" fullscreen HUD layout
+- [x] Extended "Crispy" fullscreen HUD layout (screenblocks 11)
 - [x] Gamma / level brightness control
 
 **Tactical**
