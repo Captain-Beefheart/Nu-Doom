@@ -38,6 +38,7 @@
 
 #include "st_stuff.h"
 #include "st_lib.h"
+#include "i_swap.h"
 #include "r_local.h"
 
 #include "p_local.h"
@@ -1064,9 +1065,78 @@ void ST_diffDraw(void)
     ST_drawWidgets(false);
 }
 
+//
+// ST_drawBigNumR
+// Draw a non-negative value using the tall status-bar font, right-justified so
+// the rightmost digit ends at xr (top edge at y), in 320x200 logical coords.
+// Honors the current dp_translation (the caller sets it for colouring).
+// Returns the x of the leftmost digit drawn.
+//
+static int ST_drawBigNumR(int xr, int y, int val)
+{
+    int w = SHORT(tallnum[0]->width);
+    int x = xr;
+
+    if (val < 0)
+	val = 0;
+
+    // draw at least one digit (the units), then the rest right-to-left
+    do
+    {
+	x -= w;
+	V_DrawPatch(x, y, tallnum[val % 10]);
+	val /= 10;
+    } while (val);
+
+    return x;
+}
+
+//
+// ST_DrawFullscreenHUD
+// Crispness: an extended fullscreen overlay for screenblocks 11, where the
+// 3D view fills the screen and the normal status bar is hidden. Health and
+// armor sit in the bottom-left corner, ready ammo in the bottom-right, all in
+// the tall status-bar font and tinted by value (green/gold/red) through the
+// shared Crispy_HealthColor/Crispy_AmmoColor translation tables — the same
+// colouring the docked bar uses. Must be called AFTER R_RenderPlayerView,
+// because the full-height view would otherwise paint over it.
+//
+void ST_DrawFullscreenHUD (void)
+{
+    int h  = SHORT(tallnum[0]->height);
+    int w  = SHORT(tallnum[0]->width);
+    int y  = ORIGHEIGHT - h - 2;             // bottom row
+    int xl = 2 + 3*w;                        // right edge of the left numbers
+    ammotype_t at;
+
+    if (!plyr)
+	return;
+
+    // Health (bottom-left): NNN%
+    dp_translation = Crispy_HealthColor(plyr->health);
+    V_DrawPatch(xl, y, tallpercent);
+    ST_drawBigNumR(xl, y, plyr->health);
+
+    // Armor (just above health): NNN%
+    dp_translation = Crispy_HealthColor(plyr->armorpoints);
+    V_DrawPatch(xl, y - h - 2, tallpercent);
+    ST_drawBigNumR(xl, y - h - 2, plyr->armorpoints);
+    dp_translation = NULL;
+
+    // Ready ammo (bottom-right); weapons with no ammo type (fist/chainsaw) show
+    // nothing, matching the docked bar.
+    at = weaponinfo[plyr->readyweapon].ammo;
+    if (at != am_noammo)
+    {
+	dp_translation = Crispy_AmmoColor(plyr->ammo[at], plyr->maxammo[at]);
+	ST_drawBigNumR(ORIGWIDTH - 2, y, plyr->ammo[at]);
+	dp_translation = NULL;
+    }
+}
+
 void ST_Drawer (boolean fullscreen, boolean refresh)
 {
-  
+
     st_statusbaron = (!fullscreen) || automapactive;
     st_firsttime = st_firsttime || refresh;
 

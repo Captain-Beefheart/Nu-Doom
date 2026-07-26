@@ -45,6 +45,10 @@ void ST_Ticker (void);
 // Called by main loop.
 void ST_Drawer (boolean fullscreen, boolean refresh);
 
+// Crispness: extended big-number overlay for the fullscreen view (screenblocks
+// 11). Call after R_RenderPlayerView so the full-height view does not cover it.
+void ST_DrawFullscreenHUD (void);
+
 // Called when the console player is spawned on each level.
 void ST_Start (void);
 

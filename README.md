@@ -67,7 +67,10 @@ which the base doomgeneric had disabled, is enabled here):
   squat on landing, Weapon recoil pitch, Crosshair with shape (cross/X/dot),
   health tint, and target-highlight.
 - **HUD:** Show FPS, coordinates, level stats, level time, demo timer,
-  Colored HUD numbers (by value), "secret revealed" message.
+  Colored HUD numbers (by value), "secret revealed" message. At the fullscreen
+  view size (screenblocks 11) an **extended HUD** overlays big-number
+  health/armor (bottom-left) and ready ammo (bottom-right), value-tinted when
+  Colored HUD numbers is enabled.
 - **Automap:** Overlay mode, rotate mode, secret-sector highlighting, extended
   (exit-line) colors.
 - **Audio:** Mono SFX, full-length sounds (no cut-offs), SFX pitch shifting.

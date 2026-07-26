@@ -260,6 +260,13 @@ void D_Display (void)
     if (gamestate == GS_LEVEL && (!automapactive || crispy.automapoverlay) && gametic)
     	R_RenderPlayerView (&players[displayplayer]);
 
+    // Crispness: extended fullscreen HUD. At screenblocks 11 the view fills the
+    // screen and ST_Drawer's docked bar is hidden, so paint the big-number
+    // health/armor/ammo overlay here, on top of the finished view.
+    if (gamestate == GS_LEVEL && gametic && !automapactive
+        && viewheight == SCREENHEIGHT && scaledviewwidth == SCREENWIDTH)
+    	ST_DrawFullscreenHUD ();
+
     // overlay automap sits on top of the freshly rendered 3D view
     if (gamestate == GS_LEVEL && automapactive && crispy.automapoverlay && gametic)
     	AM_Drawer ();
