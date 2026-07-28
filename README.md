@@ -55,7 +55,7 @@ Boom/MBF/UMAPINFO and GZDoom (DECORATE/ZScript) mods are out of scope.
 
 ### Nu-Doom Options menu & config
 A dedicated **Nu-Doom Options** submenu (Options → Nu-Doom Options) spanning **six pages**
-of working toggles, all saved to **`crispy-doom.cfg`** (config persistence,
+of working toggles, all saved to **`nudoom.cfg`** (config persistence,
 which the base doomgeneric had disabled, is enabled here):
 
 - **Rendering / display:** Uncapped framerate (sub-tic interpolation of camera,
@@ -160,7 +160,7 @@ dist/NuDoom.exe -iwad /path/to/doom2.wad -file maps.wad -deh patch.deh
 dist/NuDoom.exe -iwad /path/to/doom2.wad -file mod.wad -dehlump
 ```
 
-Settings — including the Nu-Doom Options toggles — are saved to `crispy-doom.cfg` and
+Settings — including the Nu-Doom Options toggles — are saved to `nudoom.cfg` and
 `default.cfg` in the working directory. If you run from outside the MinGW shell,
 keep the DLLs from `setup_dist.sh` next to the executable.
 
@@ -204,7 +204,7 @@ Notes:
   openings).
 - [x] Remove playsim limits (intercepts / spechit / plats / buttons / ceilings).
 - [x] Native 640×400 high-resolution rendering.
-- [x] Nu-Doom Options menu + persistent `crispy-doom.cfg`.
+- [x] Nu-Doom Options menu + persistent `nudoom.cfg`.
 - [x] Nu-Doom Options menu (initial set): Crosshair, Show FPS, Translucency, Colored
   blood, Smooth pixel scaling, Uncapped/interpolated framerate (camera +
   sprites + moving sectors).

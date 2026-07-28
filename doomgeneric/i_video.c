@@ -393,7 +393,7 @@ static void I_ShotQuitCheck (void)
             fclose(f);
             printf("Nu-Doom: wrote shot.bmp (%dx%d)\n", w, h);
         }
-        M_SaveDefaults();  // flush config (incl. crispy-doom.cfg) before exit
+        M_SaveDefaults();  // flush config (incl. nudoom.cfg) before exit
         exit(0);
     }
 }

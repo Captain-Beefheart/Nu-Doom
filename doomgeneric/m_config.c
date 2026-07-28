@@ -1552,7 +1552,7 @@ static default_t extra_defaults_list[] =
 
     //!
     // Nu-Doom "Crispness" settings (see the Crispness menu). Stored in
-    // crispy-doom.cfg.
+    // nudoom.cfg.
     //
 
     CONFIG_VARIABLE_INT(crispy_uncapped),

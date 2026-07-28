@@ -372,7 +372,7 @@ menu_t  OptionsDef =
 };
 
 //
-// CRISPNESS MENU (Nu-Doom enhancement toggles, saved to crispy-doom.cfg)
+// CRISPNESS MENU (Nu-Doom enhancement toggles, saved to nudoom.cfg)
 // The full set spans three pages; the last item on each page advances to the
 // next (wrapping). Backspace/ESC steps back through the prevMenu chain.
 //

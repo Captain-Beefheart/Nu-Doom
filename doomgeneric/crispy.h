@@ -13,7 +13,7 @@
 //
 // DESCRIPTION:
 //	Nu-Doom "Crispness" settings. These are the tunables exposed by the
-//	Crispness menu and persisted to crispy-doom.cfg. Modelled on the
+//	Crispness menu and persisted to nudoom.cfg. Modelled on the
 //	crispy_t settings block used by Crispy Doom.
 //
 
@@ -75,7 +75,7 @@ extern int crispy_sfx_pitch;
 extern crispy_t crispy;
 
 // Bind the crispness variables into the config system so they load from
-// and save to crispy-doom.cfg. Called from D_BindVariables().
+// and save to nudoom.cfg. Called from D_BindVariables().
 void M_BindCrispnessVariables(void);
 
 // Per-frame overlays gated by the crispness toggles (called from D_Display).
