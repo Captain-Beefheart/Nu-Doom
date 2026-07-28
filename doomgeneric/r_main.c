@@ -725,14 +725,18 @@ void R_ExecuteSetViewSize (void)
 
     if (!detailshift)
     {
-	colfunc = basecolfunc = R_DrawColumn;
+	// [crispy] brightmaps off (the common case) uses the plain fast drawer;
+	// on selects the per-pixel brightmap variant.
+	colfunc = basecolfunc = crispy.brightmaps ? R_DrawColumnBrightmap
+						  : R_DrawColumn;
 	fuzzcolfunc = R_DrawFuzzColumn;
 	transcolfunc = R_DrawTranslatedColumn;
 	spanfunc = R_DrawSpan;
     }
     else
     {
-	colfunc = basecolfunc = R_DrawColumnLow;
+	colfunc = basecolfunc = crispy.brightmaps ? R_DrawColumnBrightmapLow
+						  : R_DrawColumnLow;
 	fuzzcolfunc = R_DrawFuzzColumnLow;
 	transcolfunc = R_DrawTranslatedColumnLow;
 	spanfunc = R_DrawSpanLow;

@@ -42,6 +42,8 @@ extern byte*		dc_source;
 //  here.
 void 	R_DrawColumn (void);
 void 	R_DrawColumnLow (void);
+void 	R_DrawColumnBrightmap (void);    // [crispy] used when crispy.brightmaps
+void 	R_DrawColumnBrightmapLow (void);
 
 // Translucency (Crispness).
 extern byte *tranmap;

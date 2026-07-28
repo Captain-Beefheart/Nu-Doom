@@ -139,11 +139,9 @@ void R_DrawColumn (void)
     // This is as fast as it gets.
     do
     {
-	// Re-map color indices from wall texture column
-	//  using a lighting/special effects LUT. Brightmap pixels use the
-	//  full-bright colormap so they glow regardless of sector light.
-	byte s = dc_source[(frac>>FRACBITS)&127];
-	*dest = dc_brightmap[s] ? dc_colormap_bright[s] : dc_colormap[s];
+	// Re-map the wall texture column through the light-diminished colormap.
+	// (Brightmaps, when enabled, use R_DrawColumnBrightmap instead.)
+	*dest = dc_colormap[dc_source[(frac>>FRACBITS)&127]];
 
 	dest += SCREENWIDTH;
 	frac += fracstep;
@@ -315,13 +313,83 @@ void R_DrawColumnLow (void)
     
     do
     {
-	// Hack. Does not work corretly.
+	*dest2 = *dest = dc_colormap[dc_source[(frac>>FRACBITS)&127]];
+	dest += SCREENWIDTH;
+	dest2 += SCREENWIDTH;
+	frac += fracstep;
+
+    } while (count--);
+}
+
+
+//
+// R_DrawColumnBrightmap / R_DrawColumnBrightmapLow
+// [crispy] Brightmap variants of the wall column drawers: a self-lit source
+// pixel (dc_brightmap[s] != 0) is drawn through the full-bright colormap
+// (dc_colormap_bright) so it glows regardless of sector lighting. These are
+// selected in R_ExecuteSetViewSize only when crispy.brightmaps is on; the plain
+// R_DrawColumn / R_DrawColumnLow (no per-pixel test) run in the common case.
+//
+void R_DrawColumnBrightmap (void)
+{
+    int			count;
+    byte*		dest;
+    fixed_t		frac;
+    fixed_t		fracstep;
+
+    count = dc_yh - dc_yl;
+    if (count < 0)
+	return;
+
+#ifdef RANGECHECK
+    if ((unsigned)dc_x >= SCREENWIDTH || dc_yl < 0 || dc_yh >= SCREENHEIGHT)
+	I_Error ("R_DrawColumnBrightmap: %i to %i at %i", dc_yl, dc_yh, dc_x);
+#endif
+
+    dest = ylookup[dc_yl] + columnofs[dc_x];
+    fracstep = dc_iscale;
+    frac = dc_texturemid + (dc_yl-centery)*fracstep;
+
+    do
+    {
+	byte s = dc_source[(frac>>FRACBITS)&127];
+	*dest = dc_brightmap[s] ? dc_colormap_bright[s] : dc_colormap[s];
+	dest += SCREENWIDTH;
+	frac += fracstep;
+    } while (count--);
+}
+
+void R_DrawColumnBrightmapLow (void)
+{
+    int			count;
+    byte*		dest;
+    byte*		dest2;
+    fixed_t		frac;
+    fixed_t		fracstep;
+    int			x;
+
+    count = dc_yh - dc_yl;
+    if (count < 0)
+	return;
+
+#ifdef RANGECHECK
+    if ((unsigned)dc_x >= SCREENWIDTH || dc_yl < 0 || dc_yh >= SCREENHEIGHT)
+	I_Error ("R_DrawColumnBrightmapLow: %i to %i at %i", dc_yl, dc_yh, dc_x);
+#endif
+
+    x = dc_x << 1;
+    dest = ylookup[dc_yl] + columnofs[x];
+    dest2 = ylookup[dc_yl] + columnofs[x+1];
+    fracstep = dc_iscale;
+    frac = dc_texturemid + (dc_yl-centery)*fracstep;
+
+    do
+    {
 	byte s = dc_source[(frac>>FRACBITS)&127];
 	*dest2 = *dest = dc_brightmap[s] ? dc_colormap_bright[s] : dc_colormap[s];
 	dest += SCREENWIDTH;
 	dest2 += SCREENWIDTH;
 	frac += fracstep;
-
     } while (count--);
 }
 

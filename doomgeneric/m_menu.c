@@ -485,7 +485,7 @@ static void M_CrispDemoBar(int choice)        { crispy.demobar        = !crispy.
 static void M_CrispAspectRatio(int choice)    { crispy.aspectratio    = !crispy.aspectratio; }
 static void M_CrispSfxPitch(int choice)       { crispy.sfxpitch       = !crispy.sfxpitch; }
 static void M_CrispColoredHUD(int choice)     { crispy.coloredhud     = !crispy.coloredhud; }
-static void M_CrispBrightmaps(int choice)     { crispy.brightmaps     = !crispy.brightmaps; }
+static void M_CrispBrightmaps(int choice)     { extern boolean setsizeneeded; crispy.brightmaps = !crispy.brightmaps; setsizeneeded = true; }
 static void M_CrispSmoothLight(int choice)    { crispy.smoothlight    = !crispy.smoothlight; R_SetSmoothLight(); }
 
 // Multi-value settings.
