@@ -444,6 +444,7 @@ enum
 enum
 {
     crisp6_smoothlight,
+    crisp6_widescreen,
     crisp6_nextpage,
     crisp6_end
 } crispness6_e;
@@ -521,6 +522,10 @@ static void M_CrispnessPage5(int choice);
 static void M_CrispnessPage6(int choice);
 static void M_CrispnessPage1(int choice);
 
+// Cycle 4:3 -> 16:9 -> 21:9. Buffers are sized at startup, so this is saved to
+// the config now and takes effect on the next launch.
+static void M_CrispWidescreen(int choice)    { crispy.widescreen    = (crispy.widescreen + 1) % 3; }
+
 menuitem_t CrispnessMenu[]=
 {
     {1,"",M_CrispUncapped,'u'},
@@ -584,6 +589,7 @@ menuitem_t Crispness5Menu[]=
 menuitem_t Crispness6Menu[]=
 {
     {1,"",M_CrispSmoothLight,'s'},
+    {1,"",M_CrispWidescreen,'w'},
     {1,"",M_CrispnessPage1,'n'}
 };
 
@@ -1320,6 +1326,7 @@ void M_Options(int choice)
 static char *crispOnOff[2] = { "Off", "On" };
 static char *crispBob[5]   = { "Off", "25%", "50%", "75%", "Full" };
 static char *crispXhair[3] = { "Cross", "X", "Dot" };
+static char *crispWidescreen[3] = { "4:3", "16:9", "21:9" };
 
 // The Crispness submenu is drawn with the standard small hu_font (its original
 // size). Labels sit on the left; values line up in a fixed right-hand column.
@@ -1424,7 +1431,11 @@ void M_DrawCrispness6(void)
     M_WriteText(Crispness6Def.x, Crispness6Def.y - 16, "NU-DOOM OPTIONS  6/6");
 
     M_DrawCrispnessItem(crisp6_smoothlight,   "Smooth lighting", crispy.smoothlight);
+    M_DrawCrispnessStr (crisp6_widescreen,    "Widescreen*",     crispWidescreen[(crispy.widescreen % 3 + 3) % 3]);
     M_DrawCrispnessNav (crisp6_nextpage,      "< First page");
+
+    M_WriteText(Crispness6Def.x, Crispness6Def.y + LINEHEIGHT * (crisp6_end + 1),
+                "* applies on next launch");
 }
 
 void M_Crispness(int choice)

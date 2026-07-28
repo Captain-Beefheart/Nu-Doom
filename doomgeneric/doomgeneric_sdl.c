@@ -5,6 +5,7 @@
 #include "doomgeneric.h"
 #include "crispy.h"
 #include "doomstat.h"   // gamestate / paused for mouse-grab decisions
+#include "i_video.h"    // SCREENWIDTH / MAXWIDTH (widescreen render width)
 
 #include <stdio.h>
 #include <unistd.h>
@@ -200,7 +201,9 @@ void DG_Init(){
   // Render the rect to the screen
   SDL_RenderPresent(renderer);
 
-  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, DOOMGENERIC_RESX, DOOMGENERIC_RESY);
+  // Texture is sized to the widest supported render (MAXWIDTH); each frame only
+  // the active SCREENWIDTH-wide sub-rect is updated and presented.
+  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, MAXWIDTH, DOOMGENERIC_RESY);
 
   DG_SetVSync(crispy.vsync);   // apply the saved Crispness VSync setting
 }
@@ -214,7 +217,19 @@ void DG_SetVSync(int enabled)
 
 void DG_DrawFrame()
 {
-  SDL_UpdateTexture(texture, NULL, DG_ScreenBuffer, DOOMGENERIC_RESX*sizeof(uint32_t));
+  // Widescreen: the render buffer is SCREENWIDTH wide (854/1120 for 16:9/21:9).
+  // Grow the window once to match so the extra horizontal FOV maps to real
+  // pixels instead of being squashed back into the 4:3 window. Left as-is for
+  // the non-wide (640) case so existing behaviour is unchanged.
+  static boolean sized_to_widescreen = false;
+  if (!sized_to_widescreen && SCREENWIDTH != DOOMGENERIC_RESX)
+  {
+    SDL_SetWindowSize(window, SCREENWIDTH, DOOMGENERIC_RESY);
+    sized_to_widescreen = true;
+  }
+
+  SDL_Rect active = { 0, 0, SCREENWIDTH, DOOMGENERIC_RESY };
+  SDL_UpdateTexture(texture, &active, DG_ScreenBuffer, SCREENWIDTH*sizeof(uint32_t));
 
   // Crispness: smooth (linear) vs crisp (nearest) scaling when the window is
   // resized away from the native resolution.
@@ -224,18 +239,21 @@ void DG_DrawFrame()
   SDL_RenderClear(renderer);
   if (crispy.aspectratio)
   {
-    // Present into the largest 4:3 rectangle centred in the window (letterbox),
-    // so the 320x200-derived image shows at its intended 4:3 aspect.
+    // Present into the largest rectangle of the correct display aspect centred
+    // in the window (letterbox/pillarbox). Doom pixels are 1.2x taller than
+    // wide, so the corrected aspect is SCREENWIDTH : (SCREENHEIGHT*1.2) =
+    // SCREENWIDTH : 480 — i.e. 4:3 / 16:9 / 21:9 at render widths 640 / 854 /
+    // 1120. Only the active (SCREENWIDTH-wide) sub-rect of the texture is used.
     int ww = 0, wh = 0;
     SDL_GetRendererOutputSize(renderer, &ww, &wh);
-    int tw = ww, th = ww * 3 / 4;
-    if (th > wh) { th = wh; tw = wh * 4 / 3; }
+    int tw = ww, th = ww * 480 / SCREENWIDTH;
+    if (th > wh) { th = wh; tw = wh * SCREENWIDTH / 480; }
     SDL_Rect dst = { (ww - tw) / 2, (wh - th) / 2, tw, th };
-    SDL_RenderCopy(renderer, texture, NULL, &dst);
+    SDL_RenderCopy(renderer, texture, &active, &dst);
   }
   else
   {
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    SDL_RenderCopy(renderer, texture, &active, NULL);
   }
   SDL_RenderPresent(renderer);
 

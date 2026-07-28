@@ -33,6 +33,7 @@ rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 #include "i_video.h"
 #include "i_system.h"
 #include "m_config.h"
+#include "crispy.h"
 #include "z_zone.h"
 
 #include "tables.h"
@@ -96,6 +97,23 @@ void I_GetEvent(void);
 // The screen buffer; this is modified to draw things to the screen
 
 byte *I_VideoBuffer = NULL;
+
+// Widescreen render width (buffer pixels) and the offset that recenters the
+// 4:3 UI within it. Both default to the non-wide (640) case and are set once at
+// startup by I_SetWidescreen() from crispy.widescreen.
+int SCREENWIDTH     = NONWIDEWIDTH;
+int WIDESCREENDELTA = 0;
+
+void I_SetWidescreen(void)
+{
+    switch (crispy.widescreen)
+    {
+        case 1:  SCREENWIDTH = 854;  break;   // 16:9
+        case 2:  SCREENWIDTH = 1120; break;   // 21:9  (MAXWIDTH)
+        default: SCREENWIDTH = NONWIDEWIDTH;   // 4:3
+    }
+    WIDESCREENDELTA = (SCREENWIDTH - NONWIDEWIDTH) / 2;
+}
 
 // If true, game is running as a screensaver
 
@@ -209,8 +227,8 @@ void I_InitGraphics (void)
     char *mode;
 
 	memset(&s_Fb, 0, sizeof(struct FB_ScreenInfo));
-	s_Fb.xres = DOOMGENERIC_RESX;
-	s_Fb.yres = DOOMGENERIC_RESY;
+	s_Fb.xres = SCREENWIDTH;   // widescreen-selected render width
+	s_Fb.yres = SCREENHEIGHT;
 	s_Fb.xres_virtual = s_Fb.xres;
 	s_Fb.yres_virtual = s_Fb.yres;
 
@@ -287,8 +305,9 @@ void I_InitGraphics (void)
     }
 
 
-    /* Allocate screen to draw to */
-	I_VideoBuffer = (byte*)Z_Malloc (SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);  // For DOOM to draw on
+    /* Allocate screen to draw to. Size to MAXWIDTH so the buffer is valid at
+       any widescreen setting; only the leftmost SCREENWIDTH columns are used. */
+	I_VideoBuffer = (byte*)Z_Malloc (MAXWIDTH * SCREENHEIGHT, PU_STATIC, NULL);  // For DOOM to draw on
 
 	screenvisible = true;
 

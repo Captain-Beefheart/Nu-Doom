@@ -203,7 +203,9 @@ static int 	grid = 0;
 static int 	leveljuststarted = 1; 	// kluge until AM_LevelInit() is called
 
 boolean    	automapactive = false;
-static int 	finit_width = SCREENWIDTH;
+// SCREENWIDTH is a runtime variable now, so it can't seed a static initialiser;
+// finit_width is set from the live SCREENWIDTH in AM_LevelInit() instead.
+static int 	finit_width = NONWIDEWIDTH;
 static int 	finit_height = SCREENHEIGHT - 32;
 
 // location of window on screen
@@ -528,6 +530,9 @@ void AM_clearMarks(void)
 void AM_LevelInit(void)
 {
     leveljuststarted = 0;
+
+    // Track the live (possibly widescreen) render width so the automap fills it.
+    finit_width = SCREENWIDTH;
 
     f_x = f_y = 0;
     f_w = finit_width;

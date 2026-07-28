@@ -585,7 +585,8 @@ F_DrawPatchCol
     int dx, dy;
 
     column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-    desttop = I_VideoBuffer + (x << HIRES);
+    // Widescreen: center the 4:3 bunny scroller within the wider buffer.
+    desttop = I_VideoBuffer + (x << HIRES) + WIDESCREENDELTA;
 
     // step through the posts in a column
     while (column->topdelta != 0xff )

@@ -3,6 +3,7 @@
 #include "m_argv.h"
 
 #include "doomgeneric.h"
+#include "i_video.h"   // MAXWIDTH / SCREENHEIGHT
 
 pixel_t* DG_ScreenBuffer = NULL;
 
@@ -18,7 +19,8 @@ void doomgeneric_Create(int argc, char **argv)
 
 	M_FindResponseFile();
 
-	DG_ScreenBuffer = malloc(DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
+	// Widescreen: size the present buffer to the widest supported render width.
+	DG_ScreenBuffer = malloc(MAXWIDTH * DOOMGENERIC_RESY * 4);
 
 	DG_Init();
 

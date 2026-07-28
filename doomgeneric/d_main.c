@@ -213,7 +213,18 @@ void D_Display (void)
 
     if (gamestate == GS_LEVEL && gametic)
     	HU_Erase();
-    
+
+    // Widescreen: the title/intermission/finale screens are authored in 4:3 and
+    // only cover the centre columns, so clear the buffer first to keep the
+    // pillarbox margins black instead of showing stale content. The 3D view,
+    // automap and windowed-view border already paint the full width themselves.
+    if (WIDESCREENDELTA > 0
+     && (gamestate == GS_DEMOSCREEN || gamestate == GS_INTERMISSION
+      || gamestate == GS_FINALE))
+    {
+    	memset(I_VideoBuffer, 0, SCREENWIDTH * SCREENHEIGHT);
+    }
+
     // do buffered drawing
     switch (gamestate)
     {
@@ -1399,6 +1410,10 @@ void D_DoomMain (void)
     M_SetConfigFilenames("default.cfg", "crispy-doom.cfg");
     D_BindVariables();
     M_LoadDefaults();
+
+    // Widescreen: pick the render width from the loaded crispy.widescreen before
+    // any subsystem (R_Init, I_InitGraphics) reads SCREENWIDTH.
+    I_SetWidescreen();
 
     // Save configuration at exit.
     I_AtExit(M_SaveDefaults, false);

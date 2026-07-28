@@ -36,8 +36,26 @@
 #define HIRES 1
 #endif
 
-#define SCREENWIDTH  (ORIGWIDTH  << HIRES)
+// Non-widescreen (4:3) render width in buffer pixels: the classic 320x200
+// doubled to 640x400. Widescreen keeps SCREENHEIGHT fixed and only widens
+// SCREENWIDTH, so the vertical FOV never changes.
+#define NONWIDEWIDTH (ORIGWIDTH  << HIRES)
+
+// SCREENWIDTH is now chosen at runtime (I_SetWidescreen) from the selected
+// aspect: 640 (4:3), 854 (16:9) or 1120 (21:9). MAXWIDTH is the largest it can
+// ever be; every per-column render array is sized to MAXWIDTH so it stays valid
+// at any aspect. All 2D UI is still authored in the 320x200 logical frame and
+// recentered by WIDESCREENDELTA (buffer pixels).
+#define MAXWIDTH     1120
+extern int SCREENWIDTH;
 #define SCREENHEIGHT (ORIGHEIGHT << HIRES)
+
+extern int WIDESCREENDELTA;
+
+// Select SCREENWIDTH / WIDESCREENDELTA from crispy.widescreen. Called once at
+// startup after the config is loaded; the render buffers are sized to MAXWIDTH
+// so the choice only affects how much of them is used.
+void I_SetWidescreen(void);
 
 // Screen width used for "squash" scale functions
 

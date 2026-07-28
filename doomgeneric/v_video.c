@@ -61,6 +61,14 @@ byte *dp_translation = NULL;
 
 static byte *dest_screen = NULL;
 
+// Widescreen: 2D UI is authored in the 4:3 (NONWIDEWIDTH) logical frame. When
+// the render buffer is wider, recenter that frame by shifting every draw to the
+// visible screen right by WIDESCREENDELTA (buffer pixels, so add it AFTER the
+// <<HIRES scaling). Temp buffers (status-bar backing, view-border background)
+// keep their logical origin — they are composited onto the main screen through
+// V_CopyRect / R_VideoErase, which carry the offset themselves.
+#define V_WIDEDELTA (dest_screen == I_VideoBuffer ? WIDESCREENDELTA : 0)
+
 int dirtybox[4]; 
 
 // haleyjd 08/28/10: clipping callback function for patches.
@@ -115,7 +123,7 @@ void V_CopyRect(int srcx, int srcy, byte *source,
     width <<= HIRES;  height <<= HIRES;
 
     src = source + SCREENWIDTH * srcy + srcx;
-    dest = dest_screen + SCREENWIDTH * desty + destx;
+    dest = dest_screen + SCREENWIDTH * desty + destx + V_WIDEDELTA;
 
     for ( ; height>0 ; height--)
     {
@@ -182,7 +190,7 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
-    desttop = dest_screen + (y << HIRES) * SCREENWIDTH + (x << HIRES);
+    desttop = dest_screen + (y << HIRES) * SCREENWIDTH + (x << HIRES) + V_WIDEDELTA;
 
     w = SHORT(patch->width);
 
@@ -237,7 +245,7 @@ void V_DrawPatchBig(int x, int y, patch_t *patch)
     }
 
     col = 0;
-    desttop = dest_screen + (y << HIRES) * SCREENWIDTH + (x << HIRES);
+    desttop = dest_screen + (y << HIRES) * SCREENWIDTH + (x << HIRES) + V_WIDEDELTA;
     w = SHORT(patch->width);
 
     for ( ; col<w ; x++, col++, desttop += f)

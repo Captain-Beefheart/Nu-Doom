@@ -62,6 +62,14 @@ fixed_t			centerxfrac;
 fixed_t			centeryfrac;
 fixed_t			projection;
 
+// Widescreen: the 4:3-reference half-width. centerx/centerxfrac track the true
+// (wide) screen centre for horizontal placement, while these _nonwide values
+// drive the frustum scale (projection, focallength, yslope) so world geometry
+// keeps its 4:3 size and the extra width simply reveals more at the sides
+// rather than zooming or stretching.
+int			viewwidth_nonwide;
+fixed_t			centerxfrac_nonwide;
+
 // just for profiling purposes
 int			framecount;	
 
@@ -97,7 +105,7 @@ int			viewangletox[FINEANGLES/2];
 // The xtoviewangleangle[] table maps a screen pixel
 // to the lowest viewangle that maps back to x ranges
 // from clipangle to -clipangle.
-angle_t			xtoviewangle[SCREENWIDTH+1];
+angle_t			xtoviewangle[MAXWIDTH+1];
 
 // [crispy] runtime light-level resolution: 16/4 = vanilla, 32/3 = smooth.
 int			LIGHTLEVELS = 16;
@@ -555,8 +563,11 @@ void R_InitTextureMapping (void)
     //  after the view angle.
     //
     // Calc focallength
-    //  so FIELDOFVIEW angles covers SCREENWIDTH.
-    focallength = FixedDiv (centerxfrac,
+    //  so FIELDOFVIEW angles covers the 4:3 (non-wide) width. Using the wide
+    //  centerxfrac here would keep the FOV fixed and squeeze more world into the
+    //  same angle (a stretched, fish-eye look); anchoring to centerxfrac_nonwide
+    //  keeps the per-column angle identical to 4:3 and widens the FOV instead.
+    focallength = FixedDiv (centerxfrac_nonwide,
 			    finetangent[FINEANGLES/4+FIELDOFVIEW/2] );
 	
     for (i=0 ; i<FINEANGLES/2 ; i++)
@@ -677,13 +688,18 @@ void R_ExecuteSetViewSize (void)
     int		i;
     int		j;
     int		level;
-    int		startmap; 	
+    int		startmap;
+    int		scaledviewwidth_nonwide;
 
     setsizeneeded = false;
 
     if (setblocks == 11)
     {
+	// Fullscreen: the only size that uses the extra widescreen columns. The
+	// 4:3 reference width stays NONWIDEWIDTH so the FOV widens rather than
+	// zooms; every windowed size below is already <= 4:3 and unchanged.
 	scaledviewwidth = SCREENWIDTH;
+	scaledviewwidth_nonwide = NONWIDEWIDTH;
 	viewheight = SCREENHEIGHT;
     }
     else
@@ -691,17 +707,21 @@ void R_ExecuteSetViewSize (void)
 	// setblocks*32 and setblocks*168/10 are in the 320x200 logical space;
 	// scale up to the hi-res render buffer.
 	scaledviewwidth = (setblocks*32) << HIRES;
+	scaledviewwidth_nonwide = scaledviewwidth;
 	viewheight = ((setblocks*168/10)&~7) << HIRES;
     }
-    
+
     detailshift = setdetail;
     viewwidth = scaledviewwidth>>detailshift;
-	
+    viewwidth_nonwide = scaledviewwidth_nonwide>>detailshift;
+
     centery = viewheight/2;
     centerx = viewwidth/2;
     centerxfrac = centerx<<FRACBITS;
     centeryfrac = centery<<FRACBITS;
-    projection = centerxfrac;
+    centerxfrac_nonwide = (viewwidth_nonwide/2)<<FRACBITS;
+    // Frustum scale uses the 4:3 half-width (see centerxfrac_nonwide note).
+    projection = centerxfrac_nonwide;
 
     if (!detailshift)
     {
@@ -739,7 +759,9 @@ void R_ExecuteSetViewSize (void)
     {
 	dy = ((i-viewheight/2)<<FRACBITS)+FRACUNIT/2;
 	dy = abs(dy);
-	yslope[i] = FixedDiv ( (viewwidth<<detailshift)/2*FRACUNIT, dy);
+	// 4:3 half-width so floor/ceiling vertical scale matches the projection
+	// (a wide viewwidth here would stretch flats vertically).
+	yslope[i] = FixedDiv ( (viewwidth_nonwide<<detailshift)/2*FRACUNIT, dy);
     }
 	
     for (i=0 ; i<viewwidth ; i++)

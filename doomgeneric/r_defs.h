@@ -445,10 +445,10 @@ typedef struct
   // y-coordinate (and the 0xffff "no span" sentinel) no longer fits in a byte.
 
   unsigned short	pad1;
-  unsigned short	top[SCREENWIDTH];
+  unsigned short	top[MAXWIDTH];
   unsigned short	pad2;
   unsigned short	pad3;
-  unsigned short	bottom[SCREENWIDTH];
+  unsigned short	bottom[MAXWIDTH];
   unsigned short	pad4;
 
 } visplane_t;

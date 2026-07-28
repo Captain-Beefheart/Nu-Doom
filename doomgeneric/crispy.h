@@ -59,6 +59,7 @@ typedef struct
     int coloredhud;     // tint the status-bar numbers by their value
     int brightmaps;     // draw self-lit texture pixels (screens/lights) full-bright
     int smoothlight;    // finer light-diminishing gradient (32 levels vs 16)
+    int widescreen;     // horizontal FOV: 0 = 4:3, 1 = 16:9, 2 = 21:9 (next launch)
 } crispy_t;
 
 // Colored-HUD translation tables (built from PLAYPAL) and the value->table

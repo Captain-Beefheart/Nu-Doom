@@ -232,7 +232,10 @@ Goal: implement the complete Crispy Doom-style Nu-Doom Options menu. Remaining
 features, grouped by menu category:
 
 **Rendering / Visual**
-- [ ] Widescreen rendering (16:9 / 21:9 field of view)
+- [x] Widescreen rendering (16:9 / 21:9 field of view) — true wider FOV (not
+  stretched), selectable on Nu-Doom Options page 6, applied on next launch. UI
+  stays 4:3-centered; demo playback is unchanged (`timedemo demo1` = 1205
+  gametics).
 - [x] Aspect-ratio correction (4:3 letterbox)
 - [x] VSync toggle
 - [x] Framerate limit

@@ -37,8 +37,7 @@
 #include "doomstat.h"
 
 
-// ?
-#define MAXWIDTH			1120
+// MAXWIDTH now comes from i_video.h (shared with the widescreen render arrays).
 #define MAXHEIGHT			832
 
 // status bar height at bottom of screen (32 in 320x200 space, scaled to hi-res)
@@ -330,8 +329,11 @@ void R_DrawColumnLow (void)
 //
 // Spectre/Invisibility.
 //
-#define FUZZTABLE		50 
-#define FUZZOFF	(SCREENWIDTH)
+#define FUZZTABLE		50
+// The fuzz table holds vertical row deltas (+/-1 row). SCREENWIDTH is now a
+// runtime variable, so the table can't be initialised with it directly; store
+// unit steps here and multiply by SCREENWIDTH at each use site below.
+#define FUZZOFF	1
 
 
 int	fuzzoffset[FUZZTABLE] =
@@ -401,7 +403,7 @@ void R_DrawFuzzColumn (void)
 	//  a pixel that is either one column
 	//  left or right of the current one.
 	// Add index from colormap to index.
-	*dest = colormaps[6*256+dest[fuzzoffset[fuzzpos]]]; 
+	*dest = colormaps[6*256+dest[fuzzoffset[fuzzpos]*SCREENWIDTH]];
 
 	// Clamp table lookup index.
 	if (++fuzzpos == FUZZTABLE) 
@@ -467,8 +469,8 @@ void R_DrawFuzzColumnLow (void)
 	//  a pixel that is either one column
 	//  left or right of the current one.
 	// Add index from colormap to index.
-	*dest = colormaps[6*256+dest[fuzzoffset[fuzzpos]]]; 
-	*dest2 = colormaps[6*256+dest2[fuzzoffset[fuzzpos]]]; 
+	*dest = colormaps[6*256+dest[fuzzoffset[fuzzpos]*SCREENWIDTH]];
+	*dest2 = colormaps[6*256+dest2[fuzzoffset[fuzzpos]*SCREENWIDTH]];
 
 	// Clamp table lookup index.
 	if (++fuzzpos == FUZZTABLE) 
