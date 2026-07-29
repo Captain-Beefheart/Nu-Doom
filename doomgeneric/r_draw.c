@@ -1032,27 +1032,48 @@ void R_FillBackScreen (void)
     int lvw = scaledviewwidth >> HIRES;
     int lvh = viewheight      >> HIRES;
 
-    patch = W_CacheLumpName(DEH_String("brdr_t"),PU_CACHE);
-    for (x=0 ; x<lvw ; x+=8)
-	V_DrawPatch(lvx+x, lvy-8, patch);
-    patch = W_CacheLumpName(DEH_String("brdr_b"),PU_CACHE);
+    // Logical size of the background buffer. In widescreen it is wider than the
+    // 4:3 ORIGWIDTH, and at screen sizes <= 10 the (non-widened) view fills the
+    // whole height (lvy == 0), so each bezel piece is drawn only where it fits
+    // inside the buffer. Otherwise the top row lands at y = -8 (off the top) and
+    // the right/bottom edges land past the buffer -- both of which crashed.
+    int bw = SCREENWIDTH >> HIRES;
+    int bh = (SCREENHEIGHT - SBARHEIGHT) >> HIRES;
 
-    for (x=0 ; x<lvw ; x+=8)
-	V_DrawPatch(lvx+x, lvy+lvh, patch);
-    patch = W_CacheLumpName(DEH_String("brdr_l"),PU_CACHE);
+    if (lvy >= 8)
+    {
+	patch = W_CacheLumpName(DEH_String("brdr_t"),PU_CACHE);
+	for (x=0 ; x<lvw ; x+=8)
+	    V_DrawPatch(lvx+x, lvy-8, patch);
+    }
+    if (lvy+lvh+8 <= bh)
+    {
+	patch = W_CacheLumpName(DEH_String("brdr_b"),PU_CACHE);
+	for (x=0 ; x<lvw ; x+=8)
+	    V_DrawPatch(lvx+x, lvy+lvh, patch);
+    }
+    if (lvx >= 8)
+    {
+	patch = W_CacheLumpName(DEH_String("brdr_l"),PU_CACHE);
+	for (y=0 ; y<lvh ; y+=8)
+	    V_DrawPatch(lvx-8, lvy+y, patch);
+    }
+    if (lvx+lvw+8 <= bw)
+    {
+	patch = W_CacheLumpName(DEH_String("brdr_r"),PU_CACHE);
+	for (y=0 ; y<lvh ; y+=8)
+	    V_DrawPatch(lvx+lvw, lvy+y, patch);
+    }
 
-    for (y=0 ; y<lvh ; y+=8)
-	V_DrawPatch(lvx-8, lvy+y, patch);
-    patch = W_CacheLumpName(DEH_String("brdr_r"),PU_CACHE);
-
-    for (y=0 ; y<lvh ; y+=8)
-	V_DrawPatch(lvx+lvw, lvy+y, patch);
-
-    // Draw beveled edge.
-    V_DrawPatch(lvx-8,   lvy-8,   W_CacheLumpName(DEH_String("brdr_tl"),PU_CACHE));
-    V_DrawPatch(lvx+lvw, lvy-8,   W_CacheLumpName(DEH_String("brdr_tr"),PU_CACHE));
-    V_DrawPatch(lvx-8,   lvy+lvh, W_CacheLumpName(DEH_String("brdr_bl"),PU_CACHE));
-    V_DrawPatch(lvx+lvw, lvy+lvh, W_CacheLumpName(DEH_String("brdr_br"),PU_CACHE));
+    // Draw the beveled corners, each only where both adjacent edges have room.
+    if (lvy>=8 && lvx>=8)
+	V_DrawPatch(lvx-8,   lvy-8,   W_CacheLumpName(DEH_String("brdr_tl"),PU_CACHE));
+    if (lvy>=8 && lvx+lvw+8<=bw)
+	V_DrawPatch(lvx+lvw, lvy-8,   W_CacheLumpName(DEH_String("brdr_tr"),PU_CACHE));
+    if (lvy+lvh+8<=bh && lvx>=8)
+	V_DrawPatch(lvx-8,   lvy+lvh, W_CacheLumpName(DEH_String("brdr_bl"),PU_CACHE));
+    if (lvy+lvh+8<=bh && lvx+lvw+8<=bw)
+	V_DrawPatch(lvx+lvw, lvy+lvh, W_CacheLumpName(DEH_String("brdr_br"),PU_CACHE));
     }
 
     V_RestoreBuffer();

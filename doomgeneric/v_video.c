@@ -178,8 +178,11 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     }
 
 #ifdef RANGECHECK
+    // The main screen draws the HUD in the 4:3 ORIGWIDTH region (re-centered by
+    // WIDESCREENDELTA); the off-screen pillarbox buffer used by R_FillBackScreen
+    // spans the full SCREENWIDTH, so it is legitimately wider than ORIGWIDTH.
     if (x < 0
-     || x + SHORT(patch->width) > ORIGWIDTH
+     || x + SHORT(patch->width) > (dest_screen == I_VideoBuffer ? ORIGWIDTH : (SCREENWIDTH >> HIRES))
      || y < 0
      || y + SHORT(patch->height) > ORIGHEIGHT)
     {
