@@ -288,6 +288,22 @@ void D_Display (void)
     	Crispy_DrawCrosshair ();
     }
 
+    // Widescreen + docked status bar: the 4:3 bar is centred, so the wide 3D
+    // view above fills the screen but leaves a pillarbox strip either side of
+    // the bar. The windowed-border code that would fill it is skipped at full
+    // width, so black those strips out here (matching the black UI pillarbox).
+    if (gamestate == GS_LEVEL && WIDESCREENDELTA > 0
+     && scaledviewwidth == SCREENWIDTH && viewheight != SCREENHEIGHT)
+    {
+    	int yy;
+    	for (yy = viewheight; yy < SCREENHEIGHT; yy++)
+    	{
+    	    memset(I_VideoBuffer + yy*SCREENWIDTH, 0, WIDESCREENDELTA);
+    	    memset(I_VideoBuffer + yy*SCREENWIDTH + SCREENWIDTH - WIDESCREENDELTA,
+    		   0, WIDESCREENDELTA);
+    	}
+    }
+
     // clean up border stuff
     if (gamestate != oldgamestate && gamestate != GS_LEVEL)
     	I_SetPalette (W_CacheLumpName (DEH_String("PLAYPAL"),PU_CACHE));

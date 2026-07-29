@@ -693,14 +693,16 @@ void R_ExecuteSetViewSize (void)
 
     setsizeneeded = false;
 
-    if (setblocks == 11)
+    if (setblocks >= 10)
     {
-	// Fullscreen: the only size that uses the extra widescreen columns. The
-	// 4:3 reference width stays NONWIDEWIDTH so the FOV widens rather than
-	// zooms; every windowed size below is already <= 4:3 and unchanged.
+	// The largest view size renders the full widescreen width so the wide
+	// FOV shows WITH the docked status bar. The 4:3 reference width stays
+	// NONWIDEWIDTH so the view widens rather than zooms. viewheight always
+	// leaves room for the status bar (== SCREENHEIGHT - SBARHEIGHT): there is
+	// no barless fullscreen mode, so the classic HUD is drawn at every size.
 	scaledviewwidth = SCREENWIDTH;
 	scaledviewwidth_nonwide = NONWIDEWIDTH;
-	viewheight = SCREENHEIGHT;
+	viewheight = ((10*168/10)&~7) << HIRES;
     }
     else
     {

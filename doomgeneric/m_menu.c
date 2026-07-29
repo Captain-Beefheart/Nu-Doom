@@ -1308,7 +1308,7 @@ void M_DrawOptions(void)
 		 10, mouseSensitivity);
 
     M_DrawThermo(OptionsDef.x,OptionsDef.y+LINEHEIGHT*(scrnsize+1),
-		 9,screenSize);
+		 8,screenSize);
 
     // "Nu-Doom Options" submenu entry (drawn as big text; no WAD patch for it,
     // but sized to match the other option items).
@@ -1898,7 +1898,10 @@ void M_SizeDisplay(int choice)
 	}
 	break;
       case 1:
-	if (screenSize < 8)
+	// Cap at screenblocks 10: size 11 was the barless fullscreen view, but
+	// the largest size now renders full widescreen WITH the docked HUD, so
+	// there is no reason to hide the status bar.
+	if (screenSize < 7)
 	{
 	    screenblocks++;
 	    screenSize++;
@@ -2828,6 +2831,9 @@ void M_Init (void)
     itemOn = currentMenu->lastOn;
     whichSkull = 0;
     skullAnimCounter = 10;
+    // Self-heal a stale config that saved the old barless size 11.
+    if (screenblocks > 10)
+	screenblocks = 10;
     screenSize = screenblocks - 3;
     messageToPrint = 0;
     messageString = NULL;
